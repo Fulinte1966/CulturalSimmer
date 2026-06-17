@@ -1,0 +1,39 @@
+---
+import Layout from "../../components/Layout.astro";
+import BookCard from "../../components/BookCard.astro";
+import { getAllBooks, getBooksByClassification } from "../../lib/books";
+
+export async function getStaticPaths() {
+  const books = await getAllBooks();
+  const seen = new Set<string>();
+  const paths: { params: { classification: string } }[] = [];
+
+  for (const book of books) {
+    const code = book.parsed.classification;
+    if (!seen.has(code)) {
+      seen.add(code);
+      paths.push({ params: { classification: code } });
+    }
+  }
+
+  return paths;
+}
+
+const { classification } = Astro.params;
+const books = await getBooksByClassification(classification!);
+---
+
+<Layout title={`${classification} 类`}>
+  <h1 class="page-heading">{classification} 类</h1>
+  {books.length > 0 && (
+    <>
+      <p class="page-description">共 {books.length} 种书。</p>
+      <ul class="book-list">
+        {books.map((book) => <BookCard book={book} />)}
+      </ul>
+    </>
+  )}
+  {books.length === 0 && (
+    <p class="page-description">该分类下暂无书籍。</p>
+  )}
+</Layout>

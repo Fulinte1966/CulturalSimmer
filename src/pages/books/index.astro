@@ -1,0 +1,22 @@
+---
+import Layout from "../../components/Layout.astro";
+import BookCard from "../../components/BookCard.astro";
+import { getAllBooks } from "../../lib/books";
+
+const books = await getAllBooks();
+---
+
+<Layout title="全部书目">
+  <h1 class="page-heading">全部书目</h1>
+  {books.length > 0 && (
+    <>
+      <p class="page-description">共 {books.length} 种书。</p>
+      <ul class="book-list">
+        {books.map((book) => <BookCard book={book} />)}
+      </ul>
+    </>
+  )}
+  {books.length === 0 && (
+    <p class="page-description">暂无书籍。</p>
+  )}
+</Layout>

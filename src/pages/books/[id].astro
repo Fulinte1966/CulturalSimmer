@@ -1,0 +1,86 @@
+---
+import { getCollection } from "astro:content";
+import fs from "node:fs";
+import path from "node:path";
+import Layout from "../../components/Layout.astro";
+import BookMeta from "../../components/BookMeta.astro";
+import Outline from "../../components/Outline.astro";
+import type { OutlineItem } from "../../components/Outline.astro";
+import { parseBookId } from "../../lib/bookId";
+import { getDownloadUrl } from "../../lib/books";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  return books.map((book) => ({
+    params: { id: book.data.id },
+    props: { entry: book },
+  }));
+}
+
+const { entry } = Astro.props;
+const { id, title, edition, date, tags, cover, total_volumes, author } = entry.data;
+const { Content } = await entry.render();
+
+const parsed = parseBookId(id);
+const downloadUrl = getDownloadUrl(id, edition);
+
+// Load outline JSON from filesystem
+let outline: OutlineItem[] = [];
+try {
+  const outlineAbsPath = path.join(
+    process.cwd(),
+    "src",
+    "data",
+    "outlines",
+    `${id}_v${edition}.json`
+  );
+  const raw = fs.readFileSync(outlineAbsPath, "utf-8");
+  outline = JSON.parse(raw);
+} catch {
+  outline = [];
+}
+
+const bookMeta = {
+  id,
+  title,
+  author,
+  edition,
+  date,
+  tags,
+  cover,
+  total_volumes,
+  parsed,
+  downloadUrl,
+  outlinePath: `src/data/outlines/${id}_v${edition}.json`,
+};
+---
+
+<Layout title={title}>
+  <article class="book-detail">
+    <h1>{title}</h1>
+
+    {
+      cover && (
+        <div class="cover">
+          <img src={cover} alt={title} />
+        </div>
+      )
+    }
+
+    <BookMeta book={bookMeta} />
+
+    {
+      tags.length > 0 && (
+        <div class="tags">
+          {tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+      )
+    }
+
+    <div class="body">
+      <Content />
+    </div>
+
+    <Outline outline={outline} />
+  </article>
+</Layout>

@@ -1,0 +1,42 @@
+---
+import { formatEdition, formatVolume } from "../lib/bookId";
+import type { BookMeta } from "../lib/books";
+import DownloadButton from "./DownloadButton.astro";
+
+interface Props {
+  book: BookMeta;
+}
+
+const { book } = Astro.props;
+---
+
+<div class="fields">
+  {book.author && (
+    <div class="field">
+      <span class="field-label">作者</span>
+      <span>{book.author}</span>
+    </div>
+  )}
+  <div class="field">
+    <span class="field-label">索书号</span>
+    <span>{book.id}</span>
+  </div>
+  {book.parsed.isVolume && (
+    <div class="field">
+      <span class="field-label">册次</span>
+      <span>{formatVolume(book.parsed.volumeNumber!, book.total_volumes)}</span>
+    </div>
+  )}
+  <div class="field">
+    <span class="field-label">版次</span>
+    <span>{formatEdition(book.edition)}</span>
+  </div>
+  <div class="field">
+    <span class="field-label">发布日期</span>
+    <span>{book.date.toLocaleDateString("zh-CN")}</span>
+  </div>
+</div>
+
+<div class="mt-2 mb-2">
+  <DownloadButton book={book} />
+</div>

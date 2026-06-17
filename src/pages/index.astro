@@ -1,0 +1,53 @@
+---
+import Layout from "../components/Layout.astro";
+import BookCard from "../components/BookCard.astro";
+import { getAllBooks, getUniqueClassifications } from "../lib/books";
+
+const books = await getAllBooks();
+const recentBooks = books.slice(0, 5);
+const classifications = getUniqueClassifications(books);
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout
+  title="首页"
+  description="个人公益 PDF 电子书分享站 — 马列毛主义、哲学、政治、经济、语言、文学、艺术、历史、地理"
+>
+  <p class="page-description">
+    个人公益 PDF 电子书分享站。所有 PDF 由 LaTeX 编译生成，通过 GitHub Releases 分发。
+  </p>
+
+  <p class="mb-2">
+    <a href={`${base}/search/`}>
+      搜索全部书目 &rarr;
+    </a>
+  </p>
+
+  <h2 class="page-heading">分类浏览</h2>
+  {classifications.length > 0 && (
+    <ul class="category-list">
+      {classifications.map((c) => (
+        <li>
+          <a href={`${base}/categories/${c.code}/`}>{c.label}</a>
+        </li>
+      ))}
+    </ul>
+  )}
+  {classifications.length === 0 && (
+    <p class="page-description">暂无分类。</p>
+  )}
+
+  <h2 class="page-heading">最近发布</h2>
+  {recentBooks.length > 0 && (
+    <ul class="book-list">
+      {recentBooks.map((book) => <BookCard book={book} />)}
+    </ul>
+  )}
+  {recentBooks.length === 0 && (
+    <p class="page-description">暂无书籍。</p>
+  )}
+
+  <p class="mt-3">
+    <a href={`${base}/books/`}>查看全部书目 &rarr;</a>
+  </p>
+</Layout>

@@ -1,0 +1,43 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — 电子书馆</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href={base} class="site-title">电子书馆</a>
+        <nav class="site-nav">
+          <a href={`${base}/books/`}>全部书目</a>
+          <a href={`${base}/search/`}>搜索</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-main">
+      <div class="inner">
+        <slot />
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="inner">
+        <p>静态 PDF 电子书馆 · 公益项目</p>
+      </div>
+    </footer>
+  </body>
+</html>

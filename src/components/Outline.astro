@@ -1,0 +1,32 @@
+---
+export interface OutlineItem {
+  level: number;
+  title: string;
+  page: number;
+}
+
+interface Props {
+  outline: OutlineItem[];
+}
+
+const { outline } = Astro.props;
+---
+
+{
+  outline.length > 0 && (
+    <div class="outline">
+      <h2>目录</h2>
+      <ul class="outline-list">
+        {outline.map((item) => (
+          <li
+            class="outline-item"
+            style={`padding-left: ${(item.level - 1) * 1.5}rem`}
+          >
+            <span class="title">{item.title}</span>
+            <span class="page">{item.page}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
