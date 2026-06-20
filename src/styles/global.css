@@ -617,14 +617,14 @@ input {
 }
 
 .book-cover--model {
-  --book-size: 1.5rem;
-  --model-width: 242px;
+  --book-size: 2rem;
+  --model-width: 300px;
   --model-skew: -10deg;
-  --model-scale: 0.75;
-  --model-margin-left: -2rem;
+  --model-scale: 0.85;
+  --model-margin-left: -3rem;
   --model-border: 2px;
   --model-radius: 5px;
-  --model-pages-height: 235px;
+  --model-pages-height: 290px;
   --model-pages-fine: 5px;
   --model-spine-color: transparent;
   --model-shadow-extra-height: 1.25rem;
