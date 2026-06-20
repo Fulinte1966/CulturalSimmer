@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "figmaFileKey": "DIMEpyuMSATUkeAjau7CGU",
+    "figmaPage": "Page 2",
+    "desktopFrame": {
+      "width": 1280,
+      "height": 832
+    },
+    "notes": "Values are the cached handoff from the approved Figma inspection. Do not call Figma MCP during implementation."
+  },
+  "colors": {
+    "paper": "#FFFFFF",
+    "ink": "#171717",
+    "muted": "#8A8882",
+    "rule": "#DCDAD3",
+    "accent": "#84251F",
+    "accentHover": "#5E1713"
+  },
+  "typography": {
+    "letterSpacing": "0px",
+    "roles": {
+      "navigation": {
+        "family": "Chill Jinshu Song",
+        "style": "Regular",
+        "sizePx": 24,
+        "activeStyle": "Bold"
+      },
+      "callNumber": {
+        "family": "TeX Gyre Termes",
+        "style": "Bold",
+        "sizePx": 16,
+        "align": "left"
+      },
+      "bookTitle": {
+        "family": "Source Han Sans SC",
+        "style": "Medium",
+        "sizePx": 16,
+        "align": "center"
+      },
+      "bookSubtitle": {
+        "family": "Zhuque Fangsong",
+        "style": "Regular",
+        "sizePx": 16,
+        "align": "center"
+      },
+      "bookAuthor": {
+        "family": "LXGW Neo ZhiSong Screen",
+        "style": "Regular",
+        "sizePx": 16,
+        "align": "center"
+      },
+      "categoryLabel": {
+        "family": "LXGW Neo ZhiSong Screen",
+        "style": "Regular",
+        "sizePx": 24
+      },
+      "pageHeading": {
+        "family": "Chill Jinshu Song",
+        "style": "Regular",
+        "sizePx": 36
+      },
+      "placeholderCover": {
+        "family": "Chill Jinshu Song",
+        "styles": [
+          "CompactBold",
+          "WideBold"
+        ]
+      }
+    },
+    "fontSources": [
+      "C:\\Windows\\Fonts\\ChillJinshuSongRegular.otf",
+      "C:\\Windows\\Fonts\\ChillJinshuSongBold.otf",
+      "C:\\Windows\\Fonts\\ChillJinshuSong_CompactBold.otf",
+      "C:\\Windows\\Fonts\\ChillJinshuSong_WideBold.otf",
+      "C:\\Windows\\Fonts\\SourceHanSansSC-Medium.otf",
+      "C:\\Users\\Point\\AppData\\Local\\Microsoft\\Windows\\Fonts\\ZhuqueFangsong-Regular.ttf",
+      "C:\\Windows\\Fonts\\LXGWNeoZhiSongScreen.ttf",
+      "C:\\Windows\\Fonts\\texgyretermes-regular.otf",
+      "C:\\Windows\\Fonts\\texgyretermes-bold.otf"
+    ],
+    "fontPolicy": "Record sources only. Do not copy, convert, subset, or commit a font until its web embedding and redistribution license is confirmed."
+  },
+  "layout": {
+    "contentMaxWidthPx": 1078,
+    "desktopSidePaddingPx": 24,
+    "mobileSidePaddingPx": 16,
+    "navigationGapPx": 48,
+    "galleryColumnGapPx": 25,
+    "galleryRowGapPx": 56,
+    "coverWidthDesktopPx": 280,
+    "coverAspectRatio": "148 / 210",
+    "coverCornerRadiusPx": 5,
+    "coverBorderWidthPx": 1,
+    "cardTextGapPx": 4
+  },
+  "grid": {
+    "desktop": {
+      "minViewportPx": 960,
+      "columns": 3
+    },
+    "tablet": {
+      "minViewportPx": 560,
+      "maxViewportPx": 959,
+      "columns": 2
+    },
+    "mobile": {
+      "minViewportPx": 361,
+      "maxViewportPx": 559,
+      "columns": 2
+    },
+    "narrow": {
+      "maxViewportPx": 360,
+      "columns": 1
+    }
+  },
+  "cover": {
+    "realBorderColor": "#84251F",
+    "placeholderBorderColor": "#DCDAD3",
+    "background": "#FFFFFF",
+    "imageFit": "fill",
+    "modelMobileFallbackMaxViewportPx": 560
+  },
+  "motion": {
+    "respectReducedMotion": true,
+    "allowDecorativeAnimation": false
+  }
+}

@@ -53,6 +53,12 @@ export function getPdfFilename(id: string, edition: number): string {
   return `${id}_v${edition}.pdf`;
 }
 
+export function formatDisplayCallNumber(parsed: ParsedBookId): string {
+  const { classification, accessionNumber, volumeNumber } = parsed;
+  const base = `${classification}/${accessionNumber}`;
+  return volumeNumber !== null ? `${base}:${volumeNumber}` : base;
+}
+
 export function getOutlinePath(id: string, edition: number): string {
   return `src/data/outlines/${id}_v${edition}.json`;
 }

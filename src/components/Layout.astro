@@ -1,14 +1,24 @@
 ---
 import "../styles/global.css";
 
+export type ActiveNav = "new" | "search" | "categories" | "overview";
+
 interface Props {
   title: string;
   description?: string;
   searchable?: boolean;
+  activeNav: ActiveNav;
 }
 
-const { title, description, searchable = false } = Astro.props;
+const { title, description, searchable = false, activeNav } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+const navItems: { id: ActiveNav; label: string; route: string }[] = [
+  { id: "new", label: "新书", route: "/" },
+  { id: "search", label: "搜索", route: "/search/" },
+  { id: "categories", label: "分类", route: "/categories/" },
+  { id: "overview", label: "总览", route: "/books/" },
+];
 ---
 
 <!doctype html>
@@ -25,16 +35,30 @@ const base = import.meta.env.BASE_URL;
   </head>
   <body>
     <header class="site-header" data-pagefind-ignore="all">
-      <div class="inner masthead">
-        <div class="masthead-title">
-          <a href={base} class="site-title" aria-label="返回首页">
-            电子书馆
-          </a>
-          <p>个人公益 PDF 书目与重排资料</p>
-        </div>
+      <div class="inner site-header-inner">
+        <a
+          class="site-brand"
+          href={`${base}/`}
+          aria-label="返回新书页"
+        >
+          <img
+            src={`${base}/brand/wordmark.svg`}
+            alt="文火"
+            width="100"
+            height="43"
+          />
+        </a>
         <nav class="site-nav" aria-label="主导航">
-          <a href={`${base}/books/`}>馆藏</a>
-          <a href={`${base}/search/`}>检索</a>
+          {
+            navItems.map((item) => (
+              <a
+                href={`${base}${item.route}`}
+                aria-current={activeNav === item.id ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            ))
+          }
         </nav>
       </div>
     </header>
@@ -44,15 +68,5 @@ const base = import.meta.env.BASE_URL;
         <slot />
       </div>
     </main>
-
-    <footer class="site-footer" data-pagefind-ignore="all">
-      <div class="inner">
-        <p>
-          <a href={base}>电子书馆</a>
-          <span>静态 PDF 公益项目</span>
-        </p>
-        <p>书目以 Markdown 维护，文件通过 GitHub Releases 分发。</p>
-      </div>
-    </footer>
   </body>
 </html>

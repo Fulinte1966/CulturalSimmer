@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Static PDF ebook library — Astro static site deployed to GitHub Pages, PDFs hosted on GitHub Releases. Personal public-welfare project. v1: functional, no complex UI.
+Static PDF ebook library — Astro static site deployed to GitHub Pages, PDFs hosted on GitHub Releases. Personal public-welfare project.
+
+Design source of truth: `reference/figma-handoff/` (tokens, screens, component contracts, PDF metadata spec). Do not call Figma MCP — all values are cached in JSON/Markdown.
+
+Site config (`astro.config.mjs`): `site: "https://poyinte.github.io"`, `base: "ebook-library"`, `output: "static"`.
 
 ## Commands
 
@@ -13,9 +17,13 @@ npm run dev          # Astro dev server (no Pagefind — search won't work local
 npm run check        # astro check — TypeScript diagnostics
 npm run validate     # tsx scripts/validate-books.ts — validates all book entries
 npm run test:reading # python scripts/test-reading-metrics.py — reading-metric unit tests
+npm run test:metadata # python scripts/test_metadata.py — XMP extraction unit tests
 npm run build        # astro build && pagefind --site dist — production build
 npm run preview      # astro preview — serves dist/ locally
 ```
+
+**Important**: `astro dev` has no Pagefind index — search always returns empty.
+Test search with `npm run build && npm run preview` instead.
 
 ## Architecture
 
@@ -23,6 +31,8 @@ npm run preview      # astro preview — serves dist/ locally
 
 ```
 PDF (GitHub Release)
+  → extract_metadata.py (XMP extraction + validation)
+    → ingest_pdf.py (markdown + manifest generation)
   → book_assets.py (PyMuPDF) generates:
       public/covers/{id}_v{edition}.png         — first-page cover image
       public/covers/{id}_v{edition}_spine.png   — 1px-wide spine sample
@@ -30,11 +40,11 @@ PDF (GitHub Release)
       src/data/reading/{id}_v{edition}.json     — page count, character counts, estimated minutes
 
 Markdown books (src/content/books/*.md)
-  → Astro Content Collection (config.ts — Zod schema)
+  → Astro Content Collection (config.ts — Zod schema with optional subtitle)
     → books.ts (getAllBooks, getBookById, getBooksByClassification)
       └─ resolves covers (explicit → generated → placeholder), loads reading metrics
-      → Astro pages (index, books/[id], categories/[classification])
-        → Components (BookCover, BookCard, BookMeta, DownloadButton, ReadingStats, Outline)
+      → Astro pages (index, books/[id], books/, categories/, categories/[classification], search/)
+        → Components (Layout, BookCover, BookCard, BookMeta, DownloadButton, ReadingStats, Outline)
 ```
 
 ### Call number system (the core abstraction)
@@ -45,153 +55,121 @@ Every book has a call number `id` like `A12-8-2`. `src/lib/bookId.ts` parses it 
 - `A8-3` → classification `A8`, accession 3, no volume, workId `A8-3`
 - Regex: `/^[A-Z](?:\d+(?:\.\d+)?)?-\d+(?:-\d+)?$/` — supports `A8-3`, `A12-8-2`, `I210.4-1`, `T-1`, `Z228-1`
 
+Display call numbers (`formatDisplayCallNumber`):
+- `F0-1-1` → `F0/1:1`
+- `A8-3` → `A8/3`
+- `I210.4-1` → `I210.4/1`
+
 **Never hand-write** `download_url`, `release_tag`, `pdf_filename`, `classification`, or `volume` in book markdown. These are all derived from `id` + `edition` by `bookId.ts` (+ `books.ts` for the GitHub URL using `siteConfig`).
+
+`subtitle` is explicit metadata from frontmatter (or XMP). Never derive it from parentheses in `title`.
 
 ### Key files
 
 | File | Role |
 |---|---|
-| `src/lib/bookId.ts` | Parse call numbers, format edition/volume, generate release tags & filenames |
-| `src/lib/books.ts` | Query layer over content collection — `getAllBooks()`, `getBookById()`, `getBooksByClassification()`, `getDownloadUrl()`. Also resolves covers (3-tier: explicit → generated → placeholder) and loads reading metrics |
-| `src/lib/site.ts` | `siteConfig` — `githubOwner` and `githubRepo` (change these if the repo moves) |
-| `src/content/config.ts` | Zod schema for book frontmatter — validates id regex, edition, date, tags, optional `author`/`cover`/`total_volumes`/`readtime` |
+| `src/lib/bookId.ts` | Parse call numbers, format edition/volume, display call number, release tags & filenames |
+| `src/lib/books.ts` | Query layer over content collection — `getAllBooks()`, `getBookById()`, `getBooksByClassification()`, `getDownloadUrl()`. Resolves covers and loads reading metrics |
+| `src/lib/classification.ts` | Classification tree — reads `classifications.yml`, builds parent-child hierarchy, provides `getClassificationNodes()`, `getClassificationNode()`, `getClassificationAncestors()` |
+| `src/lib/site.ts` | `siteConfig` — `githubOwner` and `githubRepo` |
+| `src/content/config.ts` | Zod schema — validates id, title, subtitle, edition, date, tags, author, cover, total_volumes, readtime |
 | `src/data/classifications.yml` | `key: label` map of classification codes to Chinese names |
-| `src/data/reading-config.json` | Reading speed config: `cjk_chars_per_minute` (300), `latin_words_per_minute` (265), `sparse_text_units_per_page` (80) |
-| `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics from a PDF via PyMuPDF |
-| `scripts/extract-book-assets.py` | CLI wrapper around `book_assets.py` — run against a local PDF file |
-| `scripts/extract-outline-from-release.sh` | Downloads a PDF from a GitHub Release then runs `extract-outline.py` |
-| `scripts/validate-books.ts` | Standalone validator (used in CI) — checks id format, classification existence, outline existence, readtime, duplicates |
-| `scripts/test-reading-metrics.py` | Unit tests for `book_assets.py` — CJK/latin counting, reading-time estimation, GBK recovery |
-| `astro.config.mjs` | `site: "https://poyinte.github.io"`, `base: "ebook-library"`, `output: "static"` |
-| `.github/workflows/deploy.yml` | CI/CD — on push to `main`: `npm ci` → `npm run validate` → `npm run build` → deploy to GitHub Pages |
+| `src/data/reading-config.json` | Reading speed config |
+| `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics via PyMuPDF |
+| `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation (implements `pdf-metadata-contract.md`) |
+| `scripts/test_metadata.py` | Unit tests for XMP extraction and validation (24 tests) |
+| `scripts/test-reading-metrics.py` | Unit tests for `book_assets.py` |
+| `scripts/ingest_pdf.py` | GitHub Actions orchestration — validates, generates, publishes, and cleans up PDF ingestion |
+| `scripts/requirements.txt` | Python dependencies: PyMuPDF, PyYAML |
+| `scripts/validate-books.ts` | Standalone validator (used in CI) |
+| `.github/workflows/deploy.yml` | CI/CD — `npm ci` → `validate` → `check` → `build` → deploy to GitHub Pages |
+| `.github/workflows/ingest-pdf.yml` | PDF ingestion — triggers on `ingest-*` Release, extracts XMP, generates assets, creates canonical Release |
+
+### Layout and navigation
+
+`Layout.astro` accepts `activeNav: "new" | "search" | "categories" | "overview"` and renders the shared brand wordmark (`public/brand/wordmark.svg`, unchanged path-only SVG) and four-item navigation:
+
+| activeNav | Label | Route |
+|---|---|---|
+| `new` | 新书 | `/` |
+| `search` | 搜索 | `/search/` |
+| `categories` | 分类 | `/categories/` |
+| `overview` | 总览 | `/books/` |
 
 ### Cover system
 
 `books.ts` resolves covers in 3 tiers:
 
-1. **Explicit** (`coverKind: "explicit"`) — book frontmatter has a `cover` field pointing to a custom image
-2. **Generated** (`coverKind: "generated"`) — `public/covers/{id}_v{edition}.png` exists on disk (generated by `book_assets.py`)
-3. **Placeholder** (`coverKind: "placeholder"`) — no image available; `BookCover.astro` renders a typographic fallback
+1. **Explicit** (`coverKind: "explicit"`) — book frontmatter has a `cover` field
+2. **Generated** (`coverKind: "generated"`) — `public/covers/{id}_v{edition}.png` exists on disk
+3. **Placeholder** (`coverKind: "placeholder"`) — typographic fallback
 
-Spine images (`{id}_v{edition}_spine.png`) are 1px-wide samples of the first page's leftmost pixel column, used as `--spine-texture` in the 3D book model. A `pages-texture.svg` at `public/images/` provides the page-edge texture.
+Flat covers: 148/210 aspect ratio, 280px desktop target. Real covers show 1px dark-red border + 5px radius. Placeholders show 1px gray border. Model mode is unchanged from the original CSS geometry.
 
-### Reading metrics
+### Design tokens
 
-`books.ts` loads `src/data/reading/{id}_v{edition}.json` (generated by `book_assets.py`) with this structure:
+From `reference/figma-handoff/design-tokens.json`:
 
-```json
-{
-  "page_count": 320,
-  "cjk_character_count": 85000,
-  "latin_token_count": 1200,
-  "estimated_minutes": 288
-}
-```
+| Token | Value |
+|---|---|
+| Colors | `--paper: #FFF`, `--ink: #171717`, `--muted: #8A8882`, `--rule: #DCDAD3`, `--accent: #84251F`, `--accent-hover: #5E1713` |
+| Content max-width | 1078px |
+| Desktop padding | 24px |
+| Mobile padding | 16px |
+| Gallery gap | 25px col, 56px row |
+| Cover width | 280px |
+| Cover aspect | 148/210 |
+| Cover radius | 5px |
 
-Reading time is determined by two independent rates from `reading-config.json`:
-- CJK: characters ÷ `cjk_chars_per_minute`
-- Latin: tokens ÷ `latin_words_per_minute`
-- Sum of both, rounded up (minimum 1)
+### Responsive breakpoints
 
-A `readtime` field in book frontmatter overrides the automatic estimate (`readingTimeSource: "manual"`). Character counts are only stored when `units_per_page ≥ sparse_text_units_per_page` (to skip image-heavy PDFs).
+- Desktop ≥960px: 3-column gallery
+- Tablet 560–959px: 2-column
+- Mobile 361–559px: 2-column with mobile gutters, nav wraps
+- Narrow ≤360px: 1-column
+- ≤560px: book detail single-column with flat cover, model pseudo-elements hidden
 
-`ReadingStats.astro` renders page count, approximate character count, and estimated minutes (prefixed with "约" when automatic).
+### 3D book model (preserved)
 
-### Outline JSON
-
-Located at `src/data/outlines/{id}_v{edition}.json`. Structure: `[{ level, title, page }]`. Loaded at build time via `fs.readFileSync` in `[id].astro`. Empty array `[]` means no bookmarks — the Outline component won't render anything.
+The `.book-cover--model` element uses CSS pseudo-elements for spine, back cover, page edges, and shadow. All dimensions controlled by CSS custom properties. At ≤560px, pseudo-elements are hidden and a flat cover is shown. The spine seam repaint workaround (double `requestAnimationFrame`) and `box-shadow: inset` spine darkening are preserved.
 
 ### Pagefind
 
-Runs as a post-build step (`pagefind --site dist`). The search page (`search.astro`) loads Pagefind UI JS/CSS from the built `dist/pagefind/` at runtime. In dev mode (`astro dev`), search silently does nothing — that's expected.
+Custom JavaScript API (`search.astro`) — dynamic import of `pagefind/pagefind.js`, custom result renderer using BookCard DOM contract. No body snippets. Query survives navigation via `?q=`.
 
 ### Base path
 
-All internal links must use `import.meta.env.BASE_URL` (resolves to `/ebook-library/` in production). The pattern is `` `${base}/path/` `` — note the `/` separator between base and path. Astro config sets `base: "ebook-library"` (no leading/trailing slash — Astro normalizes it).
-
-### Styling
-
-Single global stylesheet (`src/styles/global.css`) with CSS custom properties. No CSS framework, no dark mode. Three responsive breakpoints (760px, 560px, 340px) for layout adjustments on small screens. The detail page renders a 3D book model via CSS transforms (`skewY`, `rotate`, `translate`) with custom properties `--pages-texture`, `--spine-texture`, and `--book-size`. Hover animations respect `prefers-reduced-motion`.
-
-### 3D book model
-
-The `.book-cover--model` element on the detail page (`[id].astro`) renders a 3D isometric book using CSS pseudo-elements:
-
-| Element | Pseudo-element / class | Purpose |
-|---|---|---|
-| Front cover | `.book-cover-surface` | Cover image or typographic placeholder |
-| Spine | `.book-cover--model::after` | Left-side spine, skewed 45° |
-| Back cover | `.book-cover-volume::after` | Behind front cover, offset vertically |
-| Page edges | `.book-cover-volume::before` | Top page-edge texture strip |
-| Drop shadow | `.book-cover--model::before` | Skewed shadow beneath the model |
-
-All dimensions are controlled by CSS custom properties on `.book-cover--model` (see `src/styles/global.css` lines ~620-636). The model is composite-intensive — `skewY` transforms on the container and spine create GPU layers.
-
-**Known rendering quirk**: at certain zoom levels a sub-pixel anti-aliasing gap appears between spine and cover. Two mitigations are in place:
-1. Scale value tuned to `0.84` to avoid common raster-alignment points
-2. A double-`requestAnimationFrame` script in `[id].astro` forces a recomposite after initial paint (handles cold-load gap)
-
-Spine darkening uses `box-shadow: inset` (not `filter`) so the border color (`--rule`) is preserved. Hover brightens the spine by reducing the inset shadow alpha.
-
-**Debug panel**: `src/components/BookModelDebug.astro` is a floating control panel with sliders for all model parameters. It's normally disabled (not imported). To enable:
-
-1. Add `import BookModelDebug from "../../components/BookModelDebug.astro";` to `[id].astro`
-2. Add `<BookModelDebug />` before `</Layout>`
-3. Visit any book page with `?debug` in the URL
-4. After tuning, copy the "已修改" values from the export textarea, apply to CSS defaults, then remove the import
-
-The panel activates via `window.location.search.includes("debug")` so production pages are unaffected.
+All internal links must use `import.meta.env.BASE_URL` (resolves to `/ebook-library/` in production).
 
 ## Adding a book
 
-### First release
+### XMP-based ingestion
+
+1. Compile PDF with XMP metadata (see `reference/figma-handoff/pdf-metadata-contract.md` for required fields)
+2. Create temporary GitHub Release with tag `ingest-YYYYMMDD-HHMM`, attach PDF
+3. GitHub Actions (`ingest-pdf.yml`) extracts XMP, validates, generates all assets, creates canonical Release
+
+### Manual entry
 
 1. Determine call number (e.g., `A12-8-2`)
-2. Compile PDF, name it `A12-8-2_v1.pdf`
-3. Create GitHub Release with tag `A12-8-2_v1`, upload PDF
-4. Create `src/content/books/A12-8-2.md` with frontmatter (id, title, edition, date, tags — author/cover/total_volumes/readtime optional)
-5. Generate static assets from the PDF:
+2. Create `src/content/books/A12-8-2.md` with frontmatter (id, title, subtitle?, edition, date, tags, author?, cover?, total_volumes?, readtime?)
+3. Generate static assets from PDF:
    ```bash
-   # From a GitHub Release (needs gh CLI + PyMuPDF):
-   ./scripts/extract-outline-from-release.sh A12-8-2 1
-
-   # Or from a local PDF file:
    pip install PyMuPDF
    python scripts/extract-book-assets.py path/to/A12-8-2_v1.pdf A12-8-2 1
    ```
-   This produces: cover PNG, spine PNG, outline JSON, and reading metrics JSON.
-6. Commit the .md and all generated assets, push to `main`
-7. GitHub Actions deploys automatically
+   This produces: `public/covers/{id}_v{edition}.png`, `public/covers/{id}_v{edition}_spine.png`, `src/data/outlines/{id}_v{edition}.json`, `src/data/reading/{id}_v{edition}.json`
+4. Commit the .md and all generated assets, push to `main`
 
-### New edition
-
-1. Bump `edition` in the book's .md (e.g., 1 → 2)
-2. Name the new PDF `A12-8-2_v2.pdf`
-3. Create Release with tag `A12-8-2_v2`, upload PDF
-4. Re-run asset extraction for the new edition
-5. Commit updated .md + new assets
-
-## Development notes
-
-### Editing CSS
-
-The global stylesheet (`src/styles/global.css`, ~1100 lines) uses 2-space indentation but has occasional inconsistencies from prior `sed` edits. **Always `Read` the file immediately before using `Edit`** — the Edit tool requires byte-exact `old_string` matching, and the file may have been touched by formatters or other tools between reads. **Never use `sed` on this file**; it introduces whitespace drift that compounds over time.
-
-### Adding debug controls
-
-To add a new CSS custom property with a debug slider:
-1. Define the property with default value on `.book-cover--model` in `global.css`
-2. Reference it in the relevant CSS rule via `var(--prop-name, fallback)`
-3. Add a `SliderSpec` entry in `BookModelDebug.astro`'s `SLIDERS` array
-4. Add the property name to the `allProps` list in `collectSettings()`
-5. Update `SECTION_LABELS` indices if inserting into an existing section
-
-## Constraints (v1)
+## Constraints
 
 - **No** database, user accounts, comments, CMS, SSR, online PDF reader
 - **No** EPUB/MOBI/HTML formats — PDF only
-- **No** dark mode, complex UI
+- **No** dark mode, complex UI, client framework, CSS framework
 - **No** About page, standalone copyright page
-- **No** hierarchical classification browsing — `/categories/A12/` only shows exact `A12-*` books, not subcategories
 - **No** outline-to-PDF page linking — outline is display-only
 - **No** GitHub Release existence check at build time (offline-safe)
+- **No** gradient, decorative shadow, Metro blocks, pills, nested cards
+- `subtitle` must come from explicit metadata — never derived from title
+- `public/brand/wordmark.svg` used unchanged — do not redraw, trace, or replace
+- CSS uses 2-space indentation — always `Read` before `Edit`

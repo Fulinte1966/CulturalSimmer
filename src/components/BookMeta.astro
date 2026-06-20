@@ -1,5 +1,5 @@
 ---
-import { formatEdition, formatVolume } from "../lib/bookId";
+import { formatDisplayCallNumber, formatEdition, formatVolume } from "../lib/bookId";
 import type { BookMeta } from "../lib/books";
 import DownloadButton from "./DownloadButton.astro";
 import ReadingStats from "./ReadingStats.astro";
@@ -14,7 +14,7 @@ const { book } = Astro.props;
 <div class="detail-meta">
   <div class="meta-item">
     <span class="field-label">索书号</span>
-    <span>{book.id}</span>
+    <span>{formatDisplayCallNumber(book.parsed)}</span>
   </div>
   {book.parsed.isVolume && (
     <div class="meta-item">

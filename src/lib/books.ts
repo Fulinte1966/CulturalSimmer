@@ -4,33 +4,11 @@ import { getCollection } from "astro:content";
 import type { ParsedBookId } from "./bookId";
 import { getPdfFilename, getReleaseTag, parseBookId } from "./bookId";
 import { siteConfig } from "./site";
+import { getClassificationLabel } from "./classification";
 
-let classificationsCache: Map<string, string> | null = null;
 const rootDir = process.cwd();
 
-function loadClassifications(): Map<string, string> {
-  if (classificationsCache) {
-    return classificationsCache;
-  }
-
-  const filePath = path.join(process.cwd(), "src", "data", "classifications.yml");
-  const content = fs.readFileSync(filePath, "utf-8");
-  const map = new Map<string, string>();
-
-  for (const line of content.split(/\r?\n/)) {
-    const match = line.match(/^([A-Z](?:\d+(?:\.\d+)?)?):\s*(.+)$/);
-    if (match) {
-      map.set(match[1], match[2].trim());
-    }
-  }
-
-  classificationsCache = map;
-  return map;
-}
-
-export function getClassificationLabel(code: string): string {
-  return loadClassifications().get(code) ?? code;
-}
+export { getClassificationLabel } from "./classification";
 
 export function getDownloadUrl(id: string, edition: number): string {
   const tag = getReleaseTag(id, edition);
@@ -51,6 +29,7 @@ export type ReadingTimeSource = "manual" | "automatic";
 export interface BookMeta {
   id: string;
   title: string;
+  subtitle?: string;
   author?: string;
   edition: number;
   date: Date;
@@ -145,14 +124,15 @@ export async function getAllBooks(): Promise<BookMeta[]> {
       const {
         id,
         title,
+        subtitle,
         edition,
         date,
         tags,
         cover,
         total_volumes,
         readtime,
+        author,
       } = entry.data;
-      const author = entry.data.author;
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, edition, cover);
       const reading = loadReadingMetrics(id, edition);
@@ -166,6 +146,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
       return {
         id,
         title,
+        subtitle,
         author,
         edition,
         date,

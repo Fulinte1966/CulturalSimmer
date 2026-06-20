@@ -1,0 +1,103 @@
+name: Ingest PDF
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    # Only run for temporary ingest-* tags; canonical releases skip.
+    if: startsWith(github.ref, 'refs/tags/ingest-')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Download intake assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p _ingest_workspace
+          gh release download "${{ github.ref_name }}" --dir _ingest_workspace
+
+      - name: Validate intake
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ingest_pdf.py validate \
+            --workspace _ingest_workspace \
+            --release-id "${{ github.event.release.id }}" \
+            --release-tag "${{ github.ref_name }}" \
+            --output _ingest_output.json
+
+      - name: Generate assets
+        run: |
+          python scripts/ingest_pdf.py generate \
+            --metadata _ingest_output.json \
+            --workspace _ingest_workspace
+
+      - name: Run all tests
+        run: |
+          npm run check
+          npm run validate
+          npm run test:metadata
+          npm run test:reading
+          npm run build
+
+      - name: Create canonical Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ingest_pdf.py publish \
+            --metadata _ingest_output.json \
+            --workspace _ingest_workspace
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/books/ src/data/ public/covers/ src/data/manifests/
+          git commit -m "$(python scripts/ingest_pdf.py commit-message --metadata _ingest_output.json)" || true
+          git pull --rebase origin main
+          git push origin main
+
+      - name: Delete temporary Release
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ingest_pdf.py cleanup \
+            --metadata _ingest_output.json \
+            --release-tag "${{ github.ref_name }}" \
+            --push-success "${{ job.status == 'success' }}"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Ingest Result" >> "$GITHUB_STEP_SUMMARY"
+          cat _ingest_summary.md >> "$GITHUB_STEP_SUMMARY" || true

@@ -6,7 +6,6 @@ import Layout from "../../components/Layout.astro";
 import BookCover from "../../components/BookCover.astro";
 import BookMeta from "../../components/BookMeta.astro";
 import Outline from "../../components/Outline.astro";
-import BookModelDebug from "../../components/BookModelDebug.astro";
 import type { OutlineItem } from "../../components/Outline.astro";
 import { getBookById } from "../../lib/books";
 
@@ -19,10 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { id, title, edition, tags, author } = entry.data;
-const titleParts = title.match(/^(.*?)(（[^）]+）)$/);
-const titleMain = titleParts?.[1] ?? title;
-const titleParenthetical = titleParts?.[2];
+const { id, title, subtitle, edition, tags, author } = entry.data;
 const { Content } = await entry.render();
 const book = await getBookById(id);
 
@@ -43,17 +39,27 @@ try {
 } catch {
   outline = [];
 }
+
+// Pagefind meta
+const callNumber = `${book.parsed.classification}/${book.parsed.accessionNumber}${
+  book.parsed.volumeNumber !== null ? `:${book.parsed.volumeNumber}` : ""
+}`;
 ---
 
 <Layout
   title={title}
-  description={`${title}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`}
+  description={`${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`}
   searchable
+  activeNav="overview"
 >
   <article class="book-detail" data-pagefind-body>
     <header class="detail-lead">
       <div class="detail-cover">
-        <BookCover book={book} mode="model" pagefindMeta />
+        <BookCover
+          book={book}
+          mode="model"
+          pagefindMeta
+        />
       </div>
 
       <div class="detail-intro">
@@ -62,19 +68,24 @@ try {
           class:list={{ "detail-title--long": title.length > 18 }}
           data-pagefind-meta="title"
         >
-          {titleMain}
-          {
-            titleParenthetical && (
-              <>
-                <wbr />
-                <span class="detail-title-parenthetical">
-                  {titleParenthetical}
-                </span>
-              </>
-            )
-          }
+          {title}
         </h1>
-        {author && <p class="detail-author">{author}</p>}
+        {subtitle && (
+          <p
+            class="detail-subtitle"
+            data-pagefind-meta="book_subtitle"
+          >
+            {subtitle}
+          </p>
+        )}
+        {author && (
+          <p
+            class="detail-author"
+            data-pagefind-meta="author"
+          >
+            {author}
+          </p>
+        )}
         <BookMeta book={book} />
       </div>
     </header>
@@ -96,18 +107,25 @@ try {
 
     <Outline outline={outline} />
   </article>
-
-  <BookModelDebug />
 </Layout>
+
+<!-- Pagefind metadata (hidden) -->
+<div
+  hidden
+  data-pagefind-meta="book_id[id]"
+  data-pagefind-meta={`call_number:${callNumber}`}
+  data-pagefind-meta={`cover_kind:${book.coverKind}`}
+></div>
 
 <script>
   // Fix sub-pixel rendering gap between spine and cover on initial paint.
   // Double rAF: first frame completes initial paint + composite, second
-  // frame re-sets the transform to force a fresh composite.  This handles
-  // both soft (Ctrl+R) and hard (Ctrl+Shift+R) reloads.
+  // frame re-sets the transform to force a fresh composite.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      const model = document.querySelector(".book-cover--model");
+      const model = document.querySelector(
+        ".book-cover--model"
+      ) as HTMLElement | null;
       if (model) {
         const t = getComputedStyle(model).transform;
         model.style.transform = t;

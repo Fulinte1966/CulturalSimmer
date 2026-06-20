@@ -1,73 +1,18 @@
 ---
 import Layout from "../components/Layout.astro";
 import BookCard from "../components/BookCard.astro";
-import { getAllBooks, getUniqueClassifications } from "../lib/books";
+import { getAllBooks } from "../lib/books";
 
 const books = await getAllBooks();
 const recentBooks = books.slice(0, 3);
-const classifications = getUniqueClassifications(books);
-const base = import.meta.env.BASE_URL;
 ---
 
-<Layout
-  title="首页"
-  description="个人公益 PDF 电子书分享站，按书目、分类与全文检索浏览。"
->
-  <section class="title-page">
-    <div class="title-page-copy">
-      <h1>电子书馆</h1>
-      <p>
-        收录经过整理与重排的 PDF 资料。按馆藏书目、分类与全文检索查找，
-        文件通过 GitHub Releases 公开分发。
-      </p>
-    </div>
-    <dl class="title-page-stats">
-      <div><dt>馆藏</dt><dd>{books.length} 种</dd></div>
-      <div><dt>分类</dt><dd>{classifications.length} 类</dd></div>
-    </dl>
-  </section>
-
-  <form class="library-search" method="get" action={`${base}/search/`}>
-    <label for="home-query">检索馆藏</label>
-    <div>
-      <input
-        id="home-query"
-        name="q"
-        type="search"
-        placeholder="书名、作者、索书号或正文"
-      />
-      <button type="submit">检索</button>
-    </div>
-  </form>
-
-  <section class="section-block" aria-labelledby="category-heading">
-    <div class="section-heading">
-      <h2 id="category-heading">分类目录</h2>
-      <a href={`${base}/books/`}>全部馆藏</a>
-    </div>
-    {classifications.length > 0 && (
-      <ol class="category-index">
-        {classifications.map((category) => (
-          <li>
-            <a href={`${base}/categories/${category.code}/`}>
-              <span>{category.code}</span>
-              <strong>{category.label}</strong>
-            </a>
-          </li>
-        ))}
-      </ol>
-    )}
-  </section>
-
-  <section class="section-block" aria-labelledby="recent-heading">
-    <div class="section-heading">
-      <h2 id="recent-heading">最近入馆</h2>
-      <p>按发布日期排列</p>
-    </div>
-    {recentBooks.length > 0 && (
-      <ol class="catalog-grid">
-        {recentBooks.map((book) => <BookCard book={book} />)}
-      </ol>
-    )}
-  </section>
+<Layout title="新书" activeNav="new">
+  {recentBooks.length > 0 ? (
+    <ol class="catalog-grid">
+      {recentBooks.map((book) => <BookCard book={book} />)}
+    </ol>
+  ) : (
+    <p class="empty-state">暂无书籍。</p>
+  )}
 </Layout>

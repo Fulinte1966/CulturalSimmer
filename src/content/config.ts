@@ -10,6 +10,7 @@ const books = defineCollection({
     edition: z.number().int().positive("edition must be a positive integer"),
     date: z.date(),
     author: z.string().optional(),
+    subtitle: z.string().optional(),
     tags: z.array(z.string()).default([]),
     cover: z.string().optional(),
     total_volumes: z

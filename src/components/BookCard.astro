@@ -1,9 +1,7 @@
 ---
 import BookCover from "./BookCover.astro";
-import DownloadButton from "./DownloadButton.astro";
-import ReadingStats from "./ReadingStats.astro";
 import type { BookMeta } from "../lib/books";
-import { formatEdition, formatVolume } from "../lib/bookId";
+import { formatDisplayCallNumber } from "../lib/bookId";
 
 interface Props {
   book: BookMeta;
@@ -19,30 +17,19 @@ const detailUrl = `${base}/books/${book.id}/`;
     <a
       class="catalog-cover-link"
       href={detailUrl}
-      aria-label={"查看《" + book.title + "》"}
+      aria-label={`查看《${book.title}》`}
     >
       <BookCover book={book} mode="flat" />
     </a>
 
-    <div class="catalog-copy">
-      <p class="catalog-id">{book.id}</p>
-      <h3><a href={detailUrl}>{book.title}</a></h3>
-      {book.author && <p class="catalog-author">{book.author}</p>}
+    <p class="catalog-call-number">
+      {formatDisplayCallNumber(book.parsed)}
+    </p>
 
-      <div class="catalog-meta">
-        {book.parsed.isVolume && (
-          <span>{formatVolume(book.parsed.volumeNumber!, book.total_volumes)}</span>
-        )}
-        <span>{formatEdition(book.edition)}</span>
-        <span>{book.date.toLocaleDateString("zh-CN")}</span>
-      </div>
+    <h3><a href={detailUrl}>{book.title}</a></h3>
 
-      <ReadingStats book={book} compact />
+    {book.subtitle && <p class="catalog-subtitle">{book.subtitle}</p>}
 
-      <div class="catalog-actions">
-        <a href={detailUrl}>书目详情</a>
-        <DownloadButton book={book} />
-      </div>
-    </div>
+    {book.author && <p class="catalog-author">{book.author}</p>}
   </article>
 </li>

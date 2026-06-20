@@ -3,56 +3,200 @@ import Layout from "../components/Layout.astro";
 ---
 
 <Layout
-  title="馆藏检索"
-  description="检索电子书馆的书名、作者、索书号、标签、简介与目录。"
+  title="搜索"
+  description="检索电子书馆的书名、作者、索书号。"
+  activeNav="search"
 >
-  <header class="page-header search-header">
-    <div>
-      <h1>馆藏检索</h1>
-      <p>检索书名、作者、索书号、标签、内容简介与目录。</p>
-    </div>
-    <p class="folio">全文索引</p>
-  </header>
-
-  <div class="search-container">
-    <div id="search"></div>
-    <noscript>
-      <p>搜索需要启用 JavaScript。</p>
-    </noscript>
+  <div class="search-form-underline">
+    <form method="get" action="./" role="search">
+      <div class="search-input-group">
+        <label for="search-input" class="search-label">搜索</label>
+        <input
+          id="search-input"
+          name="q"
+          type="search"
+          placeholder="书名、作者、索书号"
+          autocomplete="off"
+        />
+        <button type="submit">检索</button>
+      </div>
+    </form>
   </div>
+
+  <div id="search-results" aria-live="polite"></div>
+  <noscript>
+    <p class="empty-state">搜索需要启用 JavaScript。</p>
+  </noscript>
 </Layout>
+
+<template id="search-result-template">
+  <li class="catalog-item">
+    <article>
+      <a class="catalog-cover-link">
+        <figure class="book-cover book-cover--flat book-cover--placeholder">
+          <div class="book-cover-volume">
+            <div class="book-cover-surface">
+              <div class="book-cover-placeholder" role="img">
+                <span class="placeholder-series">电子书馆</span>
+                <strong class="placeholder-title"></strong>
+                <span class="placeholder-subtitle"></span>
+                <span class="placeholder-author"></span>
+                <span class="placeholder-id"></span>
+              </div>
+            </div>
+          </div>
+        </figure>
+      </a>
+      <p class="catalog-call-number"></p>
+      <h3><a></a></h3>
+      <p class="catalog-subtitle"></p>
+      <p class="catalog-author"></p>
+    </article>
+  </li>
+</template>
 
 <script>
   const base = import.meta.env.BASE_URL;
 
-  async function loadPagefind() {
-    try {
-      const cssLink = document.createElement("link");
-      cssLink.href = `${base}/pagefind/pagefind-ui.css`;
-      cssLink.rel = "stylesheet";
-      document.head.appendChild(cssLink);
+  const resultsEl = document.getElementById("search-results");
+  const templateEl = document.getElementById(
+    "search-result-template"
+  ) as HTMLTemplateElement | null;
 
-      const script = document.createElement("script");
-      script.src = `${base}/pagefind/pagefind-ui.js`;
-      script.onload = () => {
-        const searchEl = document.getElementById("search");
-        if (searchEl && window.PagefindUI) {
-          const pagefind = new window.PagefindUI({
-            element: "#search",
-            showSubResults: true,
-            showImages: true,
-          });
-          const query = new URLSearchParams(window.location.search)
-            .get("q")
-            ?.trim();
-          if (query) {
-            pagefind.triggerSearch(query);
-          }
-        }
-      };
-      document.head.appendChild(script);
-    } catch {
-      // Pagefind is only available after a production build.
+  function setText(
+    root: Element | null,
+    selector: string,
+    value: string | undefined
+  ) {
+    if (!root || !value) return;
+    const el = root.querySelector(selector);
+    if (el) el.textContent = value;
+  }
+
+  function setHref(root: Element, selector: string, value: string) {
+    const el = root.querySelector(selector) as HTMLAnchorElement | null;
+    if (el) el.href = value;
+  }
+
+  function buildResult(
+    result: any,
+    template: HTMLTemplateElement
+  ): HTMLLIElement | null {
+    const fragment = template.content.cloneNode(true) as DocumentFragment;
+    const root = fragment.firstElementChild;
+    if (!root) return null;
+
+    const meta = result.meta || {};
+    const title = meta.title || result.meta?.book_id || "";
+    const subtitle = meta.book_subtitle || "";
+    const author = meta.author || "";
+    const callNumber = meta.call_number || "";
+    const image = meta.image || "";
+    const imageAlt = meta.image_alt || title;
+
+    setHref(root, ".catalog-cover-link", `${base}/books/${meta.book_id}/`);
+    setHref(root, "h3 a", `${base}/books/${meta.book_id}/`);
+
+    if (image) {
+      // Replace placeholder with real image
+      const cover = root.querySelector(".book-cover");
+      if (cover) {
+        cover.classList.remove("book-cover--placeholder");
+        cover.classList.add(
+          meta.cover_kind === "explicit"
+            ? "book-cover--explicit"
+            : "book-cover--generated"
+        );
+      }
+      const surface = root.querySelector(".book-cover-surface");
+      if (surface) {
+        surface.innerHTML = `<img src="${image}" alt="${imageAlt}" loading="lazy" />`;
+      }
+    }
+
+    setText(root, ".placeholder-title", title);
+    setText(root, ".placeholder-subtitle", subtitle);
+    setText(root, ".placeholder-author", author);
+    setText(root, ".placeholder-id", callNumber);
+    setText(root, ".catalog-call-number", callNumber);
+    setText(root, "h3 a", title);
+    setText(root, ".catalog-subtitle", subtitle);
+    setText(root, ".catalog-author", author);
+
+    return root as HTMLLIElement;
+  }
+
+  function showStatus(message: string) {
+    if (resultsEl) {
+      resultsEl.innerHTML = `<p class="empty-state">${message}</p>`;
+    }
+  }
+
+  function renderResults(results: any[]) {
+    if (!resultsEl || !templateEl) return;
+
+    if (results.length === 0) {
+      showStatus("未找到匹配的书籍。");
+      return;
+    }
+
+    const ol = document.createElement("ol");
+    ol.className = "catalog-grid";
+
+    for (const result of results) {
+      const item = buildResult(result, templateEl);
+      if (item) ol.appendChild(item);
+    }
+
+    resultsEl.innerHTML = "";
+    resultsEl.appendChild(ol);
+  }
+
+  async function loadPagefind() {
+    const q = new URLSearchParams(window.location.search).get("q")?.trim();
+    const input = document.getElementById(
+      "search-input"
+    ) as HTMLInputElement | null;
+
+    if (input && q) {
+      input.value = q;
+    }
+
+    if (!q) return;
+
+    try {
+      showStatus("搜索中……");
+
+      // Dynamic import of Pagefind JS API
+      const pagefind = await import(
+        /* @vite-ignore */ `${base}/pagefind/pagefind.js`
+      );
+
+      const search = await pagefind.search(q, {
+        // Restrict to book detail pages only
+      });
+
+      if (!search) {
+        showStatus("搜索索引不可用。");
+        return;
+      }
+
+      const results = await Promise.all(search.results.map((r: any) => r.data()));
+
+      if (!results || results.length === 0) {
+        showStatus("未找到匹配的书籍。");
+        return;
+      }
+
+      renderResults(results);
+    } catch (err) {
+      // Pagefind only available in production builds
+      if (import.meta.env.DEV) {
+        // Silently do nothing in dev
+      } else {
+        console.error(err);
+        showStatus("搜索服务暂时不可用。");
+      }
     }
   }
 

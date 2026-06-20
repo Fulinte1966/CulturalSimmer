@@ -1,0 +1,20 @@
+---
+import Layout from "../../components/Layout.astro";
+import { getTopLevelClassifications } from "../../lib/classification";
+
+const topLevel = getTopLevelClassifications();
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="分类" activeNav="categories">
+  <h1 class="page-heading">分类</h1>
+  <ol class="category-index-list">
+    {topLevel.map((node) => (
+      <li>
+        <a href={`${base}/categories/${node.code}/`}>
+          {node.code} {node.label}
+        </a>
+      </li>
+    ))}
+  </ol>
+</Layout>

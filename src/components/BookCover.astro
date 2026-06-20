@@ -1,5 +1,6 @@
 ---
 import type { BookMeta } from "../lib/books";
+import { formatDisplayCallNumber } from "../lib/bookId";
 
 interface Props {
   book: BookMeta;
@@ -51,9 +52,16 @@ const modelStyle =
             aria-label={`${book.title}排版封面`}
           >
             <span class="placeholder-series">电子书馆</span>
-            <strong>{book.title}</strong>
-            {book.author && <span class="placeholder-author">{book.author}</span>}
-            <span class="placeholder-id">{book.id}</span>
+            <strong class="placeholder-title">{book.title}</strong>
+            {book.subtitle && (
+              <span class="placeholder-subtitle">{book.subtitle}</span>
+            )}
+            {book.author && (
+              <span class="placeholder-author">{book.author}</span>
+            )}
+            <span class="placeholder-id">
+              {formatDisplayCallNumber(book.parsed)}
+            </span>
           </div>
         )
       }

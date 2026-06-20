@@ -5,21 +5,42 @@
 }
 
 :root {
-  --paper: #ffffff;
-  --paper-muted: #f4f3f0;
+  /* Handoff design tokens */
+  --paper: #FFFFFF;
   --ink: #171717;
-  --muted: #68645f;
-  --rule: #cbc8c2;
-  --rule-dark: #4c4945;
-  --accent: #84251f;
-  --accent-hover: #5e1713;
-  --max-width: 60rem;
-  --reading-width: 43rem;
+  --muted: #8A8882;
+  --rule: #DCDAD3;
+  --accent: #84251F;
+  --accent-hover: #5E1713;
+
+  /* Layout */
+  --content-max-width: 1078px;
+  --side-padding: 24px;
+  --mobile-side-padding: 16px;
+  --nav-gap: 48px;
+
+  /* Gallery grid */
+  --gallery-col-gap: 25px;
+  --gallery-row-gap: 56px;
+  --cover-width: 280px;
+  --cover-aspect: 148 / 210;
+  --cover-radius: 5px;
+  --cover-border: 1px;
+
+  /* Book model (preserved from existing geometry) */
   --book-cover-ratio: 640 / 909;
-  --font-serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC",
-    "STSong", "SimSun", serif;
-  --font-sans: "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC",
-    "Source Han Sans SC", sans-serif;
+
+  /* Typography */
+  --font-call-number: "TeX Gyre Termes", "Times New Roman", serif;
+  --font-book-title: "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+  --font-book-subtitle: "Zhuque Fangsong", "FangSong", "仿宋", serif;
+  --font-book-author: "LXGW Neo ZhiSong Screen", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-category: "LXGW Neo ZhiSong Screen", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-nav: "Chill Jinshu Song", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-page-heading: "Chill Jinshu Song", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-placeholder: "Chill Jinshu Song", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-sans: "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", sans-serif;
+  --font-serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
 }
 
 html {
@@ -30,6 +51,7 @@ html {
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  letter-spacing: 0;
 }
 
 body {
@@ -79,100 +101,68 @@ input {
   font: inherit;
 }
 
+/* ------------------------------------------------------------------ */
+
 .inner {
   margin: 0 auto;
-  max-width: var(--max-width);
-  padding: 0 1.5rem;
+  max-width: var(--content-max-width);
+  padding: 0 var(--side-padding);
 }
+
+/* --- Site header -------------------------------------------------- */
 
 .site-header {
-  border-bottom: 1px solid var(--ink);
-  border-top: 0.4rem solid var(--ink);
   background: var(--paper);
+  border-bottom: 1px solid var(--ink);
 }
 
-.masthead {
+.site-header-inner {
   align-items: flex-end;
   display: flex;
+  gap: var(--nav-gap);
   justify-content: space-between;
-  min-height: 7.5rem;
-  padding-bottom: 1.1rem;
-  padding-top: 1.25rem;
+  min-height: 4.5rem;
+  padding-bottom: 0.75rem;
+  padding-top: 1rem;
 }
 
-.masthead-title {
-  display: flex;
-  align-items: baseline;
-  gap: 1.25rem;
-}
-
-.site-title {
+.site-brand {
   color: var(--ink);
-  font-size: 2.3rem;
-  font-weight: 700;
+  display: block;
+  flex-shrink: 0;
   line-height: 1;
 }
 
-.site-title:hover {
-  color: var(--ink);
-  text-decoration-color: transparent;
-}
-
-.masthead-title p {
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  margin-bottom: 0;
+.site-brand img {
+  height: 43px;
+  width: auto;
 }
 
 .site-nav {
   display: flex;
-  font-family: var(--font-sans);
-  font-size: 0.88rem;
-  gap: 1.5rem;
+  font-family: var(--font-nav);
+  font-size: 24px;
+  gap: var(--nav-gap);
+  letter-spacing: 0;
 }
 
 .site-nav a {
   border-bottom: 1px solid transparent;
   color: var(--ink);
   padding-bottom: 0.15rem;
+  text-decoration: none;
 }
 
 .site-nav a:hover {
   border-bottom-color: var(--ink);
-  text-decoration: none;
+}
+
+.site-nav a[aria-current="page"] {
+  font-weight: 700;
 }
 
 .site-main {
-  padding: 3.5rem 0 6rem;
-}
-
-.site-footer {
-  border-top: 1px solid var(--ink);
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  padding: 1.5rem 0 2rem;
-}
-
-.site-footer .inner {
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.site-footer p {
-  margin-bottom: 0;
-}
-
-.site-footer p:first-child {
-  display: flex;
-  gap: 1rem;
-}
-
-.site-footer a {
-  color: var(--ink);
-  font-weight: 700;
+  padding: 3rem 0 6rem;
 }
 
 .title-page {
@@ -1108,5 +1098,425 @@ input {
   .book-cover--flat {
     margin: 0 auto;
     max-width: 13rem;
+  }
+}
+
+/* ==================================================================
+   New handoff-based styles
+   ================================================================== */
+
+/* --- Gallery grid ------------------------------------------------- */
+
+.catalog-grid {
+  display: grid;
+  gap: var(--gallery-row-gap) var(--gallery-col-gap);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Catalog item ------------------------------------------------- */
+
+.catalog-item article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-text-gap, 4px);
+}
+
+.catalog-item h3 {
+  font-family: var(--font-book-title);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.catalog-item h3 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.catalog-item h3 a:hover {
+  color: var(--accent);
+}
+
+/* --- Call number -------------------------------------------------- */
+
+.catalog-call-number {
+  color: var(--ink);
+  font-family: var(--font-call-number);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* --- Subtitle / author in cards ----------------------------------- */
+
+.catalog-subtitle {
+  color: var(--ink);
+  font-family: var(--font-book-subtitle);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.catalog-author {
+  color: var(--ink);
+  font-family: var(--font-book-author);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* --- Cover link --------------------------------------------------- */
+
+.catalog-cover-link {
+  display: block;
+}
+
+.catalog-cover-link:hover {
+  text-decoration: none;
+}
+
+/* --- Book cover (flat) -------------------------------------------- */
+
+.book-cover--flat {
+  aspect-ratio: var(--cover-aspect);
+  max-width: var(--cover-width);
+  width: 100%;
+}
+
+.book-cover--flat .book-cover-volume,
+.book-cover--flat .book-cover-surface {
+  height: 100%;
+  width: 100%;
+}
+
+.book-cover--flat .book-cover-surface {
+  border-radius: var(--cover-radius);
+  overflow: hidden;
+}
+
+.book-cover--flat img {
+  height: 100%;
+  object-fit: fill;
+  width: 100%;
+}
+
+.book-cover--explicit.book-cover--flat .book-cover-surface,
+.book-cover--generated.book-cover--flat .book-cover-surface {
+  border: var(--cover-border) solid var(--accent);
+}
+
+.book-cover--placeholder.book-cover--flat .book-cover-surface {
+  border: var(--cover-border) solid var(--rule);
+  background: var(--paper);
+}
+
+/* --- Placeholder cover typography --------------------------------- */
+
+.book-cover-placeholder {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+}
+
+.placeholder-series {
+  color: var(--muted);
+  font-family: var(--font-placeholder);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.placeholder-title {
+  color: var(--ink);
+  font-family: var(--font-placeholder);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.placeholder-subtitle {
+  color: var(--ink);
+  font-family: var(--font-book-subtitle);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.placeholder-author {
+  color: var(--ink);
+  font-family: var(--font-book-author);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.placeholder-id {
+  color: var(--muted);
+  font-family: var(--font-call-number);
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* --- Page heading ------------------------------------------------- */
+
+.page-heading {
+  font-family: var(--font-page-heading);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.25;
+  margin-bottom: 2rem;
+  overflow-wrap: anywhere;
+}
+
+/* --- Classification index ----------------------------------------- */
+
+.category-index-list {
+  font-family: var(--font-category);
+  font-size: 24px;
+  line-height: 1.75;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.category-index-list a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.category-index-list a:hover {
+  color: var(--accent);
+}
+
+.category-child-index {
+  font-family: var(--font-category);
+  font-size: 24px;
+  line-height: 1.75;
+  list-style: none;
+  margin: 0 0 2rem 0;
+  padding: 0;
+}
+
+.category-child-index .prefix {
+  color: var(--muted);
+}
+
+.category-child-index .suffix {
+  color: var(--ink);
+}
+
+.category-child-index a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.category-child-index a:hover .suffix {
+  color: var(--accent);
+}
+
+.category-ancestors {
+  color: var(--muted);
+  font-family: var(--font-category);
+  font-size: 16px;
+  line-height: 1.75;
+  margin-bottom: 0.5rem;
+}
+
+.category-ancestors a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.category-ancestors a:hover {
+  color: var(--accent);
+}
+
+.category-separator {
+  color: var(--muted);
+  margin: 0 0.5em;
+}
+
+/* --- Search ------------------------------------------------------- */
+
+.search-form-underline {
+  margin: 0 auto;
+  max-width: 804px;
+  text-align: center;
+}
+
+.search-form-underline label {
+  font-family: var(--font-page-heading);
+  font-size: 36px;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-group {
+  align-items: center;
+  border-bottom: 1px solid var(--ink);
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.search-input-group input {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  flex: 1;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  min-width: 0;
+  padding: 0.5rem 0;
+}
+
+.search-input-group input::placeholder {
+  color: var(--muted);
+}
+
+.search-input-group button {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-nav);
+  font-size: 24px;
+  padding: 0.25rem 0.5rem;
+}
+
+.search-input-group button:hover {
+  color: var(--accent);
+}
+
+/* --- Empty / status states ---------------------------------------- */
+
+.empty-state {
+  color: var(--muted);
+  font-family: var(--font-sans);
+  text-align: center;
+}
+
+/* --- Detail page additions ---------------------------------------- */
+
+.detail-subtitle {
+  font-family: var(--font-book-subtitle);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 0.25rem 0 0 0;
+}
+
+.detail-author {
+  font-family: var(--font-book-author);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0.25rem 0 0 0;
+}
+
+/* ==================================================================
+   Responsive
+   ================================================================== */
+
+/* Tablet: 2 columns */
+@media (max-width: 959px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile: 2 columns with tighter gutters */
+@media (max-width: 559px) {
+  :root {
+    --side-padding: var(--mobile-side-padding);
+    --gallery-col-gap: 16px;
+    --gallery-row-gap: 40px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .site-header-inner {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
+    font-size: 20px;
+    gap: 24px;
+  }
+
+  .site-main {
+    padding: 2rem 0 4rem;
+  }
+
+  /* Detail: single column, flat cover */
+  .detail-lead {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .detail-cover {
+    min-height: auto;
+  }
+
+  .book-cover--model::after,
+  .book-cover--model::before,
+  .book-cover--model .book-cover-volume::before,
+  .book-cover--model .book-cover-volume::after {
+    display: none;
+  }
+
+  .book-cover--model {
+    margin-left: 0;
+    transform: none;
+    width: 100%;
+  }
+
+  .book-cover--model .book-cover-surface {
+    border: var(--cover-border) solid var(--accent);
+    border-radius: var(--cover-radius);
+    height: auto;
+    width: 100%;
+  }
+}
+
+/* Narrow: 1 column */
+@media (max-width: 360px) {
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-header-inner {
+    flex-direction: column;
+  }
+}
+
+/* Motion */
+@media (prefers-reduced-motion: reduce) {
+  .book-cover--model,
+  .book-cover--model::after,
+  .book-cover--model .book-cover-surface {
+    transition: none;
   }
 }
