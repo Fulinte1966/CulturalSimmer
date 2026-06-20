@@ -1,0 +1,404 @@
+<!--
+  Debug panel for the 3D book model on detail pages.
+  Only visible when the page URL includes ?debug.
+  Drag the header bar to reposition.
+-->
+<script>
+  if (!window.location.search.includes("debug")) {
+  } else {
+
+  interface SliderSpec {
+    prop: string;
+    label: string;
+    min: number;
+    max: number;
+    step: number;
+    default: number;
+    unit: string;
+    hint?: string;
+    /** If true, a value of min means "unset the property" (CSS fallback kicks in) */
+    zeroIsUnset?: boolean;
+    unsetLabel?: string;
+  }
+
+  const SLIDERS: SliderSpec[] = [
+    // ── 书脊 Spine ──
+    { prop: "--book-size", label: "厚度", min: 0.2, max: 5, step: 0.1, default: 1.5, unit: "rem" },
+    { prop: "--model-spine-w", label: "宽度覆盖", min: 0, max: 100, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto (calc)", hint: "0 = 自动计算（厚度 + 描边 ×2）" },
+    { prop: "--model-spine-h", label: "高度覆盖", min: 0, max: 600, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto (100%)", hint: "0 = 自动（等于封面高）" },
+    { prop: "--model-spine-tx", label: "水平微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    { prop: "--model-spine-ty", label: "垂直微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    // ── 封面 Front cover ──
+    { prop: "--model-width", label: "宽度", min: 100, max: 500, step: 1, default: 242, unit: "px", hint: "高由宽按 A5 比例 (640:909) 自动推算" },
+    { prop: "--model-cover-w", label: "宽度覆盖", min: 0, max: 500, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto", hint: "0 = 跟随「封面宽度」" },
+    { prop: "--model-cover-h", label: "高度覆盖", min: 0, max: 600, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto (A5)", hint: "0 = 按宽高比自动推算" },
+    { prop: "--model-cover-tx", label: "水平微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    { prop: "--model-cover-ty", label: "垂直微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    { prop: "--model-border", label: "描边粗细", min: 0, max: 5, step: 0.5, default: 1, unit: "px" },
+    { prop: "--model-radius", label: "圆角半径", min: 0, max: 20, step: 1, default: 5, unit: "px" },
+    // ── 封底 Back cover ──
+    { prop: "--model-back-tx", label: "水平微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    { prop: "--model-back-ty", label: "垂直微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    // ── 模型变换 Transform ──
+    { prop: "--model-skew", label: "倾斜角度", min: -30, max: 0, step: 0.5, default: -10, unit: "deg" },
+    { prop: "--model-scale", label: "缩放比例", min: 0.2, max: 1.5, step: 0.01, default: 0.75, unit: "" },
+    { prop: "--model-margin-left", label: "水平偏移", min: -10, max: 5, step: 0.5, default: -2, unit: "rem" },
+    // ── 页边 Pages ──
+    { prop: "--model-pages-height", label: "页边高度", min: 100, max: 500, step: 1, default: 235, unit: "px" },
+    { prop: "--model-pages-fine", label: "页边微调", min: -20, max: 20, step: 1, default: 5, unit: "px" },
+    // ── 阴影 Shadow ──
+    { prop: "--model-shadow-extra-height", label: "阴影高度", min: 0, max: 5, step: 0.25, default: 1.25, unit: "rem" },
+    { prop: "--model-shadow-extra-width", label: "阴影展宽", min: 0, max: 2, step: 0.25, default: 0.25, unit: "rem" },
+    { prop: "--model-shadow-offset", label: "阴影底距", min: 0, max: 30, step: 1, default: 10, unit: "px" },
+    // ── 悬浮 Hover ──
+    { prop: "--model-hover-lift", label: "悬浮抬升", min: 0, max: 2, step: 0.1, default: 0.5, unit: "rem" },
+  ];
+
+  const SECTION_LABELS: Record<number, string> = {
+    0: "书脊 Spine",
+    5: "封面 Front Cover",
+    12: "封底 Back Cover",
+    14: "模型变换 Transform",
+    17: "页边 Pages",
+    19: "阴影 Shadow",
+    22: "悬浮 Hover",
+  };
+
+  function makeDraggable(panel: HTMLElement, header: HTMLElement): void {
+    let dragging = false;
+    let startX = 0, startY = 0, panelX = 0, panelY = 0;
+
+    header.addEventListener("mousedown", (e) => {
+      if ((e.target as HTMLElement).closest("button, input, label")) return;
+      dragging = true;
+      startX = e.clientX; startY = e.clientY;
+      panelX = panel.offsetLeft; panelY = panel.offsetTop;
+      panel.style.transition = "none";
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      panel.style.left = `${Math.max(0, Math.min(panelX + e.clientX - startX, window.innerWidth - panel.offsetWidth))}px`;
+      panel.style.top = `${Math.max(0, Math.min(panelY + e.clientY - startY, window.innerHeight - panel.offsetHeight))}px`;
+    });
+
+    document.addEventListener("mouseup", () => { dragging = false; });
+  }
+
+  function buildPanel(): void {
+    const target = document.querySelector(".book-cover--model") as HTMLElement | null;
+    if (!target) return;
+
+    const panel = document.createElement("div");
+    panel.id = "book-model-debug";
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "debug-header";
+    header.innerHTML = `<span>书模调试 <em class="debug-drag-hint">拖拽移动</em></span>`;
+    const toggleBtn = document.createElement("button");
+    toggleBtn.textContent = "−";
+    toggleBtn.setAttribute("aria-label", "折叠");
+    header.appendChild(toggleBtn);
+    panel.appendChild(header);
+
+    const body = document.createElement("div");
+    body.className = "debug-body";
+
+    // Spine color picker — CSS default is transparent; color input uses a fallback display value
+    const SPINE_COLOR_FALLBACK = "#222222";
+    const colorGroup = document.createElement("div");
+    colorGroup.className = "debug-group";
+    const colorLabel = document.createElement("label");
+    colorLabel.className = "debug-label";
+    colorLabel.innerHTML = "<span>书脊颜色</span>";
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.className = "debug-color";
+    const colorHint = document.createElement("span");
+    colorHint.className = "debug-value";
+    colorHint.textContent = "默认透明";
+    colorInput.addEventListener("input", () => {
+      target.style.setProperty("--model-spine-color", colorInput.value);
+      colorHint.textContent = colorInput.value;
+    });
+    const initColor = getComputedStyle(target).getPropertyValue("--model-spine-color").trim();
+    if (initColor && initColor !== "transparent" && /^#[0-9a-fA-F]{6}$/.test(initColor)) {
+      colorInput.value = initColor;
+      colorHint.textContent = initColor;
+    } else {
+      colorInput.value = SPINE_COLOR_FALLBACK;
+      colorHint.textContent = "默认透明";
+    }
+    colorLabel.appendChild(colorInput);
+    colorLabel.appendChild(colorHint);
+    colorGroup.appendChild(colorLabel);
+    body.appendChild(colorGroup);
+
+    let currentSection = "";
+    for (const [i, spec] of SLIDERS.entries()) {
+      const section = SECTION_LABELS[i];
+      if (section && section !== currentSection) {
+        currentSection = section;
+        const h = document.createElement("div");
+        h.className = "debug-section";
+        h.textContent = section;
+        body.appendChild(h);
+      }
+
+      const group = document.createElement("div");
+      group.className = "debug-group";
+      const label = document.createElement("label");
+      label.className = "debug-label";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "debug-name";
+      nameSpan.textContent = spec.label;
+
+      const valueDisplay = document.createElement("span");
+      valueDisplay.className = "debug-value";
+
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = String(spec.min);
+      slider.max = String(spec.max);
+      slider.step = String(spec.step);
+      slider.className = "debug-slider";
+
+      // Read current value from computed style or inline style
+      const inlineVal = target.style.getPropertyValue(spec.prop);
+      let currentVal: number;
+      if (inlineVal && inlineVal !== "") {
+        currentVal = parseFloat(inlineVal);
+      } else if (spec.zeroIsUnset) {
+        currentVal = spec.default; // property not set → use default (0)
+      } else {
+        const computed = getComputedStyle(target).getPropertyValue(spec.prop).trim();
+        currentVal = computed ? parseFloat(computed) : spec.default;
+      }
+      slider.value = String(Number.isNaN(currentVal) ? spec.default : currentVal);
+
+      const update = () => {
+        const val = parseFloat(slider.value);
+        const atDefault = Math.abs(val - spec.default) < (spec.step / 2);
+        if (spec.zeroIsUnset && Math.abs(val - spec.min) < (spec.step / 2)) {
+          target.style.removeProperty(spec.prop);
+          valueDisplay.textContent = spec.unsetLabel || "auto";
+        } else if (atDefault && !spec.zeroIsUnset) {
+          // At default: remove inline style so CSS stylesheet or var() fallback
+          // provides the value. This keeps "no-op" transforms from creating
+          // GPU layers / stacking contexts.
+          target.style.removeProperty(spec.prop);
+          valueDisplay.textContent = spec.unit ? `${val}${spec.unit}` : String(val);
+        } else {
+          const formatted = spec.unit ? `${val}${spec.unit}` : String(val);
+          target.style.setProperty(spec.prop, formatted);
+          valueDisplay.textContent = formatted;
+          if (target.style.getPropertyValue(spec.prop) !== formatted) {
+            console.warn(`[书模调试] 属性未生效: ${spec.prop} 设置="${formatted}" 读回="${target.style.getPropertyValue(spec.prop)}"`);
+          }
+        }
+      };
+
+      slider.addEventListener("input", update);
+      update();
+
+      label.appendChild(nameSpan);
+      label.appendChild(valueDisplay);
+      if (spec.hint) {
+        const hint = document.createElement("span");
+        hint.className = "debug-hint";
+        hint.textContent = spec.hint;
+        label.appendChild(hint);
+      }
+
+      group.appendChild(label);
+      group.appendChild(slider);
+      body.appendChild(group);
+    }
+
+    // Reset
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "debug-reset";
+    resetBtn.textContent = "重置全部默认值";
+    resetBtn.addEventListener("click", () => {
+      for (const spec of SLIDERS) {
+        target.style.removeProperty(spec.prop);
+      }
+      target.style.removeProperty("--model-spine-color");
+      colorInput.value = SPINE_COLOR_FALLBACK;
+      colorHint.textContent = "默认透明";
+
+      const allSliders = body.querySelectorAll<HTMLInputElement>(".debug-slider");
+      for (const [j, s] of allSliders.entries()) {
+        if (j < SLIDERS.length) {
+          s.value = String(SLIDERS[j].default);
+          const vd = s.parentElement?.querySelector(".debug-value") as HTMLElement | null;
+          if (vd) {
+            const sp = SLIDERS[j];
+            if (sp.zeroIsUnset && sp.default === sp.min) {
+              vd.textContent = sp.unsetLabel || "auto";
+            } else {
+              vd.textContent = sp.unit ? `${sp.default}${sp.unit}` : String(sp.default);
+            }
+          }
+        }
+      }
+      refreshExport();
+    });
+    body.appendChild(resetBtn);
+
+    // ── Export current settings ──
+    const exportSection = document.createElement("div");
+    exportSection.className = "debug-section";
+    exportSection.textContent = "当前参数";
+    exportSection.style.marginTop = "0.75rem";
+    body.appendChild(exportSection);
+
+    const exportTextarea = document.createElement("textarea");
+    exportTextarea.className = "debug-export";
+    exportTextarea.readOnly = true;
+    exportTextarea.rows = 6;
+    exportTextarea.setAttribute("aria-label", "当前 CSS 自定义属性");
+    exportTextarea.addEventListener("focus", () => exportTextarea.select());
+    body.appendChild(exportTextarea);
+
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "debug-copy";
+    copyBtn.textContent = "复制参数";
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(exportTextarea.value);
+        copyBtn.textContent = "已复制 ✓";
+        setTimeout(() => { copyBtn.textContent = "复制参数"; }, 1500);
+      } catch {
+        exportTextarea.select();
+        document.execCommand("copy");
+        copyBtn.textContent = "已复制 ✓";
+        setTimeout(() => { copyBtn.textContent = "复制参数"; }, 1500);
+      }
+    });
+    body.appendChild(copyBtn);
+
+    function collectSettings(): string {
+      const lines: string[] = [];
+      // Show inline-styles only (user-set values) first, then full computed
+      const inlineLines: string[] = [];
+      const computedLines: string[] = [];
+      const computed = getComputedStyle(target!);
+      for (let i = 0; i < target!.style.length; i++) {
+        const prop = target!.style[i];
+        if (prop.startsWith("--model") || prop === "--book-size") {
+          inlineLines.push(`${prop}: ${target!.style.getPropertyValue(prop)};`);
+        }
+      }
+      const allProps = [
+        "--book-size",
+        "--model-width",
+        "--model-skew",
+        "--model-scale",
+        "--model-margin-left",
+        "--model-border",
+        "--model-radius",
+        "--model-pages-height",
+        "--model-pages-fine",
+        "--model-spine-color",
+        "--model-shadow-extra-height",
+        "--model-shadow-extra-width",
+        "--model-shadow-offset",
+        "--model-hover-lift",
+        "--model-cover-tx",
+        "--model-cover-ty",
+        "--model-spine-tx",
+        "--model-spine-ty",
+        "--model-spine-w",
+        "--model-spine-h",
+        "--model-back-tx",
+        "--model-back-ty",
+        "--model-cover-w",
+        "--model-cover-h",
+      ];
+      for (const prop of allProps) {
+        const val = computed.getPropertyValue(prop).trim();
+        if (val) {
+          computedLines.push(`${prop}: ${val};`);
+        }
+      }
+      if (inlineLines.length > 0) {
+        lines.push("/* ── 已修改（内联样式）── */");
+        lines.push(...inlineLines);
+        lines.push("");
+        lines.push("/* ── 全部计算值 ── */");
+      }
+      lines.push(...computedLines);
+      return lines.join("\n");
+    }
+
+    function refreshExport(): void {
+      exportTextarea.value = collectSettings();
+    }
+
+    // Hook into all slider update callbacks (re-collect after each change)
+    for (const slider of body.querySelectorAll<HTMLInputElement>(".debug-slider")) {
+      slider.addEventListener("input", () => setTimeout(refreshExport, 0));
+    }
+    // Also refresh when color changes
+    colorInput.addEventListener("input", () => setTimeout(refreshExport, 0));
+    // Toggle button
+    toggleBtn.addEventListener("click", () => setTimeout(refreshExport, 50));
+
+    refreshExport();
+
+    panel.appendChild(body);
+
+    // Collapse toggle
+    let collapsed = false;
+    toggleBtn.addEventListener("click", () => {
+      collapsed = !collapsed;
+      body.hidden = collapsed;
+      toggleBtn.textContent = collapsed ? "+" : "−";
+    });
+
+    document.body.appendChild(panel);
+    makeDraggable(panel, header);
+  }
+
+  // ── Styles ──
+  const style = document.createElement("style");
+  style.textContent = `
+    #book-model-debug{position:fixed;top:0.75rem;left:calc(100vw - 272px - 0.75rem);width:272px;max-height:calc(100vh - 1.5rem);overflow-y:auto;background:var(--paper,#fff);border:1px solid var(--rule,#cbc8c2);border-radius:6px;font-family:var(--font-sans,sans-serif);font-size:0.7rem;line-height:1.45;color:var(--ink,#171717);z-index:9999;box-shadow:0 2px 12px rgba(0,0,0,0.15);transition:none}
+    #book-model-debug .debug-header{display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.75rem;border-bottom:1px solid var(--rule,#cbc8c2);font-weight:700;font-size:0.75rem;position:sticky;top:0;background:var(--paper,#fff);z-index:1;cursor:grab;user-select:none;-webkit-user-select:none}
+    #book-model-debug .debug-header:active{cursor:grabbing}
+    #book-model-debug .debug-drag-hint{font-weight:400;color:var(--muted,#68645f);font-size:0.58rem;margin-left:0.25rem}
+    #book-model-debug .debug-header button{background:none;border:1px solid var(--rule,#cbc8c2);border-radius:3px;cursor:pointer;font-size:0.8rem;line-height:1;width:1.3rem;height:1.3rem;padding:0;display:flex;align-items:center;justify-content:center;color:var(--ink,#171717);flex-shrink:0}
+    #book-model-debug .debug-body{padding:0.4rem 0.75rem 0.6rem}
+    #book-model-debug .debug-section{font-weight:700;font-size:0.64rem;color:var(--accent,#84251f);margin-top:0.55rem;margin-bottom:0.2rem;padding-bottom:0.1rem;border-bottom:1px solid var(--rule,#cbc8c2)}
+    #book-model-debug .debug-group{margin-bottom:0.35rem}
+    #book-model-debug .debug-label{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.25rem;margin-bottom:0.1rem}
+    #book-model-debug .debug-name{color:var(--ink,#171717)}
+    #book-model-debug .debug-value{font-variant-numeric:tabular-nums;color:var(--muted,#68645f);font-size:0.62rem}
+    #book-model-debug .debug-hint{width:100%;color:var(--muted,#68645f);font-size:0.58rem;font-style:italic}
+    #book-model-debug .debug-slider{width:100%;margin:0;accent-color:var(--accent,#84251f)}
+    #book-model-debug .debug-color{width:1.4rem;height:1.1rem;border:1px solid var(--rule,#cbc8c2);border-radius:3px;padding:0;cursor:pointer;vertical-align:middle}
+    #book-model-debug .debug-reset{display:block;width:100%;margin-top:0.6rem;padding:0.3rem 0;border:1px solid var(--accent,#84251f);border-radius:4px;background:transparent;color:var(--accent,#84251f);font-family:var(--font-sans,sans-serif);font-size:0.66rem;cursor:pointer}
+    #book-model-debug .debug-reset:hover{background:var(--accent,#84251f);color:var(--paper,#fff)}
+    #book-model-debug .debug-export{width:100%;margin-top:0.25rem;padding:0.35rem;border:1px solid var(--rule,#cbc8c2);border-radius:3px;font-family:var(--font-mono,Consolas,monospace);font-size:0.6rem;line-height:1.35;resize:vertical;background:var(--paper-muted,#f4f3f0);color:var(--ink,#171717);white-space:pre;overflow-x:auto;box-sizing:border-box}
+    #book-model-debug .debug-copy{display:block;width:100%;margin-top:0.3rem;padding:0.25rem 0;border:1px solid var(--muted,#68645f);border-radius:3px;background:transparent;color:var(--muted,#68645f);font-family:var(--font-sans,sans-serif);font-size:0.62rem;cursor:pointer}
+    #book-model-debug .debug-copy:hover{background:var(--muted,#68645f);color:var(--paper,#fff)}
+  `;
+  document.head.appendChild(style);
+
+  if (document.querySelector(".book-cover--model")) {
+    buildPanel();
+  } else {
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(".book-cover--model")) {
+        observer.disconnect();
+        buildPanel();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+  }
+</script>

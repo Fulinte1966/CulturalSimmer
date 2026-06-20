@@ -618,49 +618,68 @@ input {
 
 .book-cover--model {
   --book-size: 1.5rem;
+  --model-width: 242px;
+  --model-skew: -10deg;
+  --model-scale: 0.75;
+  --model-margin-left: -2rem;
+  --model-border: 2px;
+  --model-radius: 5px;
+  --model-pages-height: 235px;
+  --model-pages-fine: 5px;
+  --model-spine-color: transparent;
+  --model-shadow-extra-height: 1.25rem;
+  --model-shadow-extra-width: 0.25rem;
+  --model-shadow-offset: 10px;
+  --model-hover-lift: 0.5rem;
+  --model-spine-tx: -4px;
+  --model-back-tx: -4px;
+  --model-back-ty: -4px;
   align-self: flex-start;
   box-sizing: border-box;
   font-size: 0;
   isolation: isolate;
-  margin-left: -2rem;
+  margin-left: var(--model-margin-left);
   position: relative;
-  transform: skewY(-10deg) scale(0.75);
-  width: 242px;
+  transform: skewY(var(--model-skew)) scale(var(--model-scale));
+  width: var(--model-width);
 }
 
 .book-cover--model .book-cover-volume {
   display: block;
   position: relative;
+  /* Only active when debug panel sets both --model-cover-tx AND --model-cover-ty.
+     No fallback → var() IACVT → transform:none when unset (no stacking context). */
+  transform: translate(var(--model-cover-tx), var(--model-cover-ty));
 }
 
 .book-cover--model .book-cover-surface {
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: var(--model-border) solid var(--rule);
   border-left: 0;
-  border-radius: 0 5px 5px 0;
-  height: auto;
+  border-radius: 0 var(--model-radius) var(--model-radius) 0;
+  height: var(--model-cover-h, auto);
   transition: filter 0.5s, transform 0.5s;
-  width: 242px;
+  width: var(--model-cover-w, var(--model-width));
 }
 
 .book-cover--model::after {
-  background-color: #222;
+  background-color: var(--model-spine-color);
   background-image: var(--spine-texture, none);
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  border: 1px solid var(--rule);
+  border: var(--model-border) solid var(--rule);
   border-radius: 0;
   border-right: 0;
   content: "";
-  height: 100%;
-  left: calc(-1 * var(--book-size));
+  height: var(--model-spine-h, 100%);
+  left: calc(-1 * var(--book-size) + var(--model-spine-tx, 0px));
   position: absolute;
-  top: 0;
+  top: var(--model-spine-ty, 0px);
   transform: skewY(45deg);
   transform-origin: right;
   transition: transform 0.5s;
-  width: calc(var(--book-size) + 2px);
+  width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
 }
 
@@ -668,10 +687,10 @@ input {
   background: var(--pages-texture) var(--paper);
   background-size: 0.5rem;
   content: "";
-  height: 235px;
+  height: var(--model-pages-height);
   left: calc(-1 * var(--book-size));
   position: absolute;
-  top: calc(-1 * (234px + (var(--book-size) / 2)) + 5px);
+  top: calc(-1 * (var(--model-pages-height) - var(--model-border) + (var(--book-size) / 2)) + var(--model-pages-fine));
   transform: rotate(90deg) skewY(-45deg);
   transform-origin: bottom;
   transition: transform 0.5s;
@@ -681,14 +700,14 @@ input {
 
 .book-cover--model .book-cover-volume::after {
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: var(--model-border) solid var(--rule);
   border-left: 0;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 var(--model-radius) var(--model-radius) 0;
   content: "";
   height: 100%;
-  left: calc(-1 * var(--book-size));
+  left: calc(-1 * var(--book-size) + var(--model-back-tx, 0px));
   position: absolute;
-  top: 0;
+  top: var(--model-back-ty, 0px);
   transform: translateY(calc(-1 * var(--book-size)));
   transition: transform 0.5s;
   width: 100%;
@@ -700,33 +719,34 @@ input {
   border-radius: 2rem;
   content: "";
   filter: blur(10px);
-  height: calc(1.25rem + var(--book-size));
+  height: calc(var(--model-shadow-extra-height) + var(--book-size));
   left: calc(-1 * var(--book-size));
   position: absolute;
-  top: calc(100% - 10px - var(--book-size));
+  top: calc(100% - var(--model-shadow-offset) - var(--book-size));
   transform: skewX(45deg);
   transition: transform 0.5s;
-  width: calc(100% + var(--book-size) + 0.25rem);
+  width: calc(100% + var(--book-size) + var(--model-shadow-extra-width));
   z-index: -1;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .book-cover--model:hover .book-cover-surface {
     filter: brightness(1.08);
-    transform: translateY(-0.5rem);
+    transform: translateY(calc(-1 * var(--model-hover-lift)));
   }
 
   .book-cover--model:hover .book-cover-volume::after {
-    transform: translateY(calc(-1 * (var(--book-size) + 0.5rem)));
+    transform: translateY(calc(-1 * (var(--book-size) + var(--model-hover-lift))));
   }
 
   .book-cover--model:hover .book-cover-volume::before {
-    transform: rotate(90deg) skewY(-45deg) translateX(-0.5rem)
-      translateY(-0.5rem);
+    transform: rotate(90deg) skewY(-45deg)
+      translateX(calc(-1 * var(--model-hover-lift)))
+      translateY(calc(-1 * var(--model-hover-lift)));
   }
 
   .book-cover--model:hover::after {
-    transform: skewY(45deg) translateY(-0.5rem);
+    transform: skewY(45deg) translateY(calc(-1 * var(--model-hover-lift)));
   }
 
   .book-cover--model:hover::before {
