@@ -6,7 +6,6 @@ import Layout from "../../components/Layout.astro";
 import BookCover from "../../components/BookCover.astro";
 import BookMeta from "../../components/BookMeta.astro";
 import Outline from "../../components/Outline.astro";
-import BookModelDebug from "../../components/BookModelDebug.astro";
 import type { OutlineItem } from "../../components/Outline.astro";
 import { getBookById } from "../../lib/books";
 
@@ -97,5 +96,4 @@ try {
     <Outline outline={outline} />
   </article>
 
-  <BookModelDebug />
 </Layout>

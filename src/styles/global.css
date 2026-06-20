@@ -620,12 +620,12 @@ input {
   --book-size: 2rem;
   --model-width: 300px;
   --model-skew: -10deg;
-  --model-scale: 0.851;
+  --model-scale: 0.84;
   --model-margin-left: -3rem;
   --model-border: 2px;
   --model-radius: 5px;
   --model-pages-height: 290px;
-  --model-pages-fine: 5px;
+  --model-pages-fine: 3px;
   --model-spine-color: transparent;
   --model-shadow-extra-height: 1.25rem;
   --model-shadow-extra-width: 0.25rem;
