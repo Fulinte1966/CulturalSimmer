@@ -662,6 +662,8 @@ input {
   width: var(--model-cover-w, var(--model-width));
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Fill sub-pixel anti-aliasing gap between cover and spine */
+  box-shadow: -1px 0 0 var(--paper);
 }
 
 .book-cover--model::after {
