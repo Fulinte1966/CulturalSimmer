@@ -113,6 +113,35 @@ All internal links must use `import.meta.env.BASE_URL` (resolves to `/ebook-libr
 
 Single global stylesheet (`src/styles/global.css`) with CSS custom properties. No CSS framework, no dark mode. Three responsive breakpoints (760px, 560px, 340px) for layout adjustments on small screens. The detail page renders a 3D book model via CSS transforms (`skewY`, `rotate`, `translate`) with custom properties `--pages-texture`, `--spine-texture`, and `--book-size`. Hover animations respect `prefers-reduced-motion`.
 
+### 3D book model
+
+The `.book-cover--model` element on the detail page (`[id].astro`) renders a 3D isometric book using CSS pseudo-elements:
+
+| Element | Pseudo-element / class | Purpose |
+|---|---|---|
+| Front cover | `.book-cover-surface` | Cover image or typographic placeholder |
+| Spine | `.book-cover--model::after` | Left-side spine, skewed 45° |
+| Back cover | `.book-cover-volume::after` | Behind front cover, offset vertically |
+| Page edges | `.book-cover-volume::before` | Top page-edge texture strip |
+| Drop shadow | `.book-cover--model::before` | Skewed shadow beneath the model |
+
+All dimensions are controlled by CSS custom properties on `.book-cover--model` (see `src/styles/global.css` lines ~620-636). The model is composite-intensive — `skewY` transforms on the container and spine create GPU layers.
+
+**Known rendering quirk**: at certain zoom levels a sub-pixel anti-aliasing gap appears between spine and cover. Two mitigations are in place:
+1. Scale value tuned to `0.84` to avoid common raster-alignment points
+2. A double-`requestAnimationFrame` script in `[id].astro` forces a recomposite after initial paint (handles cold-load gap)
+
+Spine darkening uses `box-shadow: inset` (not `filter`) so the border color (`--rule`) is preserved. Hover brightens the spine by reducing the inset shadow alpha.
+
+**Debug panel**: `src/components/BookModelDebug.astro` is a floating control panel with sliders for all model parameters. It's normally disabled (not imported). To enable:
+
+1. Add `import BookModelDebug from "../../components/BookModelDebug.astro";` to `[id].astro`
+2. Add `<BookModelDebug />` before `</Layout>`
+3. Visit any book page with `?debug` in the URL
+4. After tuning, copy the "已修改" values from the export textarea, apply to CSS defaults, then remove the import
+
+The panel activates via `window.location.search.includes("debug")` so production pages are unaffected.
+
 ## Adding a book
 
 ### First release
@@ -141,6 +170,21 @@ Single global stylesheet (`src/styles/global.css`) with CSS custom properties. N
 3. Create Release with tag `A12-8-2_v2`, upload PDF
 4. Re-run asset extraction for the new edition
 5. Commit updated .md + new assets
+
+## Development notes
+
+### Editing CSS
+
+The global stylesheet (`src/styles/global.css`, ~1100 lines) uses 2-space indentation but has occasional inconsistencies from prior `sed` edits. **Always `Read` the file immediately before using `Edit`** — the Edit tool requires byte-exact `old_string` matching, and the file may have been touched by formatters or other tools between reads. **Never use `sed` on this file**; it introduces whitespace drift that compounds over time.
+
+### Adding debug controls
+
+To add a new CSS custom property with a debug slider:
+1. Define the property with default value on `.book-cover--model` in `global.css`
+2. Reference it in the relevant CSS rule via `var(--prop-name, fallback)`
+3. Add a `SliderSpec` entry in `BookModelDebug.astro`'s `SLIDERS` array
+4. Add the property name to the `allProps` list in `collectSettings()`
+5. Update `SECTION_LABELS` indices if inserting into an existing section
 
 ## Constraints (v1)
 
