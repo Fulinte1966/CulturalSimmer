@@ -647,10 +647,7 @@ input {
 .book-cover--model .book-cover-volume {
   display: block;
   position: relative;
-  /* Default shift of -1px fills the sub-pixel anti-aliasing gap between
-     the spine's right edge and the cover's left edge.
-     Debug panel overrides via --model-cover-tx / --model-cover-ty. */
-  transform: translate(var(--model-cover-tx, -1px), var(--model-cover-ty, 0px));
+  transform: translate(var(--model-cover-tx), var(--model-cover-ty));
 }
 
 .book-cover--model .book-cover-surface {
@@ -679,9 +676,12 @@ input {
   top: var(--model-spine-ty, 0px);
   transform: skewY(45deg);
   transform-origin: right;
-  transition: transform 0.5s;
+  transition: transform 0.5s, box-shadow 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
+  /* 0.5px shadow on the right edge bridges the anti-aliasing gap to the cover.
+     Colored to match the border (--rule) so it reads as a spine crease. */
+  box-shadow: 0.5px 0 0 0 var(--rule);
 }
 
 .book-cover--model .book-cover-volume::before {
