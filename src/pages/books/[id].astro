@@ -100,13 +100,16 @@ try {
 
 <script>
   // Fix sub-pixel rendering gap between spine and cover on initial paint.
-  // Reading and re-setting the transform forces a recomposite without
-  // any visual change — same effect as the hover-triggered repaint.
+  // Double rAF: first frame completes initial paint + composite, second
+  // frame re-sets the transform to force a fresh composite.  This handles
+  // both soft (Ctrl+R) and hard (Ctrl+Shift+R) reloads.
   requestAnimationFrame(() => {
-    const model = document.querySelector(".book-cover--model");
-    if (model) {
-      const t = getComputedStyle(model).transform;
-      model.style.transform = t;
-    }
+    requestAnimationFrame(() => {
+      const model = document.querySelector(".book-cover--model");
+      if (model) {
+        const t = getComputedStyle(model).transform;
+        model.style.transform = t;
+      }
+    });
   });
 </script>
