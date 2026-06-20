@@ -97,3 +97,16 @@ try {
   </article>
 
 </Layout>
+
+<script>
+  // Fix sub-pixel rendering gap between spine and cover on initial paint.
+  // Reading and re-setting the transform forces a recomposite without
+  // any visual change — same effect as the hover-triggered repaint.
+  requestAnimationFrame(() => {
+    const model = document.querySelector(".book-cover--model");
+    if (model) {
+      const t = getComputedStyle(model).transform;
+      model.style.transform = t;
+    }
+  });
+</script>
