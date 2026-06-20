@@ -28,6 +28,8 @@
     { prop: "--model-spine-h", label: "高度覆盖", min: 0, max: 600, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto (100%)", hint: "0 = 自动（等于封面高）" },
     { prop: "--model-spine-tx", label: "水平微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
     { prop: "--model-spine-ty", label: "垂直微调", min: -100, max: 100, step: 1, default: 0, unit: "px" },
+    { prop: "--model-spine-brightness", label: "常态亮度", min: 0.1, max: 1.5, step: 0.01, default: 0.55, unit: "" },
+    { prop: "--model-spine-brightness-hover", label: "悬浮亮度", min: 0.1, max: 1.5, step: 0.01, default: 1.05, unit: "" },
     // ── 封面 Front cover ──
     { prop: "--model-width", label: "宽度", min: 100, max: 500, step: 1, default: 242, unit: "px", hint: "高由宽按 A5 比例 (640:909) 自动推算" },
     { prop: "--model-cover-w", label: "宽度覆盖", min: 0, max: 500, step: 1, default: 0, unit: "px", zeroIsUnset: true, unsetLabel: "auto", hint: "0 = 跟随「封面宽度」" },
@@ -56,12 +58,12 @@
 
   const SECTION_LABELS: Record<number, string> = {
     0: "书脊 Spine",
-    5: "封面 Front Cover",
-    12: "封底 Back Cover",
-    14: "模型变换 Transform",
-    17: "页边 Pages",
-    19: "阴影 Shadow",
-    22: "悬浮 Hover",
+    7: "封面 Front Cover",
+    14: "封底 Back Cover",
+    16: "模型变换 Transform",
+    19: "页边 Pages",
+    21: "阴影 Shadow",
+    24: "悬浮 Hover",
   };
 
   function makeDraggable(panel: HTMLElement, header: HTMLElement): void {
@@ -312,6 +314,8 @@
         "--model-cover-ty",
         "--model-spine-tx",
         "--model-spine-ty",
+        "--model-spine-brightness",
+        "--model-spine-brightness-hover",
         "--model-spine-w",
         "--model-spine-h",
         "--model-back-tx",

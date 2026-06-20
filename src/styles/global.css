@@ -627,6 +627,8 @@ input {
   --model-pages-height: 290px;
   --model-pages-fine: 3px;
   --model-spine-color: transparent;
+  --model-spine-brightness: 0.55;
+  --model-spine-brightness-hover: 1.05;
   --model-shadow-extra-height: 1.25rem;
   --model-shadow-extra-width: 0.25rem;
   --model-shadow-offset: 10px;
@@ -679,7 +681,7 @@ input {
   transition: transform 0.5s, filter 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
-      filter: brightness(0.55);
+      filter: brightness(var(--model-spine-brightness));
 }
 
 .book-cover--model .book-cover-volume::before {
@@ -746,7 +748,7 @@ input {
 
   .book-cover--model:hover::after {
     transform: skewY(45deg) translateY(calc(-1 * var(--model-hover-lift)));
-    filter: brightness(1.05);
+    filter: brightness(var(--model-spine-brightness-hover));
   }
 
   .book-cover--model:hover::before {
