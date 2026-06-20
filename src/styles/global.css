@@ -620,7 +620,7 @@ input {
   --book-size: 2rem;
   --model-width: 300px;
   --model-skew: -10deg;
-  --model-scale: 0.85;
+  --model-scale: 0.851;
   --model-margin-left: -3rem;
   --model-border: 2px;
   --model-radius: 5px;
@@ -676,12 +676,11 @@ input {
   top: var(--model-spine-ty, 0px);
   transform: skewY(45deg);
   transform-origin: right;
-  transition: transform 0.5s, box-shadow 0.5s;
+  transition: transform 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
   /* 0.5px shadow on the right edge bridges the anti-aliasing gap to the cover.
      Colored to match the border (--rule) so it reads as a spine crease. */
-  box-shadow: 0.5px 0 0 0 var(--rule);
 }
 
 .book-cover--model .book-cover-volume::before {
