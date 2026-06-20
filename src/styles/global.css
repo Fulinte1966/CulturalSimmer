@@ -642,6 +642,10 @@ input {
   position: relative;
   transform: skewY(var(--model-skew)) scale(var(--model-scale));
   width: var(--model-width);
+  /* Composite entire model as a single GPU layer to prevent sub-pixel seams between children */
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .book-cover--model .book-cover-volume {
