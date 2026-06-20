@@ -617,11 +617,11 @@ input {
 }
 
 .book-cover--model {
-  --book-size: 2rem;
+  --book-size: 32px;
   --model-width: 300px;
   --model-skew: -10deg;
   --model-scale: 0.84;
-  --model-margin-left: -3rem;
+  --model-margin-left: -48px;
   --model-border: 2px;
   --model-radius: 5px;
   --model-pages-height: 290px;
@@ -629,10 +629,10 @@ input {
   --model-spine-color: transparent;
   --model-spine-brightness: 0.8;
   --model-spine-brightness-hover: 0.85;
-  --model-shadow-extra-height: 1.25rem;
-  --model-shadow-extra-width: 0.25rem;
+  --model-shadow-extra-height: 20px;
+  --model-shadow-extra-width: 4px;
   --model-shadow-offset: 10px;
-  --model-hover-lift: 0.5rem;
+  --model-hover-lift: 8px;
   --model-spine-tx: -4px;
   --model-back-tx: -4px;
   --model-back-ty: -4px;
