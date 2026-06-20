@@ -642,18 +642,15 @@ input {
   position: relative;
   transform: skewY(var(--model-skew)) scale(var(--model-scale));
   width: var(--model-width);
-  /* Composite entire model as a single GPU layer to prevent sub-pixel seams between children */
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .book-cover--model .book-cover-volume {
   display: block;
   position: relative;
-  /* Only active when debug panel sets both --model-cover-tx AND --model-cover-ty.
-     No fallback → var() IACVT → transform:none when unset (no stacking context). */
-  transform: translate(var(--model-cover-tx), var(--model-cover-ty));
+  /* Default shift of -1px fills the sub-pixel anti-aliasing gap between
+     the spine's right edge and the cover's left edge.
+     Debug panel overrides via --model-cover-tx / --model-cover-ty. */
+  transform: translate(var(--model-cover-tx, -1px), var(--model-cover-ty, 0px));
 }
 
 .book-cover--model .book-cover-surface {
@@ -664,10 +661,6 @@ input {
   height: var(--model-cover-h, auto);
   transition: filter 0.5s, transform 0.5s;
   width: var(--model-cover-w, var(--model-width));
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  /* Fill sub-pixel anti-aliasing gap between cover and spine */
-  box-shadow: -1px 0 0 var(--paper);
 }
 
 .book-cover--model::after {
@@ -689,8 +682,6 @@ input {
   transition: transform 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .book-cover--model .book-cover-volume::before {
