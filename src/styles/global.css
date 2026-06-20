@@ -660,6 +660,8 @@ input {
   height: var(--model-cover-h, auto);
   transition: filter 0.5s, transform 0.5s;
   width: var(--model-cover-w, var(--model-width));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .book-cover--model::after {
@@ -679,8 +681,10 @@ input {
   transform: skewY(45deg);
   transform-origin: right;
   transition: transform 0.5s;
-  width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border) + 1px));
+  width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .book-cover--model .book-cover-volume::before {
