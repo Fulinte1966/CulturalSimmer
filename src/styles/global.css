@@ -676,11 +676,10 @@ input {
   top: var(--model-spine-ty, 0px);
   transform: skewY(45deg);
   transform-origin: right;
-  transition: transform 0.5s;
+  transition: transform 0.5s, filter 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
-  /* 0.5px shadow on the right edge bridges the anti-aliasing gap to the cover.
-     Colored to match the border (--rule) so it reads as a spine crease. */
+      filter: brightness(0.55);
 }
 
 .book-cover--model .book-cover-volume::before {
@@ -693,7 +692,7 @@ input {
   top: calc(-1 * (var(--model-pages-height) - var(--model-border) + (var(--book-size) / 2)) + var(--model-pages-fine));
   transform: rotate(90deg) skewY(-45deg);
   transform-origin: bottom;
-  transition: transform 0.5s;
+  transition: transform 0.5s, filter 0.5s;
   width: var(--book-size);
   z-index: -1;
 }
@@ -709,7 +708,7 @@ input {
   position: absolute;
   top: var(--model-back-ty, 0px);
   transform: translateY(calc(-1 * var(--book-size)));
-  transition: transform 0.5s;
+  transition: transform 0.5s, filter 0.5s;
   width: 100%;
   z-index: -2;
 }
@@ -724,7 +723,7 @@ input {
   position: absolute;
   top: calc(100% - var(--model-shadow-offset) - var(--book-size));
   transform: skewX(45deg);
-  transition: transform 0.5s;
+  transition: transform 0.5s, filter 0.5s;
   width: calc(100% + var(--book-size) + var(--model-shadow-extra-width));
   z-index: -1;
 }
@@ -747,6 +746,7 @@ input {
 
   .book-cover--model:hover::after {
     transform: skewY(45deg) translateY(calc(-1 * var(--model-hover-lift)));
+    filter: brightness(1.05);
   }
 
   .book-cover--model:hover::before {
