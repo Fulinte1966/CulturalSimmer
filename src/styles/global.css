@@ -681,7 +681,7 @@ input {
   transition: transform 0.5s, box-shadow 0.5s;
   width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
   z-index: -1;
-      box-shadow: inset 0 0 0 999px rgba(0,0,0, calc(1 - var(--model-spine-brightness)));
+  box-shadow: inset 0 0 0 999px rgba(0,0,0, calc(1 - var(--model-spine-brightness)));
 }
 
 .book-cover--model .book-cover-volume::before {
