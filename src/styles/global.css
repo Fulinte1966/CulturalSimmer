@@ -631,8 +631,8 @@ input {
   --model-shadow-extra-width: 0.25rem;
   --model-shadow-offset: 10px;
   --model-hover-lift: 0.5rem;
-  --model-spine-tx: -3px;
-  --model-back-tx: -3px;
+  --model-spine-tx: -4px;
+  --model-back-tx: -4px;
   --model-back-ty: -4px;
   align-self: flex-start;
   box-sizing: border-box;
@@ -679,7 +679,7 @@ input {
   transform: skewY(45deg);
   transform-origin: right;
   transition: transform 0.5s;
-  width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border)));
+  width: var(--model-spine-w, calc(var(--book-size) + 2 * var(--model-border) + 1px));
   z-index: -1;
 }
 
