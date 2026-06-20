@@ -631,8 +631,8 @@ input {
   --model-shadow-extra-width: 0.25rem;
   --model-shadow-offset: 10px;
   --model-hover-lift: 0.5rem;
-  --model-spine-tx: -4px;
-  --model-back-tx: -4px;
+  --model-spine-tx: -3px;
+  --model-back-tx: -3px;
   --model-back-ty: -4px;
   align-self: flex-start;
   box-sizing: border-box;
