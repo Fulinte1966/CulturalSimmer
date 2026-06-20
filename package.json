@@ -7,7 +7,8 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
-    "validate": "tsx scripts/validate-books.ts"
+    "validate": "tsx scripts/validate-books.ts",
+    "test:reading": "python scripts/test-reading-metrics.py"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

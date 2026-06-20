@@ -4,39 +4,54 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  searchable?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, searchable = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html
+  lang="zh-CN"
+  data-pagefind-ignore={searchable ? undefined : "all"}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} — 电子书馆</title>
+    <title>{title} - 电子书馆</title>
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   </head>
   <body>
-    <header class="site-header">
-      <div class="inner">
-        <a href={base} class="site-title">电子书馆</a>
-        <nav class="site-nav">
-          <a href={`${base}/books/`}>全部书目</a>
-          <a href={`${base}/search/`}>搜索</a>
+    <header class="site-header" data-pagefind-ignore="all">
+      <div class="inner masthead">
+        <div class="masthead-title">
+          <a href={base} class="site-title" aria-label="返回首页">
+            电子书馆
+          </a>
+          <p>个人公益 PDF 书目与重排资料</p>
+        </div>
+        <nav class="site-nav" aria-label="主导航">
+          <a href={`${base}/books/`}>馆藏</a>
+          <a href={`${base}/search/`}>检索</a>
         </nav>
       </div>
     </header>
+
     <main class="site-main">
       <div class="inner">
         <slot />
       </div>
     </main>
-    <footer class="site-footer">
+
+    <footer class="site-footer" data-pagefind-ignore="all">
       <div class="inner">
-        <p>静态 PDF 电子书馆 · 公益项目</p>
+        <p>
+          <a href={base}>电子书馆</a>
+          <span>静态 PDF 公益项目</span>
+        </p>
+        <p>书目以 Markdown 维护，文件通过 GitHub Releases 分发。</p>
       </div>
     </footer>
   </body>

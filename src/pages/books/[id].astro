@@ -3,11 +3,11 @@ import { getCollection } from "astro:content";
 import fs from "node:fs";
 import path from "node:path";
 import Layout from "../../components/Layout.astro";
+import BookCover from "../../components/BookCover.astro";
 import BookMeta from "../../components/BookMeta.astro";
 import Outline from "../../components/Outline.astro";
 import type { OutlineItem } from "../../components/Outline.astro";
-import { parseBookId } from "../../lib/bookId";
-import { getDownloadUrl } from "../../lib/books";
+import { getBookById } from "../../lib/books";
 
 export async function getStaticPaths() {
   const books = await getCollection("books");
@@ -18,13 +18,17 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { id, title, edition, date, tags, cover, total_volumes, author } = entry.data;
+const { id, title, edition, tags, author } = entry.data;
+const titleParts = title.match(/^(.*?)(（[^）]+）)$/);
+const titleMain = titleParts?.[1] ?? title;
+const titleParenthetical = titleParts?.[2];
 const { Content } = await entry.render();
+const book = await getBookById(id);
 
-const parsed = parseBookId(id);
-const downloadUrl = getDownloadUrl(id, edition);
+if (!book) {
+  throw new Error(`Book metadata not found for ${id}`);
+}
 
-// Load outline JSON from filesystem
 let outline: OutlineItem[] = [];
 try {
   const outlineAbsPath = path.join(
@@ -34,52 +38,60 @@ try {
     "outlines",
     `${id}_v${edition}.json`
   );
-  const raw = fs.readFileSync(outlineAbsPath, "utf-8");
-  outline = JSON.parse(raw);
+  outline = JSON.parse(fs.readFileSync(outlineAbsPath, "utf-8"));
 } catch {
   outline = [];
 }
-
-const bookMeta = {
-  id,
-  title,
-  author,
-  edition,
-  date,
-  tags,
-  cover,
-  total_volumes,
-  parsed,
-  downloadUrl,
-  outlinePath: `src/data/outlines/${id}_v${edition}.json`,
-};
 ---
 
-<Layout title={title}>
-  <article class="book-detail">
-    <h1>{title}</h1>
+<Layout
+  title={title}
+  description={`${title}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`}
+  searchable
+>
+  <article class="book-detail" data-pagefind-body>
+    <header class="detail-lead">
+      <div class="detail-cover">
+        <BookCover book={book} mode="model" pagefindMeta />
+      </div>
 
-    {
-      cover && (
-        <div class="cover">
-          <img src={cover} alt={title} />
-        </div>
-      )
-    }
-
-    <BookMeta book={bookMeta} />
+      <div class="detail-intro">
+        <p class="running-head">馆藏书目 / {id}</p>
+        <h1
+          class:list={{ "detail-title--long": title.length > 18 }}
+          data-pagefind-meta="title"
+        >
+          {titleMain}
+          {
+            titleParenthetical && (
+              <>
+                <wbr />
+                <span class="detail-title-parenthetical">
+                  {titleParenthetical}
+                </span>
+              </>
+            )
+          }
+        </h1>
+        {author && <p class="detail-author">{author}</p>}
+        <BookMeta book={book} />
+      </div>
+    </header>
 
     {
       tags.length > 0 && (
-        <div class="tags">
+        <div class="tags detail-tags" aria-label="标签">
           {tags.map((tag) => <span class="tag">{tag}</span>)}
         </div>
       )
     }
 
-    <div class="body">
-      <Content />
-    </div>
+    <section class="content-section" aria-labelledby="summary-heading">
+      <h2 id="summary-heading">内容简介</h2>
+      <div class="body">
+        <Content />
+      </div>
+    </section>
 
     <Outline outline={outline} />
   </article>

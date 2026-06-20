@@ -17,6 +17,11 @@ const books = defineCollection({
       .int()
       .positive("total_volumes must be a positive integer")
       .optional(),
+    readtime: z
+      .number()
+      .int()
+      .positive("readtime must be a positive integer")
+      .optional(),
   }),
 });
 

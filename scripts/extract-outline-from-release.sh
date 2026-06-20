@@ -15,7 +15,6 @@ ID="$1"
 EDITION="$2"
 TAG="${ID}_v${EDITION}"
 PDF="${TAG}.pdf"
-OUT="src/data/outlines/${TAG}.json"
 
 if ! command -v gh &>/dev/null; then
   echo "Error: GitHub CLI (gh) is not installed."
@@ -36,9 +35,9 @@ if ! gh release download "$TAG" \
   exit 1
 fi
 
-echo "Extracting outline..."
+echo "Extracting cover, outline, and reading metadata..."
 
-python scripts/extract-outline.py ".cache/pdfs/$PDF" "$OUT"
+python scripts/extract-book-assets.py ".cache/pdfs/$PDF" "$ID" "$EDITION"
 
-echo "Done: ${OUT}"
-echo "Remember to commit this file to the repository."
+echo "Done."
+echo "Remember to commit the generated cover, outline, and reading files."

@@ -1,22 +1,52 @@
 ---
 import Layout from "../../components/Layout.astro";
 import BookCard from "../../components/BookCard.astro";
-import { getAllBooks } from "../../lib/books";
+import { getAllBooks, getUniqueClassifications } from "../../lib/books";
 
 const books = await getAllBooks();
+const classifications = getUniqueClassifications(books);
+const base = import.meta.env.BASE_URL;
 ---
 
-<Layout title="全部书目">
-  <h1 class="page-heading">全部书目</h1>
-  {books.length > 0 && (
-    <>
-      <p class="page-description">共 {books.length} 种书。</p>
-      <ul class="book-list">
-        {books.map((book) => <BookCard book={book} />)}
-      </ul>
-    </>
-  )}
-  {books.length === 0 && (
-    <p class="page-description">暂无书籍。</p>
+<Layout
+  title="馆藏书目"
+  description="浏览电子书馆全部 PDF 书目。"
+>
+  <header class="page-header">
+    <div>
+      <h1>馆藏书目</h1>
+      <p>共收录 {books.length} 种书，按发布日期倒序排列。</p>
+    </div>
+    <p class="folio">目录 / {new Date().getFullYear()}</p>
+  </header>
+
+  <form class="library-search" method="get" action={`${base}/search/`}>
+    <label for="catalog-query">检索馆藏</label>
+    <div>
+      <input
+        id="catalog-query"
+        name="q"
+        type="search"
+        placeholder="书名、作者、索书号或正文"
+      />
+      <button type="submit">检索</button>
+    </div>
+  </form>
+
+  <nav class="catalog-categories" aria-label="馆藏分类">
+    <span>分类</span>
+    {classifications.map((category) => (
+      <a href={`${base}/categories/${category.code}/`}>
+        {category.code} {category.label}
+      </a>
+    ))}
+  </nav>
+
+  {books.length > 0 ? (
+    <ol class="catalog-grid">
+      {books.map((book) => <BookCard book={book} />)}
+    </ol>
+  ) : (
+    <p class="empty-state">暂无书籍。</p>
   )}
 </Layout>

@@ -1,7 +1,11 @@
 ---
 import Layout from "../../components/Layout.astro";
 import BookCard from "../../components/BookCard.astro";
-import { getAllBooks, getBooksByClassification } from "../../lib/books";
+import {
+  getAllBooks,
+  getBooksByClassification,
+  getClassificationLabel,
+} from "../../lib/books";
 
 export async function getStaticPaths() {
   const books = await getAllBooks();
@@ -21,19 +25,25 @@ export async function getStaticPaths() {
 
 const { classification } = Astro.params;
 const books = await getBooksByClassification(classification!);
+const label = getClassificationLabel(classification!);
+const base = import.meta.env.BASE_URL;
 ---
 
-<Layout title={`${classification} 类`}>
-  <h1 class="page-heading">{classification} 类</h1>
-  {books.length > 0 && (
-    <>
-      <p class="page-description">共 {books.length} 种书。</p>
-      <ul class="book-list">
-        {books.map((book) => <BookCard book={book} />)}
-      </ul>
-    </>
-  )}
-  {books.length === 0 && (
-    <p class="page-description">该分类下暂无书籍。</p>
+<Layout title={label}>
+  <header class="page-header category-header">
+    <div>
+      <p class="running-head">分类 {classification}</p>
+      <h1>{label}</h1>
+      <p>共 {books.length} 种书，仅列该精确分类下的条目。</p>
+    </div>
+    <a class="folio-link" href={`${base}/books/`}>返回馆藏</a>
+  </header>
+
+  {books.length > 0 ? (
+    <ol class="catalog-grid">
+      {books.map((book) => <BookCard book={book} />)}
+    </ol>
+  ) : (
+    <p class="empty-state">该分类下暂无书籍。</p>
   )}
 </Layout>

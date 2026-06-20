@@ -1,0 +1,34 @@
+---
+import type { BookMeta } from "../lib/books";
+
+interface Props {
+  book: BookMeta;
+  compact?: boolean;
+}
+
+const { book, compact = false } = Astro.props;
+const characterCount =
+  (book.reading?.cjk_character_count ?? 0) +
+  (book.reading?.latin_token_count ?? 0);
+const hasStats =
+  Boolean(book.reading?.page_count) ||
+  Boolean(characterCount) ||
+  Boolean(book.readingMinutes);
+---
+
+{
+  hasStats && (
+    <ul class:list={["reading-stats", { "reading-stats--compact": compact }]}>
+      {book.reading?.page_count && <li>{book.reading.page_count} 页</li>}
+      {characterCount > 0 && (
+        <li>约 {characterCount.toLocaleString("zh-CN")} 字</li>
+      )}
+      {book.readingMinutes && (
+        <li>
+          {book.readingTimeSource === "automatic" ? "约 " : ""}
+          {book.readingMinutes} 分钟
+        </li>
+      )}
+    </ul>
+  )
+}

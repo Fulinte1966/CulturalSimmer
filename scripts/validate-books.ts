@@ -11,6 +11,7 @@
  * 7. classification exists in classifications.yml
  * 8. outline JSON exists (warning only)
  * 9. no duplicate ids
+ * 10. readtime (if present) is a positive integer
  */
 
 import fs from "node:fs";
@@ -48,6 +49,7 @@ interface BookEntry {
   cover?: string;
   total_volumes?: number;
   author?: string;
+  readtime?: number;
   filename: string;
 }
 
@@ -115,6 +117,7 @@ function loadBooks(): BookEntry[] {
       cover: fm.cover as string | undefined,
       total_volumes: fm.total_volumes as number | undefined,
       author: fm.author as string | undefined,
+      readtime: fm.readtime as number | undefined,
       filename: file,
     };
   });
@@ -183,6 +186,16 @@ function main() {
       if (!Number.isInteger(book.total_volumes) || book.total_volumes < 1) {
         console.error(
           `${prefix} ERROR: total_volumes must be a positive integer, got ${book.total_volumes}`
+        );
+        errors++;
+      }
+    }
+
+    // 10. manual reading-time override
+    if (book.readtime !== undefined) {
+      if (!Number.isInteger(book.readtime) || book.readtime < 1) {
+        console.error(
+          `${prefix} ERROR: readtime must be a positive integer, got ${book.readtime}`
         );
         errors++;
       }

@@ -1,0 +1,62 @@
+---
+import type { BookMeta } from "../lib/books";
+
+interface Props {
+  book: BookMeta;
+  mode?: "flat" | "model";
+  pagefindMeta?: boolean;
+}
+
+const {
+  book,
+  mode = "flat",
+  pagefindMeta = false,
+} = Astro.props;
+const coverClass = [
+  "book-cover",
+  `book-cover--${mode}`,
+  `book-cover--${book.coverKind}`,
+].join(" ");
+const base = import.meta.env.BASE_URL;
+const modelStyle =
+  mode === "model"
+    ? [
+        `--pages-texture: url("${base}/images/pages-texture.svg")`,
+        book.spineUrl
+          ? `--spine-texture: url("${book.spineUrl}")`
+          : undefined,
+      ]
+        .filter(Boolean)
+        .join("; ")
+    : undefined;
+---
+
+<figure class={coverClass} style={modelStyle}>
+  <div class="book-cover-volume">
+    <div class="book-cover-surface">
+      {
+        book.coverUrl ? (
+          <img
+            src={book.coverUrl}
+            alt={`${book.title}封面`}
+            loading={mode === "flat" ? "lazy" : "eager"}
+            data-pagefind-meta={
+              pagefindMeta ? "image[src], image_alt[alt]" : undefined
+            }
+          />
+        ) : (
+          <div
+            class="book-cover-placeholder"
+            role="img"
+            aria-label={`${book.title}排版封面`}
+          >
+            <span class="placeholder-series">电子书馆</span>
+            <strong>{book.title}</strong>
+            {book.author && <span class="placeholder-author">{book.author}</span>}
+            <span class="placeholder-id">{book.id}</span>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</figure>
