@@ -104,7 +104,7 @@
   --model-pages-fine: 5px;
   --model-pages-height: 275px;
   --model-width: 284px;
-  --shadow-depth: 1.5;
+  --shadow-depth: 5;
   --shadow-height: 130px;
   --shadow-offset-x: 46px;
   --shadow-offset-y: -4px;
@@ -122,9 +122,15 @@
 }
 
 .bmd-cover-stage .book-cover--model::before {
-  background: rgb(0 0 0 / calc(var(--shadow-depth) * 0.35));
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / calc(var(--shadow-depth) * 0.30)) 0%,
+    rgb(0 0 0 / calc(var(--shadow-depth) * 0.10)) 30%,
+    rgb(0 0 0 / calc(var(--shadow-depth) * 0.03)) 60%,
+    transparent 100%
+  );
   content: "";
-  filter: none;
+  filter: blur(5px);
   height: calc(var(--shadow-height) + 120px);
   left: calc(-200px + var(--shadow-offset-x));
   position: absolute;
@@ -132,8 +138,8 @@
   clip-path: polygon(
     163px calc(120px + var(--shadow-top-left)),
     calc(100% - 200px) calc(120px - var(--book-size) + var(--shadow-top-right)),
-    calc(100% - 200px + var(--shadow-slope-right)) 100%,
-    calc(163px - var(--shadow-slope-left)) 100%
+    calc(100% - 200px + var(--shadow-slope-right)) calc(120px + var(--shadow-height)),
+    calc(163px - var(--shadow-slope-left)) calc(120px + var(--shadow-height))
   );
   width: calc(100% + 500px + var(--shadow-width));
   z-index: -3;
