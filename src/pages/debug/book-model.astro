@@ -29,6 +29,7 @@ if (!book) {
           <h1>书模调试台</h1>
         </div>
         <div class="bmd-actions">
+          <button type="button" data-action="toggle-cover">隐藏封面</button>
           <button type="button" data-action="reset">重置</button>
           <button type="button" data-action="copy">复制参数</button>
         </div>
@@ -276,7 +277,7 @@ if (!book) {
             min: -20,
             max: 28,
             step: 1,
-            value: 10,
+            value: 8,
             target: "model",
             cssVar: "--model-pages-fine",
           },
@@ -391,42 +392,108 @@ if (!book) {
             min: 0,
             max: 16,
             step: 1,
-            value: 7,
+            value: 5,
             target: "model",
             cssVar: "--model-radius",
           },
           {
-            key: "shadowHeight",
-            label: "阴影高度",
-            unit: "px",
+            key: "shadowDepth",
+            label: "阴影深度",
+            unit: "",
             min: 0,
-            max: 48,
-            step: 1,
-            value: 18,
+            max: 1.5,
+            step: 0.05,
+            value: 1.5,
             target: "model",
-            cssVar: "--model-shadow-extra-height",
+            cssVar: "--shadow-depth",
+          },
+          {
+            key: "shadowTopLeft",
+            label: "左上缘",
+            unit: "px",
+            min: -120,
+            max: 120,
+            step: 1,
+            value: -6,
+            target: "model",
+            cssVar: "--shadow-top-left",
+          },
+          {
+            key: "shadowTopRight",
+            label: "右上缘",
+            unit: "px",
+            min: -60,
+            max: 60,
+            step: 1,
+            value: 0,
+            target: "model",
+            cssVar: "--shadow-top-right",
+          },
+          {
+            key: "shadowSlopeLeft",
+            label: "左边斜度",
+            unit: "px",
+            min: -360,
+            max: 360,
+            step: 2,
+            value: -120,
+            target: "model",
+            cssVar: "--shadow-slope-left",
+          },
+          {
+            key: "shadowSlopeRight",
+            label: "右边斜度",
+            unit: "px",
+            min: -360,
+            max: 360,
+            step: 2,
+            value: 360,
+            target: "model",
+            cssVar: "--shadow-slope-right",
           },
           {
             key: "shadowWidth",
             label: "阴影宽度",
             unit: "px",
-            min: 0,
-            max: 48,
-            step: 1,
-            value: 8,
+            min: -60,
+            max: 200,
+            step: 2,
+            value: -26,
             target: "model",
-            cssVar: "--model-shadow-extra-width",
+            cssVar: "--shadow-width",
           },
           {
-            key: "shadowOffset",
-            label: "阴影上移",
+            key: "shadowOffsetX",
+            label: "阴影水平",
             unit: "px",
-            min: -20,
-            max: 40,
+            min: -120,
+            max: 120,
             step: 1,
-            value: 8,
+            value: 37,
             target: "model",
-            cssVar: "--model-shadow-offset",
+            cssVar: "--shadow-offset-x",
+          },
+          {
+            key: "shadowHeight",
+            label: "阴影长度",
+            unit: "px",
+            min: 20,
+            max: 200,
+            step: 5,
+            value: 130,
+            target: "model",
+            cssVar: "--shadow-height",
+          },
+          {
+            key: "shadowOffsetY",
+            label: "阴影垂直",
+            unit: "px",
+            min: -60,
+            max: 60,
+            step: 1,
+            value: -4,
+            target: "model",
+            cssVar: "--shadow-offset-y",
           },
         ],
       },
@@ -452,6 +519,17 @@ if (!book) {
       applyValues();
       updateOutput();
     }
+
+    let coverHidden = false;
+    document.querySelector("[data-action='toggle-cover']")?.addEventListener("click", (e) => {
+      coverHidden = !coverHidden;
+      const btn = e.currentTarget as HTMLButtonElement;
+      const surface = model?.querySelector(".book-cover-surface") as HTMLElement | null;
+      const img = model?.querySelector(".book-cover-surface img") as HTMLElement | null;
+      if (surface) surface.style.display = coverHidden ? "none" : "";
+      if (img) img.style.display = coverHidden ? "none" : "";
+      btn.textContent = coverHidden ? "显示封面" : "隐藏封面";
+    });
 
     document.querySelector("[data-action='reset']")?.addEventListener("click", () => {
       for (const control of flatControls) {
@@ -527,8 +605,6 @@ if (!book) {
             type="number"
             data-key="${control.key}"
             data-kind="number"
-            min="${control.min}"
-            max="${control.max}"
             step="${control.step}"
             value="${value}"
             aria-label="${control.label}数值"
@@ -598,6 +674,25 @@ if (!book) {
         "    skewY(var(--model-skew))",
         "    scale(var(--model-scale));",
         "  width: var(--model-width);",
+        "}",
+        "",
+        ".bd-cover-stage .book-cover--model::before {",
+        "  background: rgb(0 0 0 / calc(var(--shadow-depth) * 0.35));",
+        "  border-radius: 4px;",
+        "  content: \"\";",
+        "  filter: none;",
+        "  height: calc(var(--shadow-height) + 120px);",
+        "  left: calc(-200px + var(--shadow-offset-x));",
+        "  position: absolute;",
+        "  top: calc(100% - var(--shadow-offset-y) - 120px);",
+        "  clip-path: polygon(",
+        "    163px calc(120px + var(--shadow-top-left)),",
+        "    calc(100% - 200px) calc(120px - var(--book-size) + var(--shadow-top-right)),",
+        "    calc(100% - 200px + var(--shadow-slope-right)) 100%,",
+        "    calc(163px - var(--shadow-slope-left)) 100%",
+        "  );",
+        "  width: calc(100% + 500px + var(--shadow-width));",
+        "  z-index: -3;",
         "}",
         "",
         ".bd-cover-stage .book-cover--model .book-cover-surface {",

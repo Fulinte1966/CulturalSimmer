@@ -101,19 +101,43 @@
   --debug-surface-width: 100%;
   --debug-surface-x: 0px;
   --debug-surface-y: 0px;
-  --model-border: 2px;
-  --model-pages-fine: 10px;
+  --model-border: 3px;
+  --model-pages-fine: 8px;
   --model-pages-height: 273px;
   --model-width: 284px;
-  --model-shadow-extra-height: 18px;
-  --model-shadow-extra-width: 8px;
-  --model-shadow-offset: 8px;
+  --shadow-depth: 1.5;
+  --shadow-height: 130px;
+  --shadow-offset-x: 37px;
+  --shadow-offset-y: -4px;
+  --shadow-width: -26px;
+  --shadow-slope-left: -120px;
+  --shadow-slope-right: 360px;
+  --shadow-top-left: -6px;
+  --shadow-top-right: 0px;
   aspect-ratio: var(--cover-ratio);
   transform:
     translate(var(--debug-model-x), var(--debug-model-y))
     skewY(var(--model-skew))
     scale(var(--model-scale));
   width: var(--model-width);
+}
+
+.bmd-cover-stage .book-cover--model::before {
+  background: rgb(0 0 0 / calc(var(--shadow-depth) * 0.35));
+  content: "";
+  filter: none;
+  height: calc(var(--shadow-height) + 120px);
+  left: calc(-200px + var(--shadow-offset-x));
+  position: absolute;
+  top: calc(100% - var(--shadow-offset-y) - 120px);
+  clip-path: polygon(
+    163px calc(120px + var(--shadow-top-left)),
+    calc(100% - 200px) calc(120px - var(--book-size) + var(--shadow-top-right)),
+    calc(100% - 200px + var(--shadow-slope-right)) 100%,
+    calc(163px - var(--shadow-slope-left)) 100%
+  );
+  width: calc(100% + 500px + var(--shadow-width));
+  z-index: -3;
 }
 
 .bmd-cover-stage .book-cover--model .book-cover-surface {
