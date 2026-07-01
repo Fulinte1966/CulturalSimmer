@@ -101,7 +101,7 @@
   --debug-surface-width: 100%;
   --debug-surface-x: 0px;
   --debug-surface-y: 0px;
-  --model-border: 0px;
+  --model-border: 2px;
   --model-pages-fine: 10px;
   --model-pages-height: 273px;
   --model-width: 284px;
@@ -136,7 +136,8 @@
     var(--spine-texture, none);
   background-position: 0 0, center;
   background-size: 100% 100%, 100% 100%;
-  border: 0;
+  border: var(--model-border) solid rgb(0 0 0 / 0.18);
+  border-right: 0;
   box-shadow: none;
   height: var(--debug-spine-height);
   left: calc(-1 * var(--book-size) + var(--debug-spine-x));
