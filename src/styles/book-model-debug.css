@@ -1,0 +1,352 @@
+.book-model-debug {
+  background: #f5f3ee;
+  color: #111111;
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) 420px;
+  height: 100vh;
+  min-width: 960px;
+  overflow: hidden;
+}
+
+.bmd-workbench {
+  align-items: center;
+  border-right: 1px solid #d0ccc2;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: auto;
+  padding: 56px;
+  position: sticky;
+  top: 0;
+}
+
+.bmd-stage-shell {
+  align-items: center;
+  background:
+    linear-gradient(#dedbd2 1px, transparent 1px),
+    linear-gradient(90deg, #dedbd2 1px, transparent 1px),
+    #ffffff;
+  background-size: 24px 24px;
+  border: 1px solid #111111;
+  display: flex;
+  height: 720px;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 720px;
+}
+
+.bmd-axis::before,
+.bmd-axis::after {
+  background: rgb(226 38 38 / 42%);
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.bmd-axis::before {
+  height: 1px;
+  left: 0;
+  top: 50%;
+  width: 100%;
+}
+
+.bmd-axis::after {
+  height: 100%;
+  left: 50%;
+  top: 0;
+  width: 1px;
+}
+
+.bmd-cover-stage {
+  --debug-stage-height: 480px;
+  --debug-stage-width: 284px;
+  align-items: center;
+  border: 1px dashed #e22626;
+  display: flex;
+  height: var(--debug-stage-height);
+  justify-content: center;
+  position: relative;
+  width: var(--debug-stage-width);
+  z-index: 1;
+}
+
+.bmd-cover-stage::before {
+  border: 1px solid rgb(17 17 17 / 28%);
+  content: "";
+  inset: 50% auto auto 50%;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: var(--model-width, 284px);
+  aspect-ratio: var(--cover-ratio);
+}
+
+.bmd-cover-stage .book-cover--model {
+  --book-size: 28px;
+  --debug-cover-image-height: 100%;
+  --debug-cover-image-width: 100%;
+  --debug-cover-image-x: 0px;
+  --debug-cover-image-y: 0px;
+  --debug-model-x: 0px;
+  --debug-model-y: 0px;
+  --debug-pages-width: 28px;
+  --debug-pages-x: 0px;
+  --debug-pages-y: 0px;
+  --debug-spine-height: 100%;
+  --debug-spine-x: 0px;
+  --debug-spine-y: 0px;
+  --debug-surface-height: 100%;
+  --debug-surface-width: 100%;
+  --debug-surface-x: 0px;
+  --debug-surface-y: 0px;
+  --model-border: 0px;
+  --model-pages-fine: 10px;
+  --model-pages-height: 273px;
+  --model-width: 284px;
+  --model-shadow-extra-height: 18px;
+  --model-shadow-extra-width: 8px;
+  --model-shadow-offset: 8px;
+  aspect-ratio: var(--cover-ratio);
+  transform:
+    translate(var(--debug-model-x), var(--debug-model-y))
+    skewY(var(--model-skew))
+    scale(var(--model-scale));
+  width: var(--model-width);
+}
+
+.bmd-cover-stage .book-cover--model .book-cover-surface {
+  height: var(--debug-surface-height);
+  transform: translate(var(--debug-surface-x), var(--debug-surface-y));
+  width: var(--debug-surface-width);
+}
+
+.bmd-cover-stage .book-cover--model .book-cover-surface img {
+  height: var(--debug-cover-image-height);
+  max-width: none;
+  transform: translate(var(--debug-cover-image-x), var(--debug-cover-image-y));
+  width: var(--debug-cover-image-width);
+}
+
+.bmd-cover-stage .book-cover--model::after {
+  background-color: var(--model-spine-color);
+  background-image:
+    linear-gradient(rgb(0 0 0 / calc(1 - var(--model-spine-brightness))), rgb(0 0 0 / calc(1 - var(--model-spine-brightness)))),
+    var(--spine-texture, none);
+  background-position: 0 0, center;
+  background-size: 100% 100%, 100% 100%;
+  border: 0;
+  box-shadow: none;
+  height: var(--debug-spine-height);
+  left: calc(-1 * var(--book-size) + var(--debug-spine-x));
+  top: var(--debug-spine-y);
+  width: var(--book-size);
+}
+
+.bmd-cover-stage .book-cover--model .book-cover-volume::before {
+  left: calc(-1 * var(--book-size) + var(--debug-pages-x));
+  top: calc(-1 * (var(--model-pages-height) - var(--model-border) + (var(--book-size) / 2)) + var(--model-pages-fine) + var(--debug-pages-y));
+  width: var(--debug-pages-width);
+}
+
+.bmd-controls {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: 100vh;
+  overflow: auto;
+  padding: 32px;
+}
+
+.bmd-controls-head {
+  align-items: flex-start;
+  border-bottom: 2px solid #111111;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding-bottom: 18px;
+}
+
+.bmd-kicker {
+  color: #575550;
+  font-family: "Home Source Han Sans SC", sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.bmd-controls h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bmd-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.bmd-actions button,
+.bmd-output button,
+.bmd-control button {
+  background: #ffffff;
+  border: 1px solid #111111;
+  color: #111111;
+  cursor: pointer;
+  font-family: "Home Source Han Sans SC", sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.bmd-actions button:hover,
+.bmd-output button:hover,
+.bmd-control button:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.bmd-groups {
+  display: grid;
+  gap: 24px;
+}
+
+.bmd-group {
+  border-bottom: 1px solid #d0ccc2;
+  display: grid;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.bmd-group h2,
+.bmd-output h2 {
+  font-family: "Home Source Han Sans SC", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bmd-control {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 72px 1fr 72px 44px;
+}
+
+.bmd-control span {
+  color: #222222;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.bmd-control input[type="range"] {
+  accent-color: #e22626;
+  width: 100%;
+}
+
+.bmd-control input[type="number"] {
+  border: 1px solid #bdb8ae;
+  color: #111111;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  height: 30px;
+  padding: 0 6px;
+  width: 72px;
+}
+
+.bmd-control button {
+  min-height: 30px;
+  padding: 0;
+  width: 44px;
+}
+
+.bmd-output {
+  display: grid;
+  gap: 12px;
+}
+
+.bmd-output-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.bmd-output textarea {
+  border: 1px solid #111111;
+  color: #111111;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 12px;
+  resize: vertical;
+  width: 100%;
+}
+
+.bmd-status {
+  color: #575550;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 0px) {
+  .book-model-debug {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .bmd-workbench {
+    border-bottom: 1px solid #d0ccc2;
+    border-right: 0;
+    min-height: auto;
+    padding: 24px;
+    position: static;
+  }
+
+  .bmd-stage-shell {
+    height: min(720px, calc(100vw - 48px));
+    width: min(720px, calc(100vw - 48px));
+  }
+
+  .bmd-controls {
+    height: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .bmd-controls {
+    padding: 22px;
+  }
+
+  .bmd-controls-head,
+  .bmd-output-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bmd-actions {
+    flex-wrap: wrap;
+  }
+
+  .bmd-control {
+    grid-template-columns: 64px 1fr 58px 42px;
+  }
+
+  .bmd-control input[type="number"] {
+    width: 58px;
+  }
+
+  .bmd-control button {
+    width: 42px;
+  }
+}
