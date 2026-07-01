@@ -91,7 +91,6 @@
   --debug-cover-image-y: 0px;
   --debug-model-x: 0px;
   --debug-model-y: 0px;
-  --debug-pages-width: 28px;
   --debug-pages-x: 0px;
   --debug-pages-y: 0px;
   --debug-spine-height: 100%;
@@ -102,18 +101,18 @@
   --debug-surface-x: 0px;
   --debug-surface-y: 0px;
   --model-border: 3px;
-  --model-pages-fine: 8px;
-  --model-pages-height: 273px;
+  --model-pages-fine: 5px;
+  --model-pages-height: 275px;
   --model-width: 284px;
   --shadow-depth: 1.5;
   --shadow-height: 130px;
-  --shadow-offset-x: 37px;
+  --shadow-offset-x: 46px;
   --shadow-offset-y: -4px;
-  --shadow-width: -26px;
+  --shadow-width: -140px;
   --shadow-slope-left: -120px;
   --shadow-slope-right: 360px;
-  --shadow-top-left: -6px;
-  --shadow-top-right: 0px;
+  --shadow-top-left: -5px;
+  --shadow-top-right: -5px;
   aspect-ratio: var(--cover-ratio);
   transform:
     translate(var(--debug-model-x), var(--debug-model-y))
@@ -177,7 +176,7 @@
 .bmd-cover-stage .book-cover--model .book-cover-volume::before {
   left: calc(-1 * var(--book-size) + var(--debug-pages-x));
   top: calc(-1 * (var(--model-pages-height) - var(--model-border) + (var(--book-size) / 2)) + var(--model-pages-fine) + var(--debug-pages-y));
-  width: var(--debug-pages-width);
+  width: var(--book-size);
 }
 
 .bmd-controls {
