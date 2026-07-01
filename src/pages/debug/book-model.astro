@@ -369,9 +369,20 @@ if (!book) {
             min: 0,
             max: 4,
             step: 0.5,
-            value: 2,
+            value: 3,
             target: "model",
             cssVar: "--model-border",
+          },
+          {
+            key: "borderColor",
+            label: "边框色深",
+            unit: "",
+            min: 0,
+            max: 1,
+            step: 0.01,
+            value: 0.25,
+            target: "model",
+            cssVar: "--border-color-depth",
           },
           {
             key: "radius",
@@ -557,7 +568,14 @@ if (!book) {
           stage?.style.setProperty(control.cssVar, formatValue(values[control.key], control.unit));
         }
       }
+      applyBorderColor();
       localStorage.setItem(storageKey, JSON.stringify(values));
+    }
+
+    function applyBorderColor() {
+      if (!model) return;
+      const v = Math.round((1 - values.borderColor) * 255);
+      model.style.setProperty("--border-color", `rgb(${v}, ${v}, ${v})`);
     }
 
     function updateOutput(message = "参数已更新并自动保存。") {
@@ -583,6 +601,7 @@ if (!book) {
         "}",
         "",
         ".bd-cover-stage .book-cover--model .book-cover-surface {",
+        "  border-color: var(--border-color, #555);",
         "  height: var(--debug-surface-height);",
         "  transform:",
         `    translate(${values.surfaceX}px, ${values.surfaceY}px);`,
@@ -598,20 +617,23 @@ if (!book) {
         "}",
         "",
         ".bd-cover-stage .book-cover--model::after {",
-        "  background-clip: padding-box;",
         "  background-color: var(--model-spine-color);",
         "  background-image:",
         "    linear-gradient(rgb(0 0 0 / calc(1 - var(--model-spine-brightness))), rgb(0 0 0 / calc(1 - var(--model-spine-brightness)))),",
         "    var(--spine-texture, none);",
         "  background-position: 0 0, center;",
         "  background-size: 100% 100%, 100% 100%;",
-        "  border: var(--model-border) solid rgb(0 0 0 / 0.18);",
+        "  border: var(--model-border) solid var(--border-color, #555);",
         "  border-right: 0;",
         "  box-shadow: none;",
         "  height: var(--debug-spine-height);",
         "  left: calc(-1 * var(--book-size) + var(--debug-spine-x));",
         "  top: var(--debug-spine-y);",
         "  width: var(--book-size);",
+        "}",
+        "",
+        ".bd-cover-stage .book-cover--model .book-cover-volume::after {",
+        "  border-color: var(--border-color, #555);",
         "}",
         "",
         ".bd-cover-stage .book-cover--model .book-cover-volume::before {",

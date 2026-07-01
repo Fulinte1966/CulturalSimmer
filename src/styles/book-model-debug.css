@@ -117,6 +117,7 @@
 }
 
 .bmd-cover-stage .book-cover--model .book-cover-surface {
+  border-color: var(--border-color, #555);
   height: var(--debug-surface-height);
   transform: translate(var(--debug-surface-x), var(--debug-surface-y));
   width: var(--debug-surface-width);
@@ -130,20 +131,23 @@
 }
 
 .bmd-cover-stage .book-cover--model::after {
-  background-clip: padding-box;
   background-color: var(--model-spine-color);
   background-image:
     linear-gradient(rgb(0 0 0 / calc(1 - var(--model-spine-brightness))), rgb(0 0 0 / calc(1 - var(--model-spine-brightness)))),
     var(--spine-texture, none);
   background-position: 0 0, center;
   background-size: 100% 100%, 100% 100%;
-  border: var(--model-border) solid rgb(0 0 0 / 0.18);
+  border: var(--model-border) solid var(--border-color, #555);
   border-right: 0;
   box-shadow: none;
   height: var(--debug-spine-height);
   left: calc(-1 * var(--book-size) + var(--debug-spine-x));
   top: var(--debug-spine-y);
   width: var(--book-size);
+}
+
+.bmd-cover-stage .book-cover--model .book-cover-volume::after {
+  border-color: var(--border-color, #555);
 }
 
 .bmd-cover-stage .book-cover--model .book-cover-volume::before {
