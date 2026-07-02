@@ -30,6 +30,36 @@ const { book } = Astro.props;
     <span class="field-label">发布日期</span>
     <span>{book.date.toLocaleDateString("zh-CN")}</span>
   </div>
+  {book.series && (
+    <div class="meta-item">
+      <span class="field-label">丛书</span>
+      <span>{book.series}</span>
+    </div>
+  )}
+  {book.publisher && (
+    <div class="meta-item">
+      <span class="field-label">出版者</span>
+      <span>{book.publisher}</span>
+    </div>
+  )}
+  {book.source && (
+    <div class="meta-item">
+      <span class="field-label">底本来源</span>
+      <span>{book.source}</span>
+    </div>
+  )}
+  {book.rights && (
+    <div class="meta-item">
+      <span class="field-label">权利说明</span>
+      <span>{book.rights}</span>
+    </div>
+  )}
+  {book.licenseUrl && (
+    <div class="meta-item">
+      <span class="field-label">许可</span>
+      <a href={book.licenseUrl} rel="license">查看许可</a>
+    </div>
+  )}
 </div>
 
 <ReadingStats book={book} />

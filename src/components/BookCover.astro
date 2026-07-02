@@ -1,6 +1,6 @@
 ---
 import type { BookMeta } from "../lib/books";
-import { formatDisplayCallNumber } from "../lib/bookId";
+import { joinBasePath } from "../lib/basePath";
 
 interface Props {
   book: BookMeta;
@@ -22,7 +22,7 @@ const base = import.meta.env.BASE_URL;
 const modelStyle =
   mode === "model"
     ? [
-        `--pages-texture: url("${base}/images/pages-texture.svg")`,
+        `--pages-texture: url("${joinBasePath(base, "images/pages-texture.svg")}")`,
         book.spineUrl
           ? `--spine-texture: url("${book.spineUrl}")`
           : undefined,
@@ -51,17 +51,13 @@ const modelStyle =
             role="img"
             aria-label={`${book.title}排版封面`}
           >
-            <span class="placeholder-series">电子书馆</span>
+            {book.author && (
+              <span class="placeholder-author">{book.author}</span>
+            )}
             <strong class="placeholder-title">{book.title}</strong>
             {book.subtitle && (
               <span class="placeholder-subtitle">{book.subtitle}</span>
             )}
-            {book.author && (
-              <span class="placeholder-author">{book.author}</span>
-            )}
-            <span class="placeholder-id">
-              {formatDisplayCallNumber(book.parsed)}
-            </span>
           </div>
         )
       }

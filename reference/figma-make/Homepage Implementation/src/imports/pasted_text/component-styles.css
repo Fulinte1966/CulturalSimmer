@@ -1,0 +1,640 @@
+/* Components */
+
+position: relative;
+width: 330px;
+height: 180px;
+
+background: #FFFFFF;
+
+
+/* Frame 2 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 1px;
+gap: 1px;
+
+position: absolute;
+width: 40px;
+height: 27px;
+left: 14px;
+top: 12px;
+
+background: #FFFFFF;
+
+
+/* BorderFont1 */
+
+width: 12px;
+height: 25px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Border Font 1 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 1px;
+top: 1px;
+
+
+
+/* Group 9 */
+
+position: absolute;
+width: 10px;
+height: 4px;
+left: calc(50% - 10px/2);
+top: 4px;
+
+
+
+/* Rectangle 10 */
+
+position: absolute;
+width: 2px;
+height: 4px;
+left: calc(50% - 2px/2 - 1.33px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 13 */
+
+position: absolute;
+width: 2px;
+height: 4px;
+left: calc(50% - 2px/2 + 4px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 8 */
+
+position: absolute;
+width: 0.67px;
+height: 4px;
+left: calc(50% - 0.67px/2 - 4.67px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 11 */
+
+position: absolute;
+width: 0.67px;
+height: 4px;
+left: calc(50% - 0.67px/2 + 0.67px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 9 */
+
+position: absolute;
+width: 0.67px;
+height: 4px;
+left: calc(50% - 0.67px/2 - 3.33px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 12 */
+
+position: absolute;
+width: 0.67px;
+height: 4px;
+left: calc(50% - 0.67px/2 + 2px);
+top: calc(50% - 4px/2);
+
+background: #000000;
+
+
+/* Rectangle 19 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 1px;
+top: 14px;
+
+
+
+/* Rectangle 19 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* BorderFont2 */
+
+width: 12px;
+height: 25px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Border Font 2 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 14px;
+top: 1px;
+
+
+
+/* Group 4 */
+
+position: absolute;
+width: 10px;
+height: 4px;
+left: calc(50% - 10px/2);
+top: calc(50% - 4px/2);
+
+
+
+/* ∫ */
+
+position: absolute;
+width: 9.33px;
+height: 2.17px;
+left: calc(50% - 9.33px/2 + 0.33px);
+top: calc(50% - 2.17px/2 - 0.92px);
+
+background: #000000;
+
+
+/* ∫ */
+
+position: absolute;
+width: 9.33px;
+height: 2.17px;
+left: calc(50% - 9.33px/2 - 0.33px);
+top: calc(50% - 2.17px/2 + 0.92px);
+
+background: #000000;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 14px;
+top: 14px;
+
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* BorderFont3 */
+
+width: 12px;
+height: 25px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Border Font 2 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 27px;
+top: 1px;
+
+
+
+/* Group 12 */
+
+position: absolute;
+width: 3.76px;
+height: 8px;
+left: calc(50% - 3.76px/2 - 0px);
+top: calc(50% - 8px/2);
+
+
+
+/* Group 6 */
+
+position: absolute;
+width: 0.94px;
+height: 8px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 8px/2);
+
+
+
+/* Group 7 */
+
+position: absolute;
+width: 0.94px;
+height: 8px;
+left: 4.12px;
+top: 2px;
+
+
+
+/* Ellipse 1 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 - 3.53px);
+
+background: #000000;
+
+
+/* Ellipse 6 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 + 3.53px);
+
+background: #000000;
+
+
+/* Ellipse 2 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 - 2.12px);
+
+background: #000000;
+
+
+/* Ellipse 3 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 - 0.71px);
+
+background: #000000;
+
+
+/* Ellipse 4 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 + 0.71px);
+
+background: #000000;
+
+
+/* Ellipse 5 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 - 1.41px);
+top: calc(50% - 0.94px/2 + 2.12px);
+
+background: #000000;
+
+
+/* Group 7 */
+
+position: absolute;
+width: 0.94px;
+height: 8px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 8px/2);
+
+
+
+/* Group 7 */
+
+position: absolute;
+width: 0.94px;
+height: 8px;
+left: 6.94px;
+top: 2px;
+
+
+
+/* Ellipse 1 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 - 3.53px);
+
+background: #000000;
+
+
+/* Ellipse 6 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 + 3.53px);
+
+background: #000000;
+
+
+/* Ellipse 2 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 - 2.12px);
+
+background: #000000;
+
+
+/* Ellipse 3 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 - 0.71px);
+
+background: #000000;
+
+
+/* Ellipse 4 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 + 0.71px);
+
+background: #000000;
+
+
+/* Ellipse 5 */
+
+position: absolute;
+width: 0.94px;
+height: 0.94px;
+left: calc(50% - 0.94px/2 + 1.41px);
+top: calc(50% - 0.94px/2 + 2.12px);
+
+background: #000000;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+width: 12px;
+height: 12px;
+left: 27px;
+top: 14px;
+
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Button */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 116px;
+height: 80px;
+left: 62px;
+top: 13px;
+
+border: 1px dashed #8A38F5;
+border-radius: 5px;
+
+
+/* Property 1=Default */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 4px 0px;
+gap: 12px;
+
+position: absolute;
+width: 88px;
+height: 20px;
+left: calc(50% - 88px/2);
+top: calc(50% - 20px/2 - 16px);
+
+background: #FFFFFF;
+
+
+/* Rectangle 18 */
+
+width: 12px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* 按钮 */
+
+width: 40px;
+height: 12px;
+
+font-family: '寒蝉锦书宋';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 150%;
+/* or 24px */
+/* leading-trim and text-edge are draft CSS properties.
+
+Read more: https://drafts.csswg.org/css-inline-3/#leading-trim
+*/
+leading-trim: both;
+text-edge: cap;
+text-align: center;
+letter-spacing: 0.5em;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Rectangle 19 */
+
+width: 12px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Property 1=Variant2 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 4px 0px;
+gap: 12px;
+
+position: absolute;
+width: 88px;
+height: 20px;
+left: calc(50% - 88px/2);
+top: calc(50% - 20px/2 + 12px);
+
+background: #FFFFFF;
+
+
+/* Rectangle 20 */
+
+width: 12px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* 按钮 */
+
+width: 40px;
+height: 12px;
+
+font-family: '寒蝉锦书宋';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 150%;
+/* or 24px */
+/* leading-trim and text-edge are draft CSS properties.
+
+Read more: https://drafts.csswg.org/css-inline-3/#leading-trim
+*/
+leading-trim: both;
+text-edge: cap;
+text-align: center;
+letter-spacing: 0.5em;
+text-decoration-line: underline;
+
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Rectangle 21 */
+
+width: 12px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Rectangle 18 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+

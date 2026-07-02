@@ -1,18 +1,273 @@
 ---
-import Layout from "../components/Layout.astro";
-import BookCard from "../components/BookCard.astro";
+import fs from "node:fs";
+import path from "node:path";
+import { getCollection } from "astro:content";
+import NewspaperLayout from "../components/NewspaperLayout.astro";
+import type { OutlineItem } from "../components/Outline.astro";
+import "../styles/home.css";
+import { joinBasePath } from "../lib/basePath";
 import { getAllBooks } from "../lib/books";
+import { siteConfig } from "../lib/site";
+import { getCalendarStatus, getWeatherStatus } from "../lib/uapis";
 
-const books = await getAllBooks();
-const recentBooks = books.slice(0, 3);
+const [books, entries, calendar, weather] = await Promise.all([
+  getAllBooks(),
+  getCollection("books"),
+  getCalendarStatus(),
+  getWeatherStatus(),
+]);
+
+const base = import.meta.env.BASE_URL;
+const leadBook = books.find((book) => book.id === "F0-1-1") ?? books[0];
+const leadEntry = leadBook
+  ? entries.find((entry) => entry.data.id === leadBook.id)
+  : undefined;
+
+let outline: OutlineItem[] = [];
+if (leadBook) {
+  try {
+    const outlineAbsPath = path.join(
+      process.cwd(),
+      "src",
+      "data",
+      "outlines",
+      `${leadBook.id}_v${leadBook.edition}.json`
+    );
+    outline = JSON.parse(fs.readFileSync(outlineAbsPath, "utf-8"));
+  } catch {
+    outline = [];
+  }
+}
+
+const coverFallback = joinBasePath(base, "brand/homepage-cover.png");
+const coverSrc = leadBook?.coverUrl ?? coverFallback;
+const bookHref = leadBook
+  ? joinBasePath(base, `books/${leadBook.id}/`)
+  : joinBasePath(base, "books/");
+const coveredBooks = books.filter((book) => book.coverUrl);
+const shelfSource = coveredBooks.length > 0 ? coveredBooks : books;
+const shelfBooks = Array.from({ length: 10 }, (_, index) =>
+  shelfSource[index % Math.max(shelfSource.length, 1)]
+).filter(Boolean);
+
+const rawSummary =
+  leadEntry?.body.trim() ||
+  "馆藏条目正在整理中，待 PDF 元数据和内容简介补齐后展示。";
+const summaryParagraphs = rawSummary
+  .replace(/\r\n/g, "\n")
+  .split(/\n+/)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean)
+  .slice(0, 4);
+
+const excerptItems =
+  outline.length > 0
+    ? outline.slice(0, 5)
+    : [
+        { level: 1, title: "一、 学一点政治经济学" },
+        { level: 1, title: "二、 资本主义以前的社会经济制度" },
+        { level: 2, title: "1. 原始公社建立了人类历史上最早的生产关系" },
+        { level: 2, title: "2. 奴隶制是历史上最古老的剥削制度" },
+        { level: 2, title: "3. 封建制度是又一个阶级对抗的剥削制度" },
+      ];
+
+const quoteLines =
+  siteConfig.frontPageSlogan?.length > 0
+    ? siteConfig.frontPageSlogan
+    : ["你们要关心国家大事", "要把无产阶级文化大革命", "进行到底！"];
+const quoteLabelChars = Array.from("毛主席语录");
+
+const currentForecast = weather?.forecast?.[0];
+const futureForecasts =
+  weather?.forecast?.slice(1, 4).map((day) => ({
+    day: `${new Date(`${day.date}T00:00:00+08:00`).getDate()}日`,
+    weather: day.weather_day ?? day.weather_night ?? "多云",
+  })) ?? [
+    { day: "25日", weather: "晴转多云" },
+    { day: "26日", weather: "多云转阴" },
+    { day: "27日", weather: "阴有雨" },
+  ];
+
+const weatherCity = weather?.city ? `${weather.city}地区` : "北京地区";
+const dayWeather = currentForecast?.weather_day ?? weather?.weather ?? "阴转多云";
+const nightWeather = currentForecast?.weather_night ?? weather?.weather ?? "晴转多云";
+const dayWindDir = currentForecast?.wind_dir_day ?? weather?.wind_direction ?? "北转南";
+const dayWindScale = currentForecast?.wind_scale_day ?? weather?.wind_power ?? "二、三级";
+const nightWindDir = currentForecast?.wind_dir_night ?? weather?.wind_direction ?? "南转北";
+const nightWindScale = currentForecast?.wind_scale_night ?? weather?.wind_power ?? "一、二级";
+const tempMax = currentForecast?.temp_max ?? weather?.temp_max ?? weather?.temperature ?? 24;
+const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.temperature ?? 11;
 ---
 
-<Layout title="新书" activeNav="new">
-  {recentBooks.length > 0 ? (
-    <ol class="catalog-grid">
-      {recentBooks.map((book) => <BookCard book={book} />)}
-    </ol>
-  ) : (
-    <p class="empty-state">暂无书籍。</p>
-  )}
-</Layout>
+<NewspaperLayout title="文火" description="文火电子书馆">
+  <main class="figma-homepage" data-pagefind-ignore="all">
+    <div class="fm-frame" aria-label="文火主页">
+      <header class="fm-masthead">
+        <section class="fm-logo-block" aria-label="报头">
+          <img
+            class="fm-wordmark"
+            src={joinBasePath(base, "brand/wordmark.svg")}
+            alt="文火"
+            width="228"
+            height="115"
+          />
+          <div class="fm-date-line">
+            <time>{calendar.dateLabel}</time>
+            <span>{calendar.weekdayLabel}</span>
+            {calendar.lunarLabel && <span class="fm-lunar">{calendar.lunarLabel}</span>}
+          </div>
+        </section>
+
+        <section class="fm-quote" aria-label="本期口号">
+          <div class="fm-quote-label">
+            {quoteLabelChars.map((char) => <span>{char}</span>)}
+          </div>
+          <div class="fm-quote-copy">
+            <p>
+              {quoteLines.map((line, index) => (
+                <>
+                  <span>{index === 0 ? `　　${line}` : line}</span>
+                  {index < quoteLines.length - 1 && <br />}
+                </>
+              ))}
+            </p>
+          </div>
+        </section>
+      </header>
+
+      <div class="fm-thick-divider" aria-hidden="true"></div>
+
+      <section class="fm-newsletter" aria-labelledby="fm-lead-title">
+        <div class="fm-section-label" aria-hidden="true">
+          <span>新书速递</span>
+        </div>
+
+        <div class="fm-detail">
+          <a class="fm-feature-cover" href={bookHref} aria-label={leadBook ? `查看《${leadBook.title}》` : "查看书籍"}>
+            <img src={coverSrc} alt={leadBook ? `《${leadBook.title}》封面` : ""} />
+          </a>
+
+          <div class="fm-vertical-rule" aria-hidden="true">
+            <span>✻</span>
+            <i></i>
+            <span>✻</span>
+          </div>
+
+          <article class="fm-intro">
+            <div class="fm-intro-head">
+              {leadBook?.series && <p class="fm-series">{leadBook.series}</p>}
+              <h1 id="fm-lead-title">{leadBook?.title ?? "馆藏整理中"}</h1>
+              {leadBook?.subtitle && <p class="fm-subtitle">（{leadBook.subtitle}）</p>}
+            </div>
+            <div class="fm-intro-body">
+              {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          </article>
+
+          <aside class="fm-excerpt" aria-label="目录大纲">
+            <div class="fm-excerpt-inner">
+              {excerptItems.map((item) => (
+                <p class={`outline-level-${item.level}`}>{item.title}</p>
+              ))}
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <div class="fm-midline" aria-hidden="true"></div>
+
+      <section class="fm-book-shelf" aria-labelledby="fm-shelf-title">
+        <div class="fm-shelf-panel">
+          <span class="fm-shelf-badge">上架书目</span>
+          <a class="fm-shelf-button" id="fm-shelf-title" href={joinBasePath(base, "categories/")} aria-label="进入索引">
+            <i aria-hidden="true">⁝</i>
+            <span class="fm-shelf-button-text">索引</span>
+            <i aria-hidden="true">⁝</i>
+          </a>
+        </div>
+        <ol class="fm-book-list" aria-label="上架书目">
+          {shelfBooks.map((book) => (
+            <li>
+              <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
+                <img src={book.coverUrl ?? coverFallback} alt={`《${book.title}》封面`} />
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div class="fm-bottom-divider" aria-hidden="true"></div>
+
+      <footer class="fm-contact">
+        <div class="fm-address">
+          <span>本报地址：国内　霹雳放映站・</span>
+          <a href="https://space.bilibili.com/3494350898072545" target="_blank" rel="noreferrer">走火放映室</a>
+          <span class="fm-address-overseas">国外　优博放映站・</span>
+          <a href="https://www.youtube.com/@Fulinte1966" target="_blank" rel="noreferrer">弗林特放映室</a>
+        </div>
+        <span class="fm-footer-rule" aria-hidden="true"></span>
+        <div class="fm-weather">
+          <div class="fm-weather-labels">
+            <p>{weatherCity}</p>
+            <p>天气预报</p>
+          </div>
+          <div class="fm-weather-detail">
+            <p>白天 {dayWeather}</p>
+            <p>风向 {dayWindDir}</p>
+            <p>风力 {dayWindScale}</p>
+            <p><strong>最高温度</strong> {tempMax}度</p>
+            <p>夜间 {nightWeather}</p>
+            <p>风向 {nightWindDir}</p>
+            <p>风力 {nightWindScale}</p>
+            <p><strong>最低温度</strong> {tempMin}度</p>
+          </div>
+          <div class="fm-weather-days">
+            {futureForecasts.map((day) => (
+              <p>
+                {day.day}
+                <br />
+                {day.weather}
+              </p>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+</NewspaperLayout>
+
+<script>
+  for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list")) {
+    let isDragging = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    shelf.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      isDragging = true;
+      startX = event.clientX;
+      startScrollLeft = shelf.scrollLeft;
+      shelf.classList.add("is-dragging");
+      shelf.setPointerCapture(event.pointerId);
+    });
+
+    shelf.addEventListener("pointermove", (event: PointerEvent) => {
+      if (!isDragging) return;
+      event.preventDefault();
+      shelf.scrollLeft = startScrollLeft - (event.clientX - startX);
+    });
+
+    const endDrag = (event: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      shelf.classList.remove("is-dragging");
+      if (shelf.hasPointerCapture(event.pointerId)) {
+        shelf.releasePointerCapture(event.pointerId);
+      }
+    };
+
+    shelf.addEventListener("pointerup", endDrag);
+    shelf.addEventListener("pointercancel", endDrag);
+    shelf.addEventListener("pointerleave", endDrag);
+  }
+</script>

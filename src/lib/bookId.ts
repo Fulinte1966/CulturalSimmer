@@ -35,6 +35,10 @@ export function formatEdition(edition: number): string {
   return `第 ${edition} 版`;
 }
 
+export function formatEditionWithDate(date: Date, edition: number): string {
+  return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月第 ${edition} 版`;
+}
+
 export function formatVolume(
   volumeNumber: number,
   totalVolumes?: number
@@ -43,6 +47,23 @@ export function formatVolume(
     return `第 ${volumeNumber} 册 / 共 ${totalVolumes} 册`;
   }
   return `第 ${volumeNumber} 册`;
+}
+
+export function formatShortVolume(
+  volumeNumber: number,
+  totalVolumes?: number
+): string {
+  if (totalVolumes === 2) {
+    const labels = ["上册", "下册"];
+    return labels[volumeNumber - 1] ?? formatVolume(volumeNumber, totalVolumes);
+  }
+
+  if (totalVolumes === 3) {
+    const labels = ["上册", "中册", "下册"];
+    return labels[volumeNumber - 1] ?? formatVolume(volumeNumber, totalVolumes);
+  }
+
+  return formatVolume(volumeNumber, totalVolumes);
 }
 
 export function getReleaseTag(id: string, edition: number): string {

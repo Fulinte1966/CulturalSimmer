@@ -2,6 +2,7 @@
 import BookCover from "./BookCover.astro";
 import type { BookMeta } from "../lib/books";
 import { formatDisplayCallNumber } from "../lib/bookId";
+import { joinBasePath } from "../lib/basePath";
 
 interface Props {
   book: BookMeta;
@@ -9,7 +10,7 @@ interface Props {
 
 const { book } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const detailUrl = `${base}/books/${book.id}/`;
+const detailUrl = joinBasePath(base, `books/${book.id}/`);
 ---
 
 <li class="catalog-item">

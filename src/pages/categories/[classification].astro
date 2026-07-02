@@ -1,13 +1,6 @@
 ---
 import Layout from "../../components/Layout.astro";
-import BookCard from "../../components/BookCard.astro";
-import {
-  getClassificationAncestors,
-  getClassificationNode,
-  getClassificationNodes,
-  getClassificationLabel,
-} from "../../lib/classification";
-import { getBooksByClassification } from "../../lib/books";
+import { getClassificationNodes } from "../../lib/classification";
 
 export async function getStaticPaths() {
   const nodes = getClassificationNodes();
@@ -25,62 +18,8 @@ export async function getStaticPaths() {
     params: { classification: code },
   }));
 }
-
-const { classification } = Astro.params;
-const base = import.meta.env.BASE_URL;
-
-const node = getClassificationNode(classification!);
-if (!node) {
-  return Astro.redirect(`${base}/categories/`);
-}
-
-const ancestors = getClassificationAncestors(classification!);
-const books = await getBooksByClassification(classification!);
-const label = getClassificationLabel(classification!);
 ---
 
-<Layout title={label} activeNav="categories">
-  {
-    ancestors.length > 0 && (
-      <p class="category-ancestors">
-        {ancestors.reverse().map((ancestor, i) => (
-          <Fragment>
-            {i > 0 && <span class="category-separator">/</span>}
-            <a href={`${base}/categories/${ancestor.code}/`}>
-              {ancestor.code}
-            </a>
-          </Fragment>
-        ))}
-      </p>
-    )
-  }
-
-  <h1 class="page-heading">{label}</h1>
-
-  {
-    node.children.length > 0 && (
-      <ol class="category-child-index">
-        {node.children.map((child) => (
-          <li>
-            <a href={`${base}/categories/${child.code}/`}>
-              <span class="prefix">
-                {classification}/{child.code.slice(classification!.length)}
-              </span>
-              <span class="suffix"> {child.label}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    )
-  }
-
-  {books.length > 0 ? (
-    <ol class="catalog-grid">
-      {books.map((book) => <BookCard book={book} />)}
-    </ol>
-  ) : (
-    !node.children.length && (
-      <p class="empty-state">该分类下暂无书籍。</p>
-    )
-  )}
+<Layout title="索引" activeNav="categories">
+  <section class="reserved-page" aria-label="索引页待设计"></section>
 </Layout>

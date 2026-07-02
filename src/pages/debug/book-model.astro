@@ -63,7 +63,7 @@ if (!book) {
       cssVar: string;
     };
 
-    const storageKey = "cultural-simmer-book-model-debug-v4";
+    const storageKey = "cultural-simmer-book-model-debug-v19";
     const groups: { title: string; controls: ControlConfig[] }[] = [
       {
         title: "整体",
@@ -75,7 +75,7 @@ if (!book) {
             min: 240,
             max: 520,
             step: 1,
-            value: 284,
+            value: 300,
             target: "stage",
             cssVar: "--debug-stage-width",
           },
@@ -86,7 +86,7 @@ if (!book) {
             min: 300,
             max: 680,
             step: 1,
-            value: 480,
+            value: 414,
             target: "stage",
             cssVar: "--debug-stage-height",
           },
@@ -97,7 +97,7 @@ if (!book) {
             min: -120,
             max: 120,
             step: 1,
-            value: 0,
+            value: 13,
             target: "model",
             cssVar: "--debug-model-x",
           },
@@ -108,7 +108,7 @@ if (!book) {
             min: -120,
             max: 120,
             step: 1,
-            value: 0,
+            value: 13,
             target: "model",
             cssVar: "--debug-model-y",
           },
@@ -390,11 +390,66 @@ if (!book) {
             label: "阴影深度",
             unit: "",
             min: 0,
-            max: 5,
-            step: 0.05,
-            value: 5,
+            max: 1,
+            step: 0.01,
+            value: 0.9,
             target: "model",
             cssVar: "--shadow-depth",
+          },
+          {
+            key: "shadowOpacity",
+            label: "阴影透明",
+            unit: "",
+            min: 0,
+            max: 1,
+            step: 0.01,
+            value: 0.86,
+            target: "model",
+            cssVar: "--shadow-opacity",
+          },
+          {
+            key: "shadowBlur",
+            label: "阴影羽化",
+            unit: "px",
+            min: 0,
+            max: 64,
+            step: 1,
+            value: 14,
+            target: "model",
+            cssVar: "--shadow-blur",
+          },
+          {
+            key: "shadowEdgeSoftness",
+            label: "边缘柔化",
+            unit: "%",
+            min: 0,
+            max: 24,
+            step: 1,
+            value: 8,
+            target: "model",
+            cssVar: "--shadow-edge-softness",
+          },
+          {
+            key: "shadowContact",
+            label: "接触阴影",
+            unit: "",
+            min: 0,
+            max: 1,
+            step: 0.01,
+            value: 0.42,
+            target: "model",
+            cssVar: "--shadow-contact",
+          },
+          {
+            key: "shadowAmbient",
+            label: "环境阴影",
+            unit: "",
+            min: 0,
+            max: 1,
+            step: 0.01,
+            value: 0.13,
+            target: "model",
+            cssVar: "--shadow-ambient",
           },
           {
             key: "shadowTopLeft",
@@ -422,23 +477,45 @@ if (!book) {
             key: "shadowSlopeLeft",
             label: "左边斜度",
             unit: "px",
-            min: -360,
-            max: 360,
+            min: -720,
+            max: 720,
             step: 2,
             value: -120,
             target: "model",
             cssVar: "--shadow-slope-left",
           },
           {
+            key: "shadowLiftLeft",
+            label: "左边上扬",
+            unit: "px",
+            min: -200,
+            max: 240,
+            step: 2,
+            value: 80,
+            target: "model",
+            cssVar: "--shadow-lift-left",
+          },
+          {
             key: "shadowSlopeRight",
             label: "右边斜度",
             unit: "px",
-            min: -360,
-            max: 360,
+            min: -720,
+            max: 720,
             step: 2,
             value: 360,
             target: "model",
             cssVar: "--shadow-slope-right",
+          },
+          {
+            key: "shadowLiftRight",
+            label: "右边上扬",
+            unit: "px",
+            min: -200,
+            max: 240,
+            step: 2,
+            value: 80,
+            target: "model",
+            cssVar: "--shadow-lift-right",
           },
           {
             key: "shadowWidth",
@@ -634,13 +711,33 @@ if (!book) {
         }
       }
       applyBorderColor();
+      applyShadowCorners();
       localStorage.setItem(storageKey, JSON.stringify(values));
+    }
+
+    function applyShadowCorners() {
+      if (!model) return;
+      // shadowHeight scales the edge vectors along their fixed directions (130 = 1x)
+      const scale = values.shadowHeight / 130;
+      const blx = values.shadowSlopeLeft * scale;
+      const bly = -values.shadowLiftLeft * scale;
+      const brx = values.shadowSlopeRight * scale;
+      const bry = -values.shadowLiftRight * scale;
+      model.style.setProperty("--shadow-bottom-left-x", `${blx}px`);
+      model.style.setProperty("--shadow-bottom-left-y", `${bly}px`);
+      model.style.setProperty("--shadow-bottom-right-x", `${brx}px`);
+      model.style.setProperty("--shadow-bottom-right-y", `${bry}px`);
+      model.style.setProperty("--shadow-scale", String(scale));
     }
 
     function applyBorderColor() {
       if (!model) return;
+      model.style.setProperty("--border-color", getBorderColor());
+    }
+
+    function getBorderColor() {
       const v = Math.round((1 - values.borderColor) * 255);
-      model.style.setProperty("--border-color", `rgb(${v}, ${v}, ${v})`);
+      return `rgb(${v}, ${v}, ${v})`;
     }
 
     function updateOutput(message = "参数已更新并自动保存。") {
@@ -658,6 +755,7 @@ if (!book) {
             (control) =>
               `  ${control.cssVar}: ${formatValue(values[control.key], control.unit)};`
           ),
+        `  --border-color: ${getBorderColor()};`,
         "  transform:",
         `    translate(${values.offsetX}px, ${values.offsetY}px)`,
         "    skewY(var(--model-skew))",
@@ -666,24 +764,43 @@ if (!book) {
         "}",
         "",
         ".bd-cover-stage .book-cover--model::before {",
-        "  background: linear-gradient(",
-        "    to bottom,",
-        "    rgb(0 0 0 / calc(var(--shadow-depth) * 0.30)) 0%,",
-        "    rgb(0 0 0 / calc(var(--shadow-depth) * 0.10)) 30%,",
-        "    rgb(0 0 0 / calc(var(--shadow-depth) * 0.03)) 60%,",
-        "    transparent 100%",
-        "  );",
+        "  background:",
+        "    radial-gradient(",
+        "      ellipse at 28% 10%,",
+        "      rgb(0 0 0 / calc(var(--shadow-depth) * var(--shadow-contact))) 0%,",
+        "      rgb(0 0 0 / calc(var(--shadow-depth) * var(--shadow-contact) * 0.55)) 34%,",
+        "      transparent 68%",
+        "    ),",
+        "    linear-gradient(",
+        "      to bottom,",
+        "      rgb(0 0 0 / calc(var(--shadow-depth) * var(--shadow-ambient))) 0%,",
+        "      rgb(0 0 0 / calc(var(--shadow-depth) * var(--shadow-ambient) * 0.62)) 34%,",
+        "      rgb(0 0 0 / calc(var(--shadow-depth) * var(--shadow-ambient) * 0.25)) 68%,",
+        "      transparent 100%",
+        "    );",
         "  content: \"\";",
-        "  filter: blur(5px);",
-        "  height: calc(var(--shadow-height) + 120px);",
+        "  filter: blur(var(--shadow-blur));",
+        "  height: var(--shadow-element-height);",
         "  left: calc(-200px + var(--shadow-offset-x));",
+        "  -webkit-mask-image:",
+        "    linear-gradient(90deg, transparent 0%, #000 var(--shadow-edge-softness), #000 calc(100% - var(--shadow-edge-softness)), transparent 100%),",
+        "    linear-gradient(180deg, transparent 0%, #000 var(--shadow-edge-softness), #000 calc(100% - var(--shadow-edge-softness)), transparent 100%);",
+        "  -webkit-mask-composite: source-in;",
+        "  mask-composite: intersect;",
+        "  mask-image:",
+        "    linear-gradient(90deg, transparent 0%, #000 var(--shadow-edge-softness), #000 calc(100% - var(--shadow-edge-softness)), transparent 100%),",
+        "    linear-gradient(180deg, transparent 0%, #000 var(--shadow-edge-softness), #000 calc(100% - var(--shadow-edge-softness)), transparent 100%);",
+        "  mix-blend-mode: multiply;",
+        "  opacity: var(--shadow-opacity);",
+        "  pointer-events: none;",
         "  position: absolute;",
         "  top: calc(100% - var(--shadow-offset-y) - 120px);",
+        "  /* 斜边方向由 slope/lift 定义，长度由 shadow-height 缩放（基准 130=1x） */",
         "  clip-path: polygon(",
         "    163px calc(120px + var(--shadow-top-left)),",
         "    calc(100% - 200px) calc(120px - var(--book-size) + var(--shadow-top-right)),",
-        "    calc(100% - 200px + var(--shadow-slope-right)) calc(120px + var(--shadow-height)),",
-        "    calc(163px - var(--shadow-slope-left)) calc(120px + var(--shadow-height))",
+        "    calc(100% - 200px + var(--shadow-bottom-right-x)) calc(120px - var(--book-size) + var(--shadow-top-right) + var(--shadow-bottom-right-y)),",
+        "    calc(163px + var(--shadow-bottom-left-x)) calc(120px + var(--shadow-top-left) + var(--shadow-bottom-left-y))",
         "  );",
         "  width: calc(100% + 500px + var(--shadow-width));",
         "  z-index: -3;",

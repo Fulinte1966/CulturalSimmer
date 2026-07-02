@@ -1,0 +1,344 @@
+Create a high-fidelity structured prototype from my selected Figma design frame named “Details”.
+
+This page is a fixed 1280×980 Chinese retro editorial book-detail page. It should feel like a 1960s–1970s Chinese publication catalogue page, not a modern ecommerce page. Preserve the white paper background, black newspaper rules, Chinese serif typography, red correction stamp, large centered title hierarchy, compact bibliographic metadata, download/pass-around controls, and dense abstract/table-of-contents text.
+
+Use the selected Figma frame and existing image/vector assets as the source of truth. Reuse the existing book-cover render, the small “文火” logo vector, the red “勘误” badge, and the red “传阅” stamp if available. Do not replace them with generic icons.
+
+TECHNICAL STRUCTURE
+Implement as a clean componentized prototype, preferably React + CSS or semantic HTML/CSS.
+
+Component tree:
+
+- App
+  - DetailsCanvas
+  - DetailsFrame
+    - TopHeader
+      - Breadcrumb
+      - HeaderRight
+        - MiniLogo
+        - DateLine
+      - TopRule
+      - ProofreadingBadge
+    - DetailBody
+      - BookVisualColumn
+        - BookRender
+      - BookTextColumn
+        - TitleInfo
+          - SeriesName
+          - MainTitle
+          - Subtitle
+          - AuthorLine
+          - StarDivider
+          - PublicationMeta
+        - ActionRow
+          - PassAroundStamp
+          - LinkButtons
+        - DecorativeRule
+        - IntroContent
+          - AbstractBlock
+          - TableOfContentsBlock
+
+GLOBAL CANVAS
+- Canvas size: 1280px wide × 980px high.
+- Background: #FFFFFF.
+- Inner grid: 1152px wide × 912px high, centered horizontally.
+- Main frame: about 1154px wide × 917.7px high.
+- Main frame starts around y=25px.
+- Keep all layout fixed in pixels.
+- The page may scale proportionally to fit the browser viewport, but do not make the internal layout responsive or mobile-stacked.
+- Do not add modern browser chrome, navbars, cards, shadows, glass effects, or ecommerce UI.
+
+COLOR TOKENS
+- Paper background: #FFFFFF.
+- Primary black: #000000.
+- Red stamp color: #D52B28.
+- Do not introduce modern accent colors.
+- Use red only for the correction / circulation stamp elements.
+
+TYPOGRAPHY
+Use Chinese-first font stacks. Do not default to Inter.
+
+CSS font tokens:
+- --font-serif: "寒蝉锦书宋", "Source Han Serif SC", "Noto Serif SC", serif;
+- --font-body: "LXGW Neo ZhiSong Screen", "Source Han Serif SC", "Noto Serif SC", serif;
+- --font-sans: "Source Han Sans SC", "Noto Sans SC", sans-serif;
+- --font-display: "Glow Sans SC", "Source Han Sans SC", sans-serif;
+
+Use tight print-style line height. Simulate leading-trim visually with flex centering and exact line-height where needed.
+
+TOP HEADER
+Create a thin newspaper-style header at the top:
+- Width: 1154px.
+- Height: 36px.
+- Position near top y=25px.
+- White background with very subtle bottom fade if needed.
+- A black horizontal rule crosses the full width at about y=24px.
+- Rule thickness: visually 2px black.
+
+Breadcrumb, left side:
+- Position at top-left.
+- Text:
+  “主页 ・ 《政治经济学基础知识》（资本主义部分）”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Line-height: 100%.
+- Color: black.
+- Keep it small, like a catalogue locator, not a web breadcrumb component.
+- Do not style it as blue links.
+
+HeaderRight, right side:
+- Align to the upper-right.
+- Contains small black “文火” logo vector if available, then date text.
+- Date text:
+  “2026 年 6 月 24 日　星期三”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Color: black.
+- Row gap about 12px.
+- Keep the logo small, around 35–43px wide and 18px high.
+
+ProofreadingBadge:
+- Position near the upper-right under the header, around x=1094px, y=40px.
+- Size: about 48px × 67px.
+- Use existing red vector badge if available.
+- Text: “勘误”
+- Font: Glow Sans SC.
+- Size: 16px.
+- Weight: 800.
+- Use the red #D52B28 badge with black/white interior text treatment as in the Figma design.
+- This should look like a printed correction stamp, not a floating modern badge.
+
+MAIN BODY
+DetailBody:
+- Width: 992px.
+- Height: about 797.7px.
+- Layout: horizontal flex row.
+- Gap: 48px.
+- Position centered under the header, with generous top whitespace.
+- Align items to flex-start.
+
+BookVisualColumn:
+- Width: 284px.
+- Height: 480px.
+- Display the existing 3D book render.
+- Book image size: 284px × about 428.85px.
+- No shadow added by CSS; use only the shadow already in the image asset.
+- The book should sit on the left side with large white space around it.
+
+BookTextColumn:
+- Width: 660px.
+- Height: about 797.7px.
+- Layout: vertical.
+- Gap: 24px.
+- Center-align most header text.
+- This column is the dominant page content.
+
+TITLE INFO
+TitleInfo:
+- Width: 660px.
+- Height: about 334px.
+- Column layout.
+- Centered.
+- Gap: 18px.
+
+Top title stack:
+- Width: 660px.
+- Height: about 220px.
+- Column gap: 24px.
+- Inside, another title stack with gap: 6px.
+
+SeriesName:
+- Text: “青年自学丛书”
+- Font: 寒蝉锦书宋 / Chinese serif.
+- Size: 36px.
+- Weight: 400.
+- Line-height: 100%.
+- Text-align: center.
+- Use full-width/hwid Chinese font features if possible.
+
+MainTitle:
+- Text: “政治经济学基础知识”
+- Font: 寒蝉锦书宋 / Chinese serif.
+- Size: 84px.
+- Weight: 400.
+- Line-height: 100%.
+- Text-align: center.
+- This is the visual anchor of the page.
+- Do not reduce it like a normal web H1.
+
+Subtitle:
+- Text: “（资本主义部分）”
+- Font: 寒蝉锦书宋 / Chinese serif.
+- Size: 40px.
+- Weight: 500.
+- Line-height: 100%.
+- Text-align: center.
+
+AuthorLine:
+- Text: “《政治经济学基础知识》编写组编”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 24px.
+- Line-height: 100%.
+- Text-align: center.
+
+StarDivider:
+- Text: “＊”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Centered.
+
+PublicationMeta:
+Create a small centered metadata block:
+- Width: about 184px.
+- Height: 66px.
+- Gap: 6px.
+- Text:
+  “上　册”
+  “216 页　10.7 万字　1.60 兆字节”
+  “2026 年 6 月第 1 版　2026 年 6 月第 2 版”
+  “内部书号 F0/1:1”
+- Font: Source Han Sans SC for “上册”, LXGW Neo ZhiSong Screen for details.
+- Size: 10–12px.
+- Line-height: 100%.
+- Centered.
+- Use compact bibliographic formatting.
+
+ACTION ROW
+ActionRow:
+- Width: about 203px.
+- Height: about 44px.
+- Horizontal row.
+- Gap: 12px.
+- Centered under metadata.
+
+PassAroundStamp:
+- Use existing red stamp/vector if available.
+- Size: about 82.69px × 43.7px.
+- Text: “传阅”
+- Font: Glow Sans SC.
+- Size: 16px.
+- Weight: 800.
+- Letter-spacing: 0.25em.
+- Black text inside red printed outline.
+- It should look like a rubber stamp / circulation mark.
+
+LinkButtons:
+- Vertical column.
+- Width: 108px.
+- Height: 40px.
+- Two rows, each 108px × 20px.
+- Each row has decorative marks on both sides and centered text.
+- First button text: “基核技术站”
+- Second button text: “择览资料站”
+- Font: 寒蝉锦书宋.
+- Size: 12px.
+- Weight: 500.
+- Color: black.
+- Background white.
+- Do not make them modern pill buttons.
+- Add cursor pointer on hover only; very subtle underline or opacity change is acceptable.
+
+DECORATIVE RULE
+DecorativeRule:
+- Width: about 564px.
+- Height: 12px.
+- Use a dense horizontal printed line / dotted ornament / micro-rule.
+- Black.
+- Center it within the text column.
+- It separates the title/action area from the abstract.
+
+INTRO CONTENT
+IntroContent:
+- Width: 540px.
+- Height: 336px.
+- Column layout.
+- Gap: 24px.
+- Centered within the 660px text column.
+
+AbstractBlock:
+- Width: 540px.
+- Height: about 192px.
+- Column gap: 18px.
+
+Abstract heading:
+- Text: “内容提要”
+- Font: Source Han Sans SC.
+- Size: 12px.
+- Weight: 500.
+- Letter-spacing: 1em.
+- Text-align: center.
+- Width about 84px.
+- Keep the spaced-out Chinese heading style.
+
+Abstract body:
+Use the following Chinese body text or similar:
+“再明冰反青带下没，乙壮量足唐雨快；踟躇虎偎，虽路隘遍记比儿子宽等若只法一息羊放其助，难种半畔少林身怀不良，幼智吧话夏息真姐侑助更噪繁相秋他迭发，是兔耐。
+汁女把昔，父拉黑原饭孝彩斤抱粮意干现；房肖俊位麻鱼年乾卜和冒，斥免貌就包做工足而光子。
+菜二雨个林豹斤真让胡外穴她化，木物故头良色，苦苦晓得勘萌。
+禾共大害快可邦肥要蚁呀登？贡勿菜秋皮昌笑缠焦方南各扫呢！草音内笑蛋行。甲石俊占玉昌兔正内倔献吹幸穴地木十嘶若斤：读喜根时银丁隻足即读您；儿绿瓜亲有几建今仟三苗蝴；歌诉完泉土一借，兔亭三相松而校影。
+牙种那喜烧加？久春乙日适豆轧五，苗而泉屋怪时，布上右姚上去水汁唱长。立菜三古生天象心好，屋十在。跑方吧汁。”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Line-height: 150% / 18px.
+- Text-indent: 24px.
+- Color: black.
+- Keep the body compact and justified-looking if possible.
+
+TableOfContentsBlock:
+- Width: 540px.
+- Height: about 120px.
+- Column gap: 18px.
+
+TOC heading:
+- Text: “目录大纲”
+- Font: Source Han Sans SC.
+- Size: 12px.
+- Weight: 500.
+- Letter-spacing: 1em.
+- Text-align: center.
+
+TOC body:
+- Width: about 254px.
+- Text:
+  “一、学一点政治经济学
+  二、资本主义以前的社会经济制度
+  　1. 原始公社建立了人类历史上最早的生产关系
+  　2. 奴隶制是历史上最古老的剥削制度
+  　3. 封建制度是又一个阶级对抗的剥削制度”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Line-height: 150%.
+- Align the TOC block visually centered under the heading, but keep the text left-aligned.
+
+INTERACTION / PROTOTYPE BEHAVIOR
+Keep interaction extremely restrained:
+- Breadcrumb “主页” may navigate back to the homepage frame if that frame exists.
+- “基核技术站” and “择览资料站” may behave like external resource buttons.
+- “传阅” may have a subtle pressed opacity state.
+- “勘误” may open a small correction-note state only if needed, but do not add a modern modal unless explicitly requested.
+- No animated layout shifts.
+- No modern hover cards.
+
+IMPORTANT NEGATIVE CONSTRAINTS
+- Do not redesign this as an ecommerce product page.
+- Do not add price, cart, ratings, tabs, search, navigation bars, or modern CTA buttons.
+- Do not use responsive mobile stacking.
+- Do not use Inter or Western-first typography.
+- Do not use drop shadows, glassmorphism, neumorphism, gradient cards, or colorful UI accents.
+- Do not replace the 3D book image with a flat placeholder.
+- Do not make the typography smaller to “fit modern web norms”.
+- Do not remove the large white space; the page relies on print-style emptiness.
+- Do not change the canvas ratio or internal pixel rhythm.
+
+ACCEPTANCE CRITERIA
+At 1280×980, the implementation should visually match the selected Figma frame:
+- Top breadcrumb and date/logo are tiny and print-like.
+- A strong black rule spans the top.
+- Red “勘误” stamp sits near the upper-right.
+- Left side contains the 3D book render at about 284px wide.
+- Right side contains the large centered title stack, with 84px main title.
+- Metadata is compact and centered.
+- Red “传阅” stamp and two small resource buttons appear below metadata.
+- A dense ornamental horizontal rule separates title from content.
+- Abstract and TOC are compact, centered, and typeset like a Chinese printed catalogue page.
+- All major sections are named components and easy to edit.

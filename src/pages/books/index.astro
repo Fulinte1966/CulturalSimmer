@@ -1,17 +1,7 @@
 ---
 import Layout from "../../components/Layout.astro";
-import BookCard from "../../components/BookCard.astro";
-import { getAllBooks } from "../../lib/books";
-
-const books = await getAllBooks();
 ---
 
 <Layout title="总览" activeNav="overview">
-  {books.length > 0 ? (
-    <ol class="catalog-grid">
-      {books.map((book) => <BookCard book={book} />)}
-    </ol>
-  ) : (
-    <p class="empty-state">暂无书籍。</p>
-  )}
+  <section class="reserved-page" aria-label="总览页待设计"></section>
 </Layout>

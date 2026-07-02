@@ -1,0 +1,621 @@
+﻿/* Figma Make homepage deployment. Fixed source frame: 1280 x 980. */
+
+.figma-homepage {
+  background: #fff;
+  box-sizing: border-box;
+  color: #000;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+  padding: 25px 64px;
+  position: relative;
+  width: 1280px;
+}
+
+.figma-homepage *,
+.figma-homepage *::before,
+.figma-homepage *::after {
+  box-sizing: border-box;
+}
+
+.fm-frame {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: auto;
+  overflow: visible;
+  position: relative;
+  width: 1152px;
+}
+
+.fm-masthead {
+  align-items: center;
+  display: flex;
+  flex: 0 0 166px;
+  gap: 48px;
+  justify-content: center;
+  padding: 6px 0;
+  width: 1152px;
+}
+
+.fm-logo-block {
+  align-items: center;
+  display: flex;
+  flex: 0 0 354px;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.fm-wordmark {
+  display: block;
+  height: 115px;
+  margin-left: -50px;
+  object-fit: contain;
+  width: 228px;
+}
+
+.fm-date-line {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  line-height: 24px;
+  white-space: nowrap;
+  width: 354px;
+}
+
+.fm-date-line time,
+.fm-date-line span {
+  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.fm-date-line .fm-lunar {
+  font-family: "Zhuque Fangsong (technical preview):Regular", "Home Zhuque Fangsong", FangSong, STFangsong, serif;
+  font-weight: 400;
+}
+
+.fm-quote {
+  align-items: center;
+  background-image: repeating-linear-gradient(
+    135deg,
+    #e22626 0,
+    #e22626 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  border-radius: 8px;
+  display: flex;
+  flex: 0 0 528px;
+  gap: 6px;
+  height: 154px;
+  justify-content: center;
+  padding: 6px;
+}
+
+.fm-quote-label {
+  align-items: center;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  font-family: "Home Chill Jinshu Wide", "Home Chill Jinshu", serif;
+  font-size: 20px;
+  font-weight: 700;
+  gap: 6px;
+  height: 115px;
+  justify-content: center;
+  line-height: 20px;
+  text-align: center;
+  text-orientation: upright;
+  width: 30px;
+}
+
+.fm-quote-label span {
+  align-items: center;
+  background: #e22626;
+  border-radius: 1px;
+  display: flex;
+  height: 21px;
+  justify-content: center;
+  width: 29px;
+}
+
+.fm-quote-copy {
+  align-items: center;
+  background: #fff;
+  display: flex;
+  flex: 1 1 auto;
+  height: 142px;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.fm-quote-copy p {
+  color: #e22626;
+  font-family: "Home Chill Jinshu Compact", "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  line-height: 40px;
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.fm-thick-divider,
+.fm-bottom-divider {
+  background: #000;
+  flex: 0 0 2px;
+  width: 1152px;
+}
+
+.fm-newsletter {
+  align-items: center;
+  display: flex;
+  flex: 0 0 461px;
+  gap: 24px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 12px;
+  width: 1152px;
+}
+
+.fm-section-label {
+  align-items: center;
+  background-image: repeating-linear-gradient(
+    0deg,
+    #000 0,
+    #000 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  display: flex;
+  flex: 0 0 36px;
+  height: 216px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 12px 6px;
+}
+
+.fm-section-label span {
+  align-items: center;
+  background: #fff;
+  border: 1px solid transparent;
+  column-gap: 0;
+  display: flex;
+  font-family: "Home Chill Jinshu Compact", "Home Chill Jinshu", serif;
+  font-size: 24px;
+  font-weight: 700;
+  height: 180px;
+  justify-content: center;
+  letter-spacing: 0.5rem;
+  line-height: 24px;
+  row-gap: 0;
+  text-align: center;
+  text-orientation: upright;
+  width: 24px;
+  writing-mode: vertical-rl;
+}
+
+.fm-detail {
+  flex: 0 0 1068px;
+  height: 444px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fm-feature-cover {
+  border-radius: 8px;
+  display: block;
+  height: 408px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 18px;
+  width: 288px;
+}
+
+.fm-feature-cover img,
+.fm-book-list img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.fm-feature-cover:hover,
+.fm-book-list a:hover {
+  opacity: 0.9;
+}
+
+.fm-vertical-rule {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 396px;
+  justify-content: center;
+  left: 300px;
+  position: absolute;
+  top: 25px;
+  width: 12px;
+}
+
+.fm-vertical-rule span {
+  background: url("/ebook-library/brand/border-cap-start.svg") center / 12px 12px no-repeat;
+  display: block;
+  font-size: 0;
+  height: 12px;
+  line-height: 0;
+  width: 12px;
+}
+
+.fm-vertical-rule span:last-child {
+  background-image: url("/ebook-library/brand/border-cap-end.svg");
+}
+
+.fm-vertical-rule i {
+  background: url("/ebook-library/brand/border-fill-tile.svg") center top / 12px 12px repeat-y;
+  display: block;
+  flex: 0 0 360px;
+  height: 360px;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  width: 12px;
+}
+
+.fm-vertical-rule i::before {
+  content: none;
+}
+
+.fm-intro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 408px;
+  justify-content: center;
+  left: 324px;
+  overflow: hidden;
+  position: absolute;
+  top: 18px;
+  width: 336px;
+}
+
+.fm-intro-head {
+  align-items: center;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  justify-content: center;
+  text-align: center;
+  width: 336px;
+}
+
+.fm-intro-head p,
+.fm-intro-head h1 {
+  margin: 0;
+}
+
+.fm-series {
+  font-family: "Home Chill Duanhei", "Source Han Sans SC", sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 18px;
+  width: 336px;
+}
+
+.fm-intro h1 {
+  font-family: "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 36px;
+  width: 336px;
+}
+
+.fm-subtitle {
+  font-family: "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  width: 336px;
+}
+
+.fm-intro-body {
+  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", "Source Han Serif SC", serif;
+  font-size: 12px;
+  font-feature-settings: "dlig" 1;
+  line-height: 18px;
+  max-height: 250px;
+  overflow: hidden;
+  width: 336px;
+}
+
+.fm-intro-body p {
+  margin: 0;
+  text-indent: 24px;
+}
+
+.fm-excerpt {
+  background-image: repeating-linear-gradient(
+    135deg,
+    #000 0,
+    #000 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  height: 408px;
+  left: 672px;
+  overflow: hidden;
+  padding: 12px;
+  position: absolute;
+  top: 18px;
+  width: 396px;
+}
+
+.fm-excerpt-inner {
+  background: #fff;
+  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", "Source Han Serif SC", serif;
+  font-size: 12px;
+  font-feature-settings: "dlig" 1;
+  height: 384px;
+  line-height: 18px;
+  padding: 24px;
+  width: 372px;
+}
+
+.fm-excerpt-inner p {
+  margin: 0;
+}
+
+.fm-excerpt-inner .outline-level-2 {
+  padding-left: 1em;
+}
+
+.fm-midline {
+  background: url("/ebook-library/brand/midline.svg") center / 1152px 6px no-repeat;
+  flex: 0 0 12px;
+  width: 1152px;
+}
+
+.fm-book-shelf {
+  flex: 0 0 246px;
+  overflow: hidden;
+  position: relative;
+  width: 1152px;
+}
+
+.fm-shelf-panel {
+  align-items: center;
+  background: linear-gradient(90deg, #fff 0%, #fff 82%, rgb(255 255 255 / 0%) 100%);
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  height: 245px;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  text-decoration: none;
+  top: 0;
+  width: 164px;
+  z-index: 2;
+}
+
+.fm-shelf-badge {
+  align-items: center;
+  background: url("/ebook-library/brand/shelf-badge.svg") center / contain no-repeat;
+  color: #000;
+  display: flex;
+  font-family: "Glow Sans SC", "Glow Sans SC:Compressed_ExtraBold", "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  height: 56px;
+  justify-content: center;
+  letter-spacing: 4px;
+  line-height: 24px;
+  padding: 0 0 14px 4px;
+  position: relative;
+  text-align: center;
+  width: 130px;
+}
+
+.fm-shelf-badge::before,
+.fm-shelf-badge::after {
+  content: none;
+}
+
+.fm-shelf-button {
+  align-items: center;
+  color: #000;
+  display: flex;
+  font-family: "寒蝉锦书宋:Medium", "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-size: 16px;
+  font-weight: 500;
+  gap: 12px;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 24px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  width: 116px;
+}
+
+.fm-shelf-button:hover,
+.fm-shelf-button:focus,
+.fm-shelf-button:focus-visible {
+  color: #e22626;
+}
+
+.fm-shelf-button-text {
+  display: inline-block;
+  flex: 0 0 auto;
+  letter-spacing: 8px;
+  margin-right: -8px;
+  text-align: center;
+  width: 48px;
+}
+
+.fm-shelf-button i {
+  background: currentcolor;
+  display: block;
+  flex: 0 0 12px;
+  font-size: 0;
+  height: 12px;
+  mask: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='black'%3E%3Cellipse cx='4.52942' cy='1.22059' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='3.16175' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='5.10294' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='7.04411' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='8.9853' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='10.9265' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='1.22059' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='3.16175' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='5.10294' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='7.04411' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='8.9853' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='10.9265' rx='.5' ry='.470588'/%3E%3C/g%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='black'%3E%3Cellipse cx='4.52942' cy='1.22059' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='3.16175' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='5.10294' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='7.04411' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='8.9853' rx='.5' ry='.470588'/%3E%3Cellipse cx='4.52942' cy='10.9265' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='1.22059' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='3.16175' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='5.10294' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='7.04411' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='8.9853' rx='.5' ry='.470588'/%3E%3Cellipse cx='7.5' cy='10.9265' rx='.5' ry='.470588'/%3E%3C/g%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  width: 12px;
+}
+
+.fm-book-list {
+  align-items: center;
+  cursor: grab;
+  display: flex;
+  gap: 12px;
+  height: 246px;
+  left: 180px;
+  list-style: none;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  position: absolute;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  top: 0;
+  width: 984px;
+}
+
+.fm-book-list::-webkit-scrollbar {
+  display: none;
+}
+
+.fm-book-list::after {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0%) 0%, #fff 100%);
+  content: "";
+  height: 246px;
+  pointer-events: none;
+  position: sticky;
+  right: 0;
+  top: 0;
+  width: 12px;
+  z-index: 2;
+}
+
+.fm-book-list.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.fm-book-list li {
+  flex: 0 0 168px;
+  height: 238px;
+  scroll-snap-align: start;
+}
+
+.fm-book-list a {
+  border-radius: 8px;
+  display: block;
+  height: 238px;
+  overflow: hidden;
+  width: 168px;
+}
+
+.fm-contact {
+  align-items: center;
+  display: flex;
+  flex: 0 0 20px;
+  font-size: 10px;
+  gap: 20px;
+  justify-content: center;
+  line-height: 10px;
+  overflow: visible;
+  padding: 0;
+  width: 1152px;
+}
+
+.fm-address,
+.fm-weather-labels,
+.fm-weather-detail strong {
+  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 10px;
+}
+
+.fm-address {
+  white-space: nowrap;
+}
+
+.fm-address-overseas {
+  margin-left: 1em;
+}
+
+.fm-address a {
+  color: #000;
+  text-decoration: underline;
+  text-underline-position: from-font;
+}
+
+.fm-address a:hover,
+.fm-address a:focus,
+.fm-address a:focus-visible {
+  color: #e22626;
+  text-decoration-color: #e22626;
+}
+
+.fm-footer-rule {
+  background: #000;
+  flex: 0 0 1px;
+  height: 20px;
+}
+
+.fm-weather {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  height: 20px;
+}
+
+.fm-weather-labels {
+  white-space: nowrap;
+}
+
+.fm-weather-labels p,
+.fm-weather-detail p,
+.fm-weather-days p {
+  margin: 0;
+}
+
+.fm-weather-detail {
+  column-gap: 10px;
+  display: grid;
+  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", serif;
+  font-size: 10px;
+  font-feature-settings: "hwid" 1;
+  grid-template-columns: repeat(4, max-content);
+  grid-template-rows: repeat(2, max-content);
+  line-height: 10px;
+  white-space: nowrap;
+}
+
+.fm-weather-days {
+  column-gap: 15px;
+  display: grid;
+  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", serif;
+  font-size: 10px;
+  font-feature-settings: "hwid" 1;
+  grid-template-columns: repeat(3, max-content);
+  line-height: 10px;
+  padding-left: 10px;
+  text-align: center;
+  white-space: nowrap;
+}

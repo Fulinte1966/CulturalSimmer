@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 1152 6" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<path id="Midline" d="M0 0H1152V6H0V0Z" fill="url(#pattern0_0_4)"/>
+<defs>
+<pattern id="pattern0_0_4" patternUnits="userSpaceOnUse" patternTransform="matrix(12 0 0 24 0 -3)" preserveAspectRatio="none" viewBox="0 0 12 24" width="1" height="1">
+<use xlink:href="#pattern0_0_4_inner" transform="translate(-12 0)"/>
+<g id="pattern0_0_4_inner">
+<g id="Group 8">
+<g id="Frame 23">
+<rect width="12" height="12" fill="white"/>
+<g id="Group 9">
+<rect id="Rectangle 10" x="3.66666" y="4" width="2" height="4" fill="var(--fill-0, black)"/>
+<rect id="Rectangle 13" x="9" y="4" width="2" height="4" fill="var(--fill-0, black)"/>
+<rect id="Rectangle 8" x="1" y="4" width="0.666667" height="4" fill="var(--fill-0, black)"/>
+<rect id="Rectangle 11" x="6.33331" y="4" width="0.666667" height="4" fill="var(--fill-0, black)"/>
+<rect id="Rectangle 9" x="2.33334" y="4" width="0.666667" height="4" fill="var(--fill-0, black)"/>
+<path id="Rectangle 12" d="M7.66675 4H8.33341V8H7.66675V4Z" fill="var(--fill-0, black)"/>
+</g>
+</g>
+</g>
+</g>
+<use xlink:href="#pattern0_0_4_inner" transform="translate(-6 12)"/>
+<use xlink:href="#pattern0_0_4_inner" transform="translate(6 12)"/>
+</pattern></defs>
+</svg>

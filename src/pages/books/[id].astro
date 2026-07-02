@@ -2,12 +2,14 @@
 import { getCollection } from "astro:content";
 import fs from "node:fs";
 import path from "node:path";
-import Layout from "../../components/Layout.astro";
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
 import BookCover from "../../components/BookCover.astro";
-import BookMeta from "../../components/BookMeta.astro";
-import Outline from "../../components/Outline.astro";
 import type { OutlineItem } from "../../components/Outline.astro";
+import { formatDisplayCallNumber, formatEditionWithDate, formatShortVolume } from "../../lib/bookId";
 import { getBookById } from "../../lib/books";
+import { joinBasePath } from "../../lib/basePath";
+import { getCalendarStatus } from "../../lib/uapis";
+import "../../styles/book-detail.css";
 
 export async function getStaticPaths() {
   const books = await getCollection("books");
@@ -18,9 +20,12 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { id, title, subtitle, edition, tags, author } = entry.data;
+const { id, title, subtitle, edition, author } = entry.data;
 const { Content } = await entry.render();
-const book = await getBookById(id);
+const [book, calendar] = await Promise.all([
+  getBookById(id),
+  getCalendarStatus(),
+]);
 
 if (!book) {
   throw new Error(`Book metadata not found for ${id}`);
@@ -40,87 +45,178 @@ try {
   outline = [];
 }
 
-// Pagefind meta
-const callNumber = `${book.parsed.classification}/${book.parsed.accessionNumber}${
-  book.parsed.volumeNumber !== null ? `:${book.parsed.volumeNumber}` : ""
-}`;
+const base = import.meta.env.BASE_URL;
+const callNumber = formatDisplayCallNumber(book.parsed);
+const characterCount =
+  (book.reading?.cjk_character_count ?? 0) +
+  (book.reading?.latin_token_count ?? 0);
+const pageLabel = book.reading?.page_count
+  ? `${book.reading.page_count} 页`
+  : undefined;
+const characterLabel = characterCount > 0
+  ? `${(characterCount / 10000).toLocaleString("zh-CN", {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: characterCount >= 10000 ? 1 : 0,
+    })}${characterCount >= 10000 ? " 万" : ""}字`
+  : undefined;
+const fileSizeLabel = book.reading?.file_size_bytes
+  ? `${(book.reading.file_size_bytes / 1024 / 1024).toLocaleString("zh-CN", {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    })} 兆字节`
+  : undefined;
+const volumeLabel = book.parsed.isVolume
+  ? formatShortVolume(book.parsed.volumeNumber!, book.total_volumes)
+  : undefined;
+const editionLabel = formatEditionWithDate(book.date, book.edition);
+const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`;
 ---
 
-<Layout
-  title={title}
-  description={`${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`}
-  searchable
-  activeNav="overview"
->
-  <article class="book-detail" data-pagefind-body>
-    <header class="detail-lead">
-      <div class="detail-cover">
-        <BookCover
-          book={book}
-          mode="model"
-          pagefindMeta
-        />
-      </div>
+<NewspaperLayout title={title} description={description} searchable>
+  <main class="book-detail-page" data-pagefind-body>
+    <div class="bd-grid" aria-hidden="true"></div>
 
-      <div class="detail-intro">
-        <p class="running-head">馆藏书目 / {id}</p>
-        <h1
-          class:list={{ "detail-title--long": title.length > 18 }}
-          data-pagefind-meta="title"
-        >
-          {title}
-        </h1>
-        {subtitle && (
-          <p
-            class="detail-subtitle"
-            data-pagefind-meta="book_subtitle"
-          >
-            {subtitle}
-          </p>
-        )}
-        {author && (
-          <p
-            class="detail-author"
-            data-pagefind-meta="author"
-          >
-            {author}
-          </p>
-        )}
-        <BookMeta book={book} />
-      </div>
-    </header>
+    <article class="bd-frame">
+      <header class="bd-head">
+        <div class="bd-head-texture" aria-hidden="true"></div>
+        <nav class="bd-breadcrumb" aria-label="面包屑">
+          <a href={joinBasePath(base, "")}>主页</a>
+          <span>・</span>
+          <span>《{title}》{subtitle && `（${subtitle}）`}</span>
+        </nav>
 
-    {
-      tags.length > 0 && (
-        <div class="tags detail-tags" aria-label="标签">
-          {tags.map((tag) => <span class="tag">{tag}</span>)}
+        <div class="bd-date-line">
+          <img
+            class="bd-cr"
+            src={joinBasePath(base, "brand/wordmark.svg")}
+            alt=""
+            width="35"
+            height="18"
+            aria-hidden="true"
+          />
+          <time>{calendar.dateLabel}</time>
+          <span>{calendar.weekdayLabel}</span>
         </div>
-      )
-    }
 
-    <section class="content-section" aria-labelledby="summary-heading">
-      <h2 id="summary-heading">内容简介</h2>
-      <div class="body">
-        <Content />
-      </div>
-    </section>
+        <div class="bd-proof" aria-label="勘误">
+          <img
+            class="bd-proof-mark"
+            src={joinBasePath(base, "brand/proof-badge.svg")}
+            alt=""
+            width="48"
+            height="67"
+            aria-hidden="true"
+          />
+          <span>勘误</span>
+        </div>
+      </header>
 
-    <Outline outline={outline} />
-  </article>
-</Layout>
+      <section class="bd-main">
+        <div class="bd-cover-stage">
+          <BookCover book={book} mode="model" pagefindMeta />
+        </div>
 
-<!-- Pagefind metadata (hidden) -->
-<div
-  hidden
-  data-pagefind-meta="book_id[id]"
-  data-pagefind-meta={`call_number:${callNumber}`}
-  data-pagefind-meta={`cover_kind:${book.coverKind}`}
-></div>
+        <section class="bd-text" aria-labelledby="book-title">
+          <div class="bd-info">
+            <div class="bd-title-block">
+              {book.series && <p class="bd-series">{book.series}</p>}
+              <h1 id="book-title" class:list={{ "bd-title--long": title.length > 12 }} data-pagefind-meta="title">
+                {title}
+              </h1>
+              {subtitle && (
+                <p class="bd-subtitle" data-pagefind-meta="book_subtitle">
+                  （{subtitle}）
+                </p>
+              )}
+            </div>
+
+            {author && <p class="bd-author" data-pagefind-meta="author">{author}</p>}
+
+            <div class="bd-meta-ornament" aria-hidden="true">＊</div>
+
+            <div class="bd-metrics" aria-label="书目元数据">
+              {volumeLabel && <div class="bd-volume-row">{volumeLabel}</div>}
+              <div class="bd-metrics-body">
+                <div class="bd-stat-row">
+                  {pageLabel && <span>{pageLabel}</span>}
+                  {characterLabel && <span>{characterLabel}</span>}
+                  {fileSizeLabel && <span>{fileSizeLabel}</span>}
+                </div>
+                <div class="bd-edition-row">
+                  <span>{editionLabel}</span>
+                </div>
+              </div>
+              <div class="bd-call-row">内部书号 {callNumber}</div>
+            </div>
+          </div>
+
+          <div class="bd-actions" aria-label="书籍操作">
+            <div class="bd-download" aria-label="传阅">
+              <img
+                class="bd-download-mark"
+                src={joinBasePath(base, "brand/download-badge.svg")}
+                alt=""
+                width="83"
+                height="44"
+                aria-hidden="true"
+              />
+              <span class="bd-download-label">传阅</span>
+            </div>
+            <a class="bd-download-link" href={book.downloadUrl} target="_blank" rel="noopener noreferrer">下载 PDF</a>
+            <div class="bd-secondary-actions">
+              <a class="bd-button" href={joinBasePath(base, "books/")}>
+                <span class="bd-button-dot" aria-hidden="true"></span>
+                <span class="bd-button-text">基核技术站</span>
+                <span class="bd-button-dot" aria-hidden="true"></span>
+              </a>
+              <a href={joinBasePath(base, `categories/${book.parsed.classification}/`)}>
+                <span class="bd-button-dot" aria-hidden="true"></span>
+                <span class="bd-button-text">择览资料站</span>
+                <span class="bd-button-dot" aria-hidden="true"></span>
+              </a>
+            </div>
+          </div>
+
+          <div class="bd-rule" aria-hidden="true"></div>
+
+          <div class="bd-intro">
+            <section class="bd-abstract" aria-labelledby="summary-heading">
+              <h2 id="summary-heading">内容提要</h2>
+              <div class="bd-body">
+                <Content />
+              </div>
+            </section>
+
+            <section class="bd-outline" aria-labelledby="outline-heading">
+              <h2 id="outline-heading">目录大纲</h2>
+              {
+                outline.length > 0 ? (
+                  <ol class="bd-outline-list">
+                    {outline.map((item) => (
+                      <li class={`bd-outline-level-${item.level}`}>
+                        <span>{item.title}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p class="bd-empty">暂无目录数据</p>
+                )
+              }
+            </section>
+          </div>
+        </section>
+      </section>
+    </article>
+  </main>
+</NewspaperLayout>
+
+<div hidden>
+  <span data-pagefind-meta="book_id[id]">{id}</span>
+  <span data-pagefind-meta={`call_number:${callNumber}`}></span>
+  <span data-pagefind-meta={`cover_kind:${book.coverKind}`}></span>
+</div>
 
 <script>
-  // Fix sub-pixel rendering gap between spine and cover on initial paint.
-  // Double rAF: first frame completes initial paint + composite, second
-  // frame re-sets the transform to force a fresh composite.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const model = document.querySelector(

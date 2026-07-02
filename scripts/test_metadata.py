@@ -3,6 +3,7 @@
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import re
 from pathlib import Path
 
 from extract_metadata import (
@@ -96,14 +97,17 @@ def _make_test_pdf(
         # Custom PDF Info keys must be set via low-level API because
         # set_metadata() only accepts standard keys.
         if pdf_info:
+            document.set_metadata({"title": "metadata fixture"})
+            info_type, info_ref = document.xref_get_key(-1, "Info")
+            if info_type != "xref":
+                raise RuntimeError("Unable to create PDF Info dictionary")
+            info_xref = int(re.match(r"(\d+)", info_ref).group(1))
             for key, value in pdf_info.items():
-                try:
-                    trailer = document.pdf_trailer()
-                    document.xref_set_key(
-                        trailer, key, f"({value})"
-                    )
-                except Exception:
-                    pass  # best-effort for custom keys
+                pdf_key = {
+                    "ebookTotalVolumes": "EbookTotalVolumes",
+                    "ebookReadtime": "EbookReadtime",
+                }.get(key, key)
+                document.xref_set_key(info_xref, pdf_key, f"({value})")
         document.save(pdf_path)
 
     document.close()
@@ -390,7 +394,7 @@ class ExtractMetadataTests(unittest.TestCase):
                 extract(pdf, SAMPLE_CLASSIFICATIONS)
             self.assertIn("conflict", str(ctx.exception))
 
-    def test_total_volumes_less_than_volume_fails(self) -> None:
+    def test_custom_info_total_volumes_less_than_volume_fails(self) -> None:
         xmp = _make_xmp(
             **{
                 "dc:identifier": "F0-1-3",
@@ -429,8 +433,7 @@ class ExtractMetadataTests(unittest.TestCase):
             parse_custom_pdf_info({"ebookReadtime": "not-a-number"})
         self.assertIn("EbookReadtime", str(ctx.exception))
 
-    def test_total_volumes_less_than_volume_fails(self) -> None:
-        # Direct test: total_volumes < volume raises MetadataError
+    def test_custom_info_survives_pdf_round_trip(self) -> None:
         xmp = _make_xmp(
             **{
                 "dc:identifier": "F0-1-3",
@@ -448,13 +451,40 @@ class ExtractMetadataTests(unittest.TestCase):
                 root, "test.pdf", xmp=xmp,
                 pdf_info={"ebookTotalVolumes": "2"},
             )
-            meta = extract(pdf, SAMPLE_CLASSIFICATIONS)
-            # Custom info keys may not survive the PDF round-trip; verify
-            # via direct function call instead.
-            self.assertIsNotNone(meta)
+            with self.assertRaises(MetadataError) as ctx:
+                extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertIn("total_volumes", str(ctx.exception))
         with self.assertRaises(MetadataError) as ctx:
             parse_custom_pdf_info({"ebookTotalVolumes": "-1"})
         self.assertIn("EbookTotalVolumes", str(ctx.exception))
+
+    def test_rejects_non_a5_later_page(self) -> None:
+        try:
+            import fitz
+        except ImportError:
+            raise unittest.SkipTest("PyMuPDF is not installed")
+
+        xmp = _make_xmp(
+            **{
+                "dc:identifier": "F0-1-1",
+                "dc:title": _alt("标题"),
+                "dc:creator": _seq("作者"),
+                "prism:bookEdition": "1",
+                "dc:description": _alt("简介。"),
+                "dc:language": _bag("zh-CN"),
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf = Path(temp_dir) / "mixed-pages.pdf"
+            document = fitz.open()
+            document.new_page(width=420, height=595)
+            document.new_page(width=612, height=792)
+            document.set_xml_metadata(xmp)
+            document.save(pdf)
+            document.close()
+            with self.assertRaises(ValueError) as ctx:
+                extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertIn("Page 2", str(ctx.exception))
 
     def test_tags_are_deduplicated_in_source_order(self) -> None:
         xmp = _make_xmp(

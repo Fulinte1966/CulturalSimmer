@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Static PDF ebook library — Astro static site deployed to GitHub Pages, PDFs hosted on GitHub Releases. Personal public-welfare project.
 
-Design source of truth: `reference/figma-handoff/` (tokens, screens, component contracts, PDF metadata spec). Do not call Figma MCP — all values are cached in JSON/Markdown.
+Homepage design source of truth: `reference/figma-handoff/current-home/`.
+Do not call Figma MCP during implementation; freeze design values locally first.
+The older handoff files remain useful for PDF metadata and automation notes,
+but they are not the active homepage UI source.
 
 Site config (`astro.config.mjs`): `site: "https://poyinte.github.io"`, `base: "ebook-library"`, `output: "static"`.
 
@@ -18,6 +21,8 @@ npm run check        # astro check — TypeScript diagnostics
 npm run validate     # tsx scripts/validate-books.ts — validates all book entries
 npm run test:reading # python scripts/test-reading-metrics.py — reading-metric unit tests
 npm run test:metadata # python scripts/test_metadata.py — XMP extraction unit tests
+npm run test:ingest  # python scripts/test_ingest_pdf.py — ingest orchestrator tests
+npm run test:ui      # tsx --test tests/**/*.test.ts — UI utility unit tests
 npm run build        # astro build && pagefind --site dist — production build
 npm run preview      # astro preview — serves dist/ locally
 ```
@@ -43,8 +48,10 @@ Markdown books (src/content/books/*.md)
   → Astro Content Collection (config.ts — Zod schema with optional subtitle)
     → books.ts (getAllBooks, getBookById, getBooksByClassification)
       └─ resolves covers (explicit → generated → placeholder), loads reading metrics
-      → Astro pages (index, books/[id], books/, categories/, categories/[classification], search/)
-        → Components (Layout, BookCover, BookCard, BookMeta, DownloadButton, ReadingStats, Outline)
+      → Homepage (NewspaperLayout + src/styles/home.css)
+        → Components (BookCover, EditionStatus)
+      → Catalog/detail/reserved pages (Layout)
+        → Components (BookCard, BookCover, BookMeta, Outline)
 ```
 
 ### Call number system (the core abstraction)
@@ -71,30 +78,42 @@ Display call numbers (`formatDisplayCallNumber`):
 | `src/lib/bookId.ts` | Parse call numbers, format edition/volume, display call number, release tags & filenames |
 | `src/lib/books.ts` | Query layer over content collection — `getAllBooks()`, `getBookById()`, `getBooksByClassification()`, `getDownloadUrl()`. Resolves covers and loads reading metrics |
 | `src/lib/classification.ts` | Classification tree — reads `classifications.yml`, builds parent-child hierarchy, provides `getClassificationNodes()`, `getClassificationNode()`, `getClassificationAncestors()` |
-| `src/lib/site.ts` | `siteConfig` — `githubOwner` and `githubRepo` |
+| `src/lib/site.ts` | `siteConfig` — `githubOwner`, `githubRepo`, `weatherCity`, `frontPageSlogan` |
+| `src/lib/basePath.ts` | `joinBasePath(base, pathname)` — joins base URL and pathname avoiding double slashes |
+| `src/lib/uapis.ts` | API client for uapis.cn — Chinese calendar (lunar dates, holidays) and weather data |
 | `src/content/config.ts` | Zod schema — validates id, title, subtitle, edition, date, tags, author, cover, total_volumes, readtime |
-| `src/data/classifications.yml` | `key: label` map of classification codes to Chinese names |
-| `src/data/reading-config.json` | Reading speed config |
+| `src/components/Layout.astro` | Standard catalog layout — branded header + 3-item nav |
+| `src/components/NewspaperLayout.astro` | Full-page wrapper for the Figma-designed homepage — no nav |
+| `src/components/EditionStatus.astro` | Real-time date/weather/lunar calendar bar (uapis API) |
+| `src/data/classifications.yml` | `key: label` map of classification codes to Chinese names (85 entries, A–P) |
+| `src/data/reading-config.json` | Reading speed config (CJK: 300 chars/min, Latin: 265 words/min) |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics via PyMuPDF |
 | `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation (implements `pdf-metadata-contract.md`) |
 | `scripts/test_metadata.py` | Unit tests for XMP extraction and validation (24 tests) |
 | `scripts/test-reading-metrics.py` | Unit tests for `book_assets.py` |
+| `scripts/test_ingest_pdf.py` | Unit tests for `ingest_pdf.py` |
 | `scripts/ingest_pdf.py` | GitHub Actions orchestration — validates, generates, publishes, and cleans up PDF ingestion |
-| `scripts/requirements.txt` | Python dependencies: PyMuPDF, PyYAML |
+| `scripts/requirements.txt` | Python dependencies: PyMuPDF, PyYAML, defusedxml |
 | `scripts/validate-books.ts` | Standalone validator (used in CI) |
-| `.github/workflows/deploy.yml` | CI/CD — `npm ci` → `validate` → `check` → `build` → deploy to GitHub Pages |
+| `.github/workflows/deploy.yml` | CI/CD — `npm ci` → `test:ui` → `validate` → `check` → `build` → deploy to GitHub Pages |
 | `.github/workflows/ingest-pdf.yml` | PDF ingestion — triggers on `ingest-*` Release, extracts XMP, generates assets, creates canonical Release |
+| `reference/figma-handoff/current-home/` | Active homepage design source of truth — frozen measurements, fonts, assets, QA notes |
+| `reference/figma-handoff/` | Historical handoff notes plus PDF metadata and automation references |
+| `plan.md` | Original implementation plan (22 sections, Chinese) |
 
-### Layout and navigation
+### Dual layout system
 
-`Layout.astro` accepts `activeNav: "new" | "search" | "categories" | "overview"` and renders the shared brand wordmark (`public/brand/wordmark.svg`, unchanged path-only SVG) and four-item navigation:
+Two layout components serve different page types:
+
+**`Layout.astro`** — Standard catalog layout with branded header + 3-item nav (新书/索引/总览). Used by reserved pages (`/books/`, `/search/`, `/categories/`, `/categories/[classification]/`). Accepts `activeNav` and optionally `searchable`.
 
 | activeNav | Label | Route |
 |---|---|---|
 | `new` | 新书 | `/` |
-| `search` | 搜索 | `/search/` |
-| `categories` | 分类 | `/categories/` |
+| `categories` | 索引 | `/categories/` |
 | `overview` | 总览 | `/books/` |
+
+**`NewspaperLayout.astro`** — Full-page Figma-designed wrapper for the front page (`/`). No nav, no branded header — just a minimal `<html>` wrapper. The homepage-specific CSS lives in `src/styles/home.css`.
 
 ### Cover system
 
@@ -106,20 +125,19 @@ Display call numbers (`formatDisplayCallNumber`):
 
 Flat covers: 148/210 aspect ratio, 280px desktop target. Real covers show 1px dark-red border + 5px radius. Placeholders show 1px gray border. Model mode is unchanged from the original CSS geometry.
 
-### Design tokens
+### Homepage handoff
 
-From `reference/figma-handoff/design-tokens.json`:
+Active homepage values live in `reference/figma-handoff/current-home/`:
 
-| Token | Value |
+| File | Role |
 |---|---|
-| Colors | `--paper: #FFF`, `--ink: #171717`, `--muted: #8A8882`, `--rule: #DCDAD3`, `--accent: #84251F`, `--accent-hover: #5E1713` |
-| Content max-width | 1078px |
-| Desktop padding | 24px |
-| Mobile padding | 16px |
-| Gallery gap | 25px col, 56px row |
-| Cover width | 280px |
-| Cover aspect | 148/210 |
-| Cover radius | 5px |
+| `measurements.json` | Frozen Figma node dimensions and key component positions |
+| `fonts.json` | Figma font names mapped to embedded files in `public/fonts/` |
+| `assets.json` | Homepage asset inventory and usage |
+| `qa-notes.md` | Known dynamic-data and preview caveats |
+
+The homepage targets the fixed `1440 x 1024` Figma viewport. Do not add
+responsive rules until a separate mobile/tablet design is supplied.
 
 ### Responsive breakpoints
 
@@ -129,9 +147,23 @@ From `reference/figma-handoff/design-tokens.json`:
 - Narrow ≤360px: 1-column
 - ≤560px: book detail single-column with flat cover, model pseudo-elements hidden
 
-### 3D book model (preserved)
+### 3D book model + debug workbench
 
-The `.book-cover--model` element uses CSS pseudo-elements for spine, back cover, page edges, and shadow. All dimensions controlled by CSS custom properties. At ≤560px, pseudo-elements are hidden and a flat cover is shown. The spine seam repaint workaround (double `requestAnimationFrame`) and `box-shadow: inset` spine darkening are preserved.
+The `.book-cover--model` element uses CSS pseudo-elements for spine, back cover, page edges, and shadow. All dimensions controlled by CSS custom properties. At ≤560px, pseudo-elements are hidden and a flat cover is shown.
+
+**Spine darkening**: Uses `background-image` gradient overlay (`linear-gradient(rgb(0 0 0 / calc(1 - brightness)), …)`) instead of global.css's `box-shadow: inset`. The debug CSS overrides with `box-shadow: none` to prevent the inset shadow from darkening the spine border.
+
+**Unified border system**: Cover surface, spine `::after`, and back cover `volume::after` all share `border-color: var(--border-color, #555)`. The `--border-color` is computed in JS from the `border-color-depth` slider. Spine gets `border-right: 0` (cover junction); cover gets `border-left: 0` (spine junction). `--model-border` defaults to 3px.
+
+**Shadow system**: Replaced the global.css single blurred pill (`::before` with `blur(12px)` + `skewX(45deg)`) with a `clip-path` trapezoid anchored to the book's 3D bottom contour. Gradient `linear-gradient(to bottom, 30% → 10% → 3% → 0)` simulates contact/penumbra/ambient layers. Left anchor fixed at 163px from element edge. Right anchor Y follows `-var(--book-size)` dynamically.
+
+**Debug workbench** (`/debug/book-model`):
+- `src/pages/debug/book-model.astro` — interactive geometry tuning page
+- `src/styles/book-model-debug.css` — debug-only overrides (higher specificity than global.css)
+- Live controls for stage, cover image, surface alignment, spine/pages, border color/depth, shadow shape
+- "隐藏封面" toggle for shadow tuning
+- CSS output panel for copying tuned values to production (`book-detail.css`)
+- localStorage persistence with versioned keys (`v4`)
 
 ### Pagefind
 

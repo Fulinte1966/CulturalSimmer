@@ -1,5 +1,6 @@
 """Unit tests for mixed-language reading-time estimation."""
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -94,6 +95,9 @@ class ReadingMetricTests(unittest.TestCase):
             self.assertTrue(outputs["spine"].exists())
             self.assertTrue(outputs["outline"].exists())
             self.assertTrue(outputs["reading"].exists())
+
+            reading = json.loads(outputs["reading"].read_text(encoding="utf-8"))
+            self.assertEqual(reading["file_size_bytes"], pdf_path.stat().st_size)
 
             cover = fitz.Pixmap(outputs["cover"])
             spine = fitz.Pixmap(outputs["spine"])

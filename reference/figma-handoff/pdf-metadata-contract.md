@@ -151,9 +151,29 @@ Subtitle is optional. Its absence is not an error.
 - Cover and spine come from the first page.
 - Outline comes from PDF bookmarks.
 - Page count and reading estimate come from PDF content.
+- PDF file size comes from the downloaded asset byte length.
 - Canonical tag is `{id}_v{edition}`.
 - Canonical filename is `{id}_v{edition}.pdf`.
 - Download URL is derived using existing `siteConfig` behavior.
+
+## Generated reading metrics
+
+Path: `src/data/reading/{id}_v{edition}.json`.
+
+```ts
+interface ReadingMetrics {
+  page_count: number;
+  file_size_bytes?: number;
+  cjk_character_count?: number;
+  latin_token_count?: number;
+  estimated_minutes?: number;
+}
+```
+
+The Figma Make detail layout displays page count, character count, file size,
+dated edition, volume label, and internal call number. Reading time may remain
+available for other surfaces, but it is not shown in the detail-page metadata
+block.
 
 ## Generated Markdown
 
@@ -202,4 +222,3 @@ The current `example/F0.1.pdf` has no complete XMP metadata and must not pass
 strict ingestion. A local `--assets-only` option may continue generating cover,
 spine, outline, and reading data for legacy PDFs, but GitHub ingestion must
 always use strict metadata mode.
-

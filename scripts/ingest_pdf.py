@@ -12,11 +12,15 @@ Called by ``.github/workflows/ingest-pdf.yml``.  Subcommands:
 import hashlib
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
+import yaml
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -39,13 +43,21 @@ def _sha256(path: Path) -> str:
 
 def _load_classifications() -> dict[str, str]:
     path = ROOT / "src" / "data" / "classifications.yml"
-    result: dict[str, str] = {}
-    for line in path.read_text("utf-8").splitlines():
-        m = line.strip().match(r"^([A-Z](?:\d+(?:\.\d+)?)?):\s*(.+)$",
-                               line.strip())
-        if m:
-            result[m.group(1)] = m.group(2).strip()
-    return result
+    data = yaml.safe_load(path.read_text("utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("classifications.yml must contain a mapping")
+    return {str(key): str(value) for key, value in data.items()}
+
+
+def _load_frontmatter(path: Path) -> dict:
+    text = path.read_text("utf-8")
+    if not text.startswith("---\n"):
+        raise ValueError(f"Invalid frontmatter in {path}")
+    _, frontmatter, _ = text.split("---", 2)
+    data = yaml.safe_load(frontmatter)
+    if not isinstance(data, dict):
+        raise ValueError(f"Invalid frontmatter in {path}")
+    return data
 
 
 # ---------------------------------------------------------------------------
@@ -70,6 +82,19 @@ def cmd_validate(args: list[str]):
     pdf_path = pdfs[0]
     sha = _sha256(pdf_path)
 
+    release = json.loads(
+        _gh("api", f"repos/:owner/:repo/releases/{int(opts.release_id)}")
+    )
+    matching_assets = [
+        asset for asset in release.get("assets", [])
+        if asset.get("name") == pdf_path.name
+    ]
+    if len(matching_assets) != 1:
+        raise SystemExit("Unable to identify the source PDF asset")
+    published_at = release.get("published_at")
+    if not published_at:
+        raise SystemExit("Intake Release has no publication timestamp")
+
     # Extract metadata via shared extract_metadata module
     from extract_metadata import extract, MetadataError
     try:
@@ -87,12 +112,36 @@ def cmd_validate(args: list[str]):
     except subprocess.CalledProcessError:
         pass  # expected — Release does not exist yet
 
+    remote_tag = _run(
+        ["git", "ls-remote", "--tags", "origin", f"refs/tags/{tag}"],
+        capture_output=True,
+    ).stdout.strip()
+    if remote_tag:
+        raise SystemExit(f"Canonical Git tag {tag} already exists")
+
     def _exists(path: Path) -> bool:
         return path.exists()
 
     md_path = ROOT / "src" / "content" / "books" / f"{meta.id}.md"
     if _exists(md_path):
-        raise SystemExit(f"Book entry {md_path} already exists")
+        existing = _load_frontmatter(md_path)
+        if existing.get("edition") == meta.edition:
+            raise SystemExit(f"Book entry {md_path} already has edition {meta.edition}")
+
+    duplicate_paths = (
+        ROOT / "src" / "data" / "manifests" / f"{tag}.json",
+        ROOT / "public" / "covers" / f"{tag}.png",
+        ROOT / "public" / "covers" / f"{tag}_spine.png",
+        ROOT / "src" / "data" / "outlines" / f"{tag}.json",
+        ROOT / "src" / "data" / "reading" / f"{tag}.json",
+    )
+    existing_paths = [
+        str(path.relative_to(ROOT)) for path in duplicate_paths if path.exists()
+    ]
+    if existing_paths:
+        raise SystemExit(
+            f"Canonical generated assets already exist: {', '.join(existing_paths)}"
+        )
 
     result = {
         "id": meta.id,
@@ -103,6 +152,7 @@ def cmd_validate(args: list[str]):
         "description": meta.description,
         "tags": meta.tags,
         "language": meta.language,
+        "date": published_at[:10],
         "series": meta.series,
         "volume": meta.volume,
         "total_volumes": meta.total_volumes,
@@ -114,6 +164,7 @@ def cmd_validate(args: list[str]):
         "canonical_tag": tag,
         "canonical_filename": filename,
         "source_release_id": int(opts.release_id),
+        "source_asset_id": int(matching_assets[0]["id"]),
         "source_release_tag": opts.release_tag,
         "source_sha256": sha,
         "source_pdf_path": str(pdf_path),
@@ -152,25 +203,28 @@ def cmd_generate(args: list[str]):
         "date": date_str,
         "tags": tags,
     }
-    for opt in ("subtitle", "author", "total_volumes", "readtime"):
+    for opt in (
+        "subtitle",
+        "author",
+        "total_volumes",
+        "readtime",
+        "series",
+        "publisher",
+        "source",
+        "rights",
+        "license_url",
+        "language",
+    ):
         if meta.get(opt) is not None:
             frontmatter[opt] = meta[opt]
 
-    md_lines = ["---"]
-    for k, v in frontmatter.items():
-        if isinstance(v, list):
-            md_lines.append(f"{k}:")
-            for item in v:
-                md_lines.append(f"  - {item}")
-        elif isinstance(v, int):
-            md_lines.append(f"{k}: {v}")
-        else:
-            md_lines.append(f"{k}: {v}")
-    md_lines.append("---")
-    md_lines.append("")
-    md_lines.append(meta.get("description", ""))
-
-    md_content = "\n".join(md_lines)
+    yaml_text = yaml.safe_dump(
+        frontmatter,
+        allow_unicode=True,
+        sort_keys=False,
+        default_flow_style=False,
+    )
+    md_content = f"---\n{yaml_text}---\n\n{meta.get('description', '')}\n"
     md_path = ROOT / "src" / "content" / "books" / f"{id_}.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md_content, encoding="utf-8")
@@ -184,9 +238,25 @@ def cmd_generate(args: list[str]):
         "id": id_,
         "edition": edition,
         "source_release_id": meta["source_release_id"],
+        "source_asset_id": meta["source_asset_id"],
         "source_sha256": meta["source_sha256"],
         "canonical_tag": meta["canonical_tag"],
-        "generated_at": "",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "metadata": {
+            key: meta.get(key)
+            for key in (
+                "title",
+                "subtitle",
+                "author",
+                "language",
+                "series",
+                "publisher",
+                "source",
+                "rights",
+                "license_url",
+            )
+            if meta.get(key) is not None
+        },
     }
     manifest_path = manifest_dir / f"{id_}_v{edition}.json"
     manifest_path.write_text(
@@ -196,12 +266,9 @@ def cmd_generate(args: list[str]):
     print(f"Written {manifest_path}")
 
     # Cover / spine / outline / reading via book_assets.py
-    try:
-        from book_assets import extract_book_assets
-        extract_book_assets(pdf_path, id_, edition, ROOT)
-        print("Assets generated via book_assets")
-    except Exception as exc:
-        print(f"Warning: book_assets failed ({exc}); asset generation skipped")
+    from book_assets import extract_book_assets
+    extract_book_assets(pdf_path, id_, edition, ROOT)
+    print("Assets generated via book_assets")
 
     # Summary stub
     summary_lines = [
@@ -226,11 +293,14 @@ def cmd_publish(args: list[str]):
 
     meta = json.loads(Path(opts.metadata).read_text("utf-8"))
     pdf_path = Path(meta["source_pdf_path"])
+    normalized_pdf = Path(opts.workspace) / meta["canonical_filename"]
+    if pdf_path.resolve() != normalized_pdf.resolve():
+        shutil.copyfile(pdf_path, normalized_pdf)
 
     # Create canonical Release
     _gh(
         "release", "create", meta["canonical_tag"],
-        pdf_path.resolve().as_posix(),
+        normalized_pdf.resolve().as_posix(),
         "--title", f"{meta['title']} (v{meta['edition']})",
         "--notes", f"Automated intake of {meta['canonical_filename']}",
     )
@@ -244,12 +314,13 @@ def cmd_publish(args: list[str]):
 def cmd_cleanup(args: list[str]):
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--metadata", required=True)
+    ap.add_argument("--metadata")
     ap.add_argument("--release-tag", required=True)
     ap.add_argument("--push-success", required=True)
     opts = ap.parse_args(args)
 
-    if opts.push_success == "True" or opts.push_success == "true":
+    push_succeeded = opts.push_success.lower() == "true"
+    if push_succeeded:
         try:
             _gh("release", "delete", opts.release_tag, "--yes")
             _gh("api", f"repos/:owner/:repo/git/refs/tags/{opts.release_tag}",
@@ -258,6 +329,19 @@ def cmd_cleanup(args: list[str]):
         except subprocess.CalledProcessError as exc:
             print(f"Warning: cleanup failed: {exc}")
     else:
+        if opts.metadata and Path(opts.metadata).exists():
+            meta = json.loads(Path(opts.metadata).read_text("utf-8"))
+            try:
+                _gh(
+                    "release",
+                    "delete",
+                    meta["canonical_tag"],
+                    "--yes",
+                    "--cleanup-tag",
+                )
+                print(f"Rolled back canonical Release {meta['canonical_tag']}")
+            except subprocess.CalledProcessError:
+                pass
         print(f"Push did not succeed; keeping {opts.release_tag} for inspection")
 
 

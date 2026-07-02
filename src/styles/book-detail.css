@@ -1,0 +1,493 @@
+.book-detail-page {
+  --bd-accent: #e22626;
+  --bd-ink: #000000;
+  --bd-muted: #4f4f4f;
+  --bd-frame: 1152px;
+  --bd-rule: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='1.22059' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='3.16175' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='5.10294' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='7.04411' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='8.9853' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='10.9265' cy='4.52942' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='1.22059' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='3.16175' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='5.10294' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='7.04411' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='8.9853' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3Cellipse cx='10.9265' cy='7.5' rx='0.470588' ry='0.5' fill='black'/%3E%3C/svg%3E");
+  background: #ffffff;
+  color: var(--bd-ink);
+  font-family: var(--font-zhisong);
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow: visible;
+  padding: 25px 64px;
+  position: relative;
+  width: 1280px;
+}
+
+.bd-grid {
+  background: #ffffff;
+  height: calc(100% - 50px);
+  left: 64px;
+  pointer-events: none;
+  position: absolute;
+  top: 25px;
+  width: var(--bd-frame);
+  z-index: 0;
+}
+
+.bd-frame {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 84px;
+  margin: 0 auto;
+  overflow: visible;
+  position: relative;
+  width: var(--bd-frame);
+  z-index: 1;
+}
+
+.bd-head {
+  height: 36px;
+  position: relative;
+  width: 100%;
+}
+
+.bd-head::after {
+  background: var(--bd-ink);
+  content: "";
+  height: 2px;
+  inset: 24px 0 auto;
+  position: absolute;
+}
+
+.bd-head-texture {
+  background: linear-gradient(90deg, transparent, rgb(0 0 0 / 4%), transparent);
+  height: 32px;
+  inset: 0 0 auto;
+  opacity: 0.5;
+  pointer-events: none;
+  position: absolute;
+}
+
+.bd-breadcrumb {
+  align-items: center;
+  display: flex;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  gap: 0;
+  height: 18px;
+  left: 0;
+  line-height: 18px;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 760px;
+}
+
+.bd-breadcrumb a:hover,
+.bd-breadcrumb a:focus-visible,
+.bd-secondary-actions a:hover,
+.bd-secondary-actions a:focus-visible {
+  color: var(--bd-accent);
+}
+
+.bd-date-line {
+  align-items: center;
+  display: flex;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  gap: 12px;
+  height: 18px;
+  justify-content: flex-end;
+  line-height: 18px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+  white-space: nowrap;
+  width: 204px;
+}
+
+.bd-cr {
+  display: block;
+  flex: 0 0 auto;
+  filter: brightness(0);
+  height: 18px;
+  object-fit: contain;
+  width: 35px;
+}
+
+.bd-proof {
+  height: 67px;
+  position: absolute;
+  right: 12px;
+  top: 40px;
+  width: 48px;
+}
+
+.bd-proof-mark {
+  display: block;
+  height: 67px;
+  object-fit: contain;
+  width: 48px;
+}
+
+.bd-proof span {
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  font-family: "Glow Sans SC:Compressed ExtraBold", "Home Glow Sans SC", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  height: 24px;
+  justify-content: center;
+  left: 11px;
+  line-height: 24px;
+  position: absolute;
+  text-align: center;
+  top: 12px;
+  width: 26px;
+}
+
+.bd-main {
+  align-items: flex-start;
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  overflow: visible;
+  position: relative;
+}
+
+.bd-cover-stage {
+  align-items: center;
+  display: flex;
+  height: 480px;
+  justify-content: center;
+  position: relative;
+  width: 284px;
+}
+
+.bd-cover-stage .book-cover--model {
+  --book-size: 28px;
+  --model-width: 284px;
+  --model-pages-height: 270px;
+  --model-shadow-extra-height: 18px;
+  --model-shadow-extra-width: 8px;
+  --model-shadow-offset: 8px;
+  aspect-ratio: var(--cover-ratio);
+  width: 284px;
+}
+
+.bd-cover-stage .book-cover--model .book-cover-surface {
+  border-color: rgb(0 0 0 / 20%);
+}
+
+.bd-text {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  text-align: center;
+  width: 660px;
+}
+
+.bd-info {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.bd-title-block {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bd-series {
+  font-family: "Home Chill Jinshu Wide", "BookDetail Jinshu Wide Regular", "寒蝉锦书宋:WideRegular", "Songti SC", serif;
+  font-size: 36px;
+  font-feature-settings: "hwid", "fwid", "dlig";
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.bd-title-block h1 {
+  font-family: "Home Chill Jinshu Compact", var(--font-display-compact);
+  font-size: 84px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  max-width: 660px;
+  text-wrap: balance;
+}
+
+.bd-title-block h1.bd-title--long {
+  font-size: 72px;
+  line-height: 1.04;
+}
+
+.bd-subtitle {
+  font-family: "Home Chill Jinshu", var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bd-author {
+  font-family: var(--font-zhisong);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.bd-meta-ornament {
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  height: 12px;
+  line-height: 12px;
+  width: 12px;
+}
+
+.bd-metrics {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+.bd-metrics-body {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 30px;
+  justify-content: center;
+}
+
+.bd-stat-row {
+  align-items: center;
+  display: inline-flex;
+  gap: 10px;
+  height: 12px;
+  justify-content: flex-start;
+}
+
+.bd-edition-row {
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  height: 12px;
+  justify-content: flex-start;
+  width: 184px;
+}
+
+.bd-volume-row {
+  color: var(--bd-ink);
+  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 12px;
+  line-height: 12px;
+  padding-left: 12px;
+}
+
+.bd-stat-row,
+.bd-edition-row {
+  color: var(--bd-ink);
+  font-family: var(--font-zhisong);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 10px;
+}
+
+.bd-call-row {
+  color: var(--bd-ink);
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12px;
+}
+
+.bd-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.bd-download {
+  align-items: center;
+  color: var(--bd-ink);
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  position: relative;
+  width: 83px;
+}
+
+.bd-download-link:hover,
+.bd-download-link:focus-visible {
+  color: var(--bd-accent);
+}
+
+.bd-download-mark {
+  display: block;
+  height: 44px;
+  object-fit: contain;
+  width: 83px;
+}
+
+.bd-download-label {
+  color: var(--bd-ink);
+  font-family: "Glow Sans SC:Compressed ExtraBold", "Home Glow Sans SC", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  left: 33px;
+  letter-spacing: 4px;
+  line-height: 24px;
+  position: absolute;
+  text-align: center;
+  top: 9px;
+}
+
+.bd-download-link,
+.bd-secondary-actions a {
+  align-items: center;
+  background: #ffffff;
+  display: inline-flex;
+  font-size: 12px;
+  justify-content: center;
+  line-height: 12px;
+  padding: 4px 0;
+}
+
+.bd-download-link {
+  font-family: "Home Chill Jinshu", var(--font-display);
+  font-weight: 500;
+}
+
+.bd-secondary-actions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: auto;
+}
+
+.bd-secondary-actions a {
+  color: var(--bd-ink);
+  gap: 12px;
+  font-family: "Home Chill Jinshu", var(--font-display);
+  font-weight: 500;
+  min-height: 20px;
+}
+
+.bd-button-dot {
+  background: currentColor;
+  display: block;
+  height: 12px;
+  mask: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='4.52942' cy='1.22059' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='3.16175' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='5.10294' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='7.04411' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='8.9853' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='10.9265' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='1.22059' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='3.16175' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='5.10294' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='7.04411' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='8.9853' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='10.9265' rx='0.5' ry='0.470588' fill='black'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='4.52942' cy='1.22059' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='3.16175' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='5.10294' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='7.04411' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='8.9853' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='4.52942' cy='10.9265' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='1.22059' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='3.16175' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='5.10294' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='7.04411' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='8.9853' rx='0.5' ry='0.470588' fill='black'/%3E%3Cellipse cx='7.5' cy='10.9265' rx='0.5' ry='0.470588' fill='black'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  width: 12px;
+}
+
+.bd-button-text {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.bd-rule {
+  background-image: var(--bd-rule);
+  background-repeat: repeat-x;
+  background-size: 12px 12px;
+  height: 12px;
+  overflow: hidden;
+  width: 564px;
+}
+
+.bd-intro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 540px;
+}
+
+.bd-abstract,
+.bd-outline {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.bd-abstract h2,
+.bd-outline h2 {
+  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 12px;
+  line-height: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.bd-body {
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  width: 100%;
+}
+
+.bd-body p {
+  margin: 0;
+  text-indent: 24px;
+}
+
+.bd-body p + p {
+  margin-top: 0;
+}
+
+.bd-outline-list {
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 1.5;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  width: max-content;
+  max-width: 100%;
+}
+
+.bd-outline {
+  align-self: center;
+  margin-inline: auto;
+  max-width: 100%;
+  width: max-content;
+}
+
+.bd-outline-list li {
+  display: block;
+}
+
+.bd-outline-list .bd-outline-level-2 {
+  padding-left: 1.5em;
+}
+
+.bd-outline-list .bd-outline-level-3 {
+  padding-left: 3em;
+}
+
+.bd-empty {
+  color: var(--bd-muted);
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+}
+
+.bd-frame [data-pagefind-meta] {
+  scroll-margin-top: 24px;
+}

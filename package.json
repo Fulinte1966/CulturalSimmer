@@ -9,7 +9,9 @@
     "check": "astro check",
     "validate": "tsx scripts/validate-books.ts",
     "test:reading": "python scripts/test-reading-metrics.py",
-    "test:metadata": "python scripts/test_metadata.py"
+    "test:metadata": "python scripts/test_metadata.py",
+    "test:ingest": "python scripts/test_ingest_pdf.py",
+    "test:ui": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

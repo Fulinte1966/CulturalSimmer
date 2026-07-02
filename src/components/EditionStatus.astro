@@ -1,0 +1,27 @@
+---
+import { getCalendarStatus, getWeatherStatus } from "../lib/uapis";
+
+interface Props {
+  compact?: boolean;
+  showWeather?: boolean;
+}
+
+const { compact = false, showWeather = false } = Astro.props;
+const [calendar, weather] = await Promise.all([
+  getCalendarStatus(),
+  showWeather ? getWeatherStatus() : Promise.resolve(undefined),
+]);
+---
+
+<span class:list={["edition-status", { "edition-status--compact": compact }]}>
+  <time>{calendar.dateLabel}</time>
+  <span>{calendar.weekdayLabel}</span>
+  {calendar.lunarLabel && <span class="edition-lunar">{calendar.lunarLabel}</span>}
+  {weather && (
+    <span class="edition-weather">
+      {weather.city}{weather.weather}
+      {typeof weather.temperature === "number" && ` ${weather.temperature}℃`}
+      {weather.wind && ` ${weather.wind}`}
+    </span>
+  )}
+</span>

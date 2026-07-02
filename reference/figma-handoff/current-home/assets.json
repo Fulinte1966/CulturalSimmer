@@ -1,0 +1,44 @@
+{
+  "publicAssets": [
+    {
+      "path": "public/brand/wordmark.svg",
+      "usage": "homepage wordmark"
+    },
+    {
+      "path": "public/brand/quote-lines.svg",
+      "usage": "quote patterned background"
+    },
+    {
+      "path": "public/brand/rubric-lines.svg",
+      "usage": "newsletter vertical rubric pattern"
+    },
+    {
+      "path": "public/brand/border-cap-start.svg",
+      "usage": "newsletter separator cap"
+    },
+    {
+      "path": "public/brand/border-fill.svg",
+      "usage": "newsletter separator fill"
+    },
+    {
+      "path": "public/brand/border-cap-end.svg",
+      "usage": "newsletter separator cap"
+    },
+    {
+      "path": "public/brand/midline.svg",
+      "usage": "shelf top rule"
+    },
+    {
+      "path": "public/brand/bottomline.svg",
+      "usage": "footer top rule"
+    },
+    {
+      "path": "public/brand/home-source.svg",
+      "usage": "shelf index entry cropped from frozen Figma source SVG"
+    },
+    {
+      "path": "public/covers/F0-1-1_v1.png",
+      "usage": "lead and shelf generated cover"
+    }
+  ]
+}

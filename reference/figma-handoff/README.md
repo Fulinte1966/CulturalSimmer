@@ -1,37 +1,43 @@
-# Claude Code UI handoff
+# Figma Handoff
 
-This directory is the implementation source of truth for the Figma-led UI
-refactor and the PDF metadata automation work.
+This directory contains two kinds of material:
 
-Claude Code must not call Figma MCP or depend on image recognition. The Figma
-Starter plan is currently rate-limited, and all information required for code
-implementation has been normalized into text and JSON here.
+- `current-home/` is the active source of truth for the homepage rebuild.
+- The remaining Markdown/JSON files are historical handoff notes plus still
+  useful PDF metadata and automation references.
+
+Do not call Figma MCP during implementation. Freeze Figma values into local
+files first, then implement from those local files.
 
 ## Reading order
 
-1. `claude-code-prompt.md` - task boundaries and required delivery format.
-2. `design-tokens.json` - machine-readable design values and font roles.
-3. `screens.json` - Figma frame-to-route mapping and page composition.
-4. `implementation-spec.md` - route, data, search, classification, and
-   responsive behavior.
-5. `component-specs.md` - component markup and styling contracts.
-6. `pdf-metadata-contract.md` - PDF/XMP fields and generated content schema.
-7. `automation-spec.md` - GitHub Release ingestion and deployment workflow.
-8. `acceptance-checklist.md` - completion and QA criteria.
-9. `assets-status.json` - source-asset availability and blocking conditions.
-10. `source/page2.svg` - normative original Page 2 export for Codex visual QA.
-11. `source/page1.svg` - contextual Figma export; not a route specification.
+For homepage UI work:
+
+1. `current-home/README.md`
+2. `current-home/measurements.json`
+3. `current-home/fonts.json`
+4. `current-home/assets.json`
+5. `current-home/qa-notes.md`
+
+For PDF metadata and automation work:
+
+1. `pdf-metadata-contract.md`
+2. `automation-spec.md`
+3. `acceptance-checklist.md`
 
 ## Figma source
 
-- File: `DIMEpyuMSATUkeAjau7CGU`
-- Page: `Page 2` (`43:1195`)
-- Desktop frame size: `1280 x 832`
-- URL: <https://www.figma.com/design/DIMEpyuMSATUkeAjau7CGU/Untitled?node-id=43-1195>
+Current homepage:
 
-The seven frames are mapped in `screens.json`. The Figma file contains no
-mobile frame and no book-detail frame. Mobile behavior and the detail page are
-therefore governed by the written rules in this package.
+- File: `Cultural Simmer`
+- Node: `41:4`
+- Desktop frame size: `1440 x 1024`
+- Local handoff: `current-home/`
+
+Historical files such as `design-tokens.json`, `screens.json`, and
+`source/page1.svg`/`source/page2.svg` came from earlier design attempts. Do not
+use them as the active homepage source unless they are explicitly promoted into
+`current-home/`.
 
 ## Priority order
 
@@ -39,10 +45,10 @@ When documents appear to conflict, use this order:
 
 1. Data integrity and automation rules in `pdf-metadata-contract.md` and
    `automation-spec.md`.
-2. Machine-readable values in `design-tokens.json` and `screens.json`.
-3. Component behavior in `component-specs.md`.
-4. Route composition in `implementation-spec.md`.
-5. Existing code only where the handoff explicitly says to preserve it.
+2. Current homepage values in `current-home/`.
+3. Historical machine-readable values only when working on their original
+   handoff scope.
+4. Existing code only where the handoff explicitly says to preserve it.
 
 Do not infer missing values from the old Metro UI.
 
@@ -52,11 +58,8 @@ The original red `文火` wordmark is available at
 `public/brand/wordmark.svg`. It is a path-only SVG with no font or raster
 dependency. Use the file unchanged and provide a meaningful accessible label.
 
-The original Page 1 and Page 2 Figma SVG exports are retained under `source/`.
-Page 2 is the normative UI reference. Claude Code is not expected to parse the
-multi-megabyte SVGs; the normalized JSON and Markdown remain its implementation
-interface. Codex can render Page 2 during visual acceptance without consuming
-additional Figma MCP calls.
+Figma exports retained under `source/` are reference artifacts only. Active
+homepage implementation values live in `current-home/`.
 
 Font source paths are recorded for identification only. Confirm each license
 before creating or committing webfonts.

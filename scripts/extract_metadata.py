@@ -4,10 +4,12 @@ Implements the contract defined in reference/figma-handoff/pdf-metadata-contract
 """
 
 import re
-import xml.etree.ElementTree as ET
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+from defusedxml import ElementTree as ET
 
 # ---------------------------------------------------------------------------
 # XMP namespaces
@@ -68,7 +70,7 @@ def _xmp_text(desc: ET.Element, tag: str) -> Optional[str]:
     alt = el.find("rdf:Alt", NS)
     if alt is not None:
         for li in alt.findall("rdf:li", NS):
-            text = (li.text or "").strip()
+            text = _normalize_text(li.text)
             if text:
                 return text
         return None
@@ -78,13 +80,18 @@ def _xmp_text(desc: ET.Element, tag: str) -> Optional[str]:
         container = el.find(wrapper, NS)
         if container is not None:
             for li in container.findall("rdf:li", NS):
-                text = (li.text or "").strip()
+                text = _normalize_text(li.text)
                 if text:
                     return text
             return None
 
-    text = (el.text or "").strip()
+    text = _normalize_text(el.text)
     return text if text else None
+
+
+def _normalize_text(value: Optional[str]) -> str:
+    """Normalize extracted metadata to trimmed Unicode NFC."""
+    return unicodedata.normalize("NFC", value or "").strip()
 
 
 def _xmp_seq(desc: ET.Element, tag: str) -> list[str]:
@@ -99,7 +106,7 @@ def _xmp_seq(desc: ET.Element, tag: str) -> list[str]:
 
     values: list[str] = []
     for li in container.findall("rdf:li", NS):
-        text = (li.text or "").strip()
+        text = _normalize_text(li.text)
         if text:
             values.append(text)
     return values
@@ -171,16 +178,16 @@ def _extract_from_document(
         raise ValueError("PDF has zero pages")
 
     # Aspect-ratio check ---------------------------------------------------
-    page = document[0]
-    w, h = page.rect.width, page.rect.height
-    if w <= 0 or h <= 0:
-        raise ValueError("PDF page has zero dimension")
-    aspect = min(w, h) / max(w, h)
-    if abs(aspect - _A5_ASPECT) > _ASPECT_TOLERANCE:
-        raise ValueError(
-            f"Page aspect ratio {aspect:.4f} differs from A5 "
-            f"({_A5_ASPECT}) by more than 1%"
-        )
+    for page_number, page in enumerate(document, start=1):
+        w, h = page.rect.width, page.rect.height
+        if w <= 0 or h <= 0:
+            raise ValueError(f"PDF page {page_number} has zero dimension")
+        aspect = min(w, h) / max(w, h)
+        if abs(aspect - _A5_ASPECT) > _ASPECT_TOLERANCE:
+            raise ValueError(
+                f"Page {page_number} aspect ratio {aspect:.4f} differs from A5 "
+                f"({_A5_ASPECT}) by more than 1%"
+            )
 
     # XMP extraction -------------------------------------------------------
     xmp_bytes = document.get_xml_metadata()
@@ -262,7 +269,7 @@ def _extract_from_document(
     license_url = _xmp_text(desc, "xmpRights:WebStatement")
 
     # --- Custom PDF Info fields --------------------------------------------
-    info = document.metadata
+    info = _read_custom_pdf_info(document)
     total_volumes, readtime = parse_custom_pdf_info(info)
 
     # --- Classification check ---------------------------------------------
@@ -348,6 +355,35 @@ def parse_custom_pdf_info(
             raise MetadataError(f"/EbookReadtime must be positive: {readtime}")
 
     return (total_volumes, readtime)
+
+
+def _read_custom_pdf_info(document) -> dict[str, str]:
+    """Read custom keys from the PDF Info dictionary via PyMuPDF xrefs."""
+    try:
+        info_type, info_ref = document.xref_get_key(-1, "Info")
+    except (AttributeError, RuntimeError, ValueError):
+        return {}
+    if info_type != "xref":
+        return {}
+
+    match = re.match(r"(\d+)\s+\d+\s+R", info_ref)
+    if not match:
+        return {}
+    info_xref = int(match.group(1))
+
+    result: dict[str, str] = {}
+    for pdf_key, output_key in (
+        ("EbookTotalVolumes", "ebookTotalVolumes"),
+        ("EbookReadtime", "ebookReadtime"),
+    ):
+        value_type, raw_value = document.xref_get_key(info_xref, pdf_key)
+        if value_type == "null":
+            continue
+        value = raw_value.strip()
+        if value_type == "string" and value.startswith("(") and value.endswith(")"):
+            value = value[1:-1]
+        result[output_key] = value
+    return result
 
 
 def _extract_volume_from_id(book_id: str) -> Optional[int]:

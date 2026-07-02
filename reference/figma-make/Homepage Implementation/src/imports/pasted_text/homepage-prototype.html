@@ -1,0 +1,277 @@
+Create a high-fidelity structured prototype from my selected Figma design frame named “Homepage”.
+
+This is not a modern landing page. It is a fixed 1280×1080 editorial homepage inspired by 1960s–1970s Chinese newspaper layout, book catalog pages, and propaganda-era print typography. Preserve the print-poster feeling exactly: white paper background, strong black divider rules, red masthead quotation block, vertical Chinese labels, book-cover shelf, dense small footer text, and minimal/no modern UI styling.
+
+Use the selected Figma frame and its existing vector/image assets as the source of truth. Reuse imported assets whenever available, especially the red logo vector and the book-cover image. Do not replace them with generic icons unless an asset is missing.
+
+TECHNICAL STRUCTURE
+Implement as a componentized prototype, preferably React + CSS or clean HTML/CSS with named components:
+
+- App
+  - HomepageCanvas
+  - MainPaperFrame
+  - Masthead
+    - LogoBlock
+    - DateLine
+    - QuoteBlock
+  - ThickDivider
+  - NewsletterSection
+    - VerticalSectionLabel
+    - BookFeature
+    - IntroArticle
+    - DecorativeVerticalRule
+    - ExcerptBox
+  - OrnamentMidline
+  - BookShelf
+    - ShelfTitlePanel
+    - ShelfButton
+    - BookList
+    - BookCard
+    - ShelfFadeMasks
+  - BottomDivider
+  - ContactFooter
+
+GLOBAL CANVAS
+- Root canvas: 1280px wide × 1080px high.
+- Background: #FFFFFF.
+- Do not reflow into a normal responsive webpage.
+- Keep the internal layout fixed in pixels.
+- The 1280×1080 composition may scale proportionally to fit the browser viewport, but the internal design must remain fixed.
+- Main paper frame: width 1152px, height about 941px, centered horizontally, positioned around x=64px, y=75px.
+- Use box-sizing: border-box everywhere.
+- No shadows, no glassmorphism, no rounded modern cards except the small existing 8px cover/card radii.
+
+COLOR TOKENS
+- Background: #FFFFFF.
+- Primary black: #000000.
+- Historical red: #E22626.
+- Use only black, white, red, and the existing muted book-cover colors.
+- Do not introduce blue, gray UI chrome, shadows, gradients, or modern accent colors, except for the shelf fade masks.
+
+TYPOGRAPHY
+Use Chinese-first font stacks. Do not default to Inter.
+
+Suggested CSS font tokens:
+- --font-sans: "Source Han Sans SC", "Noto Sans SC", sans-serif;
+- --font-serif: "寒蝉锦书宋", "Source Han Serif SC", "Noto Serif SC", serif;
+- --font-body: "LXGW Neo ZhiSong Screen", "Source Han Serif SC", "Noto Serif SC", serif;
+- --font-fangsong: "Zhuque Fangsong (technical preview)", "FangSong", "STFangsong", serif;
+- --font-display: "Glow Sans SC", "Source Han Sans SC", sans-serif;
+
+Use visual leading-trim behavior where possible. If CSS leading-trim is unsupported, simulate it with tight line-height, flex centering, and careful vertical positioning. Prioritize matching the visual screenshot.
+
+MASTHEAD
+Create a top header/masthead:
+- Width: 1152px.
+- Height: 166px.
+- Layout: horizontal flex, centered.
+- Padding: 6px 0.
+- Gap between left logo block and right quotation block: 48px.
+
+LogoBlock:
+- Width: 354px.
+- Height: 139px.
+- Vertical flex, centered.
+- Gap: 12px.
+- Top: red vector / wordmark asset. Preserve the selected red logo from Figma if available.
+- Under it, DateLine:
+  - Text: “2026 年 6 月 24 日　星期三　农历丙午年五月初十”
+  - Split into date, weekday, lunar date if useful.
+  - Font: Source Han Sans SC / Zhuque Fangsong fallback.
+  - Size: 16px.
+  - Weight: 500 for date/weekday; regular FangSong for lunar.
+  - Color: black.
+  - Horizontal centered row with 16px gap.
+
+QuoteBlock:
+- Width: 528px.
+- Height: 154px.
+- Horizontal layout, centered.
+- Create a red hatched-outline quotation box.
+- Use #E22626.
+- Left vertical red label block, about 30px wide × 115px high.
+- Label text: “毛主席语录”
+- Label text color: white.
+- Use vertical Chinese writing mode: writing-mode: vertical-rl; text-orientation: upright.
+- Label font: Chinese Song style, 20px, weight 800.
+- Main quote text:
+  “　　你们要关心国家大事
+  要把无产阶级文化大革命
+  进行到底！”
+- Font: Chinese Song style.
+- Size: 32px.
+- Line-height: 125% / about 40px.
+- Letter spacing: 0.25em.
+- Color: #E22626.
+- The quote box should feel like a printed red newspaper clipping, not a modern card.
+
+TOP DIVIDER
+- Full-width black horizontal rule across the 1152px frame.
+- Use 2px border or visually equivalent 3–4px strong black print rule.
+- No shadow.
+
+NEWSLETTER / FEATURE SECTION
+Create the main middle editorial section:
+- Width: 1152px.
+- Height: 461px.
+- Layout: horizontal row.
+- Padding: 0 12px.
+- Gap: 24px.
+- Contains a narrow vertical label on the far left and a 1068px detail layout.
+
+VerticalSectionLabel:
+- Width: 36px.
+- Height: around 216px.
+- Centered vertically.
+- Inner white vertical panel about 24px wide × 192px high.
+- Text: “新书速递”
+- Vertical Chinese writing mode.
+- Font: Chinese Song style.
+- Size: 24px.
+- Weight: 800.
+- Line-height: 175%.
+- Black text.
+- Add a thin striped / printed-rule feel above and below if possible, matching the screenshot.
+
+Detail layout:
+- Width: 1068px.
+- Height: 444px.
+- Position its children with exact print-like geometry:
+  - BookFeature at x=0, y=18, width=288px, height=408px.
+  - DecorativeVerticalRule around x=300, height about 395px, rotated/vertical.
+  - IntroArticle at x=324, y=18, width=336px, height=408px.
+  - ExcerptBox at x=672, y=18, width=396px, height=408px.
+
+BookFeature:
+- Use the existing book-cover image from Figma.
+- Size: 288px × 408px.
+- Border radius: 8px.
+- Do not add shadow.
+- It should look like a scanned book cover.
+
+DecorativeVerticalRule:
+- A vertical ornamental separator between the cover and intro.
+- Use a thin black vertical line or repeated decorative glyphs.
+- Add small star/flower ornaments at both ends.
+- Keep it black and print-like.
+
+IntroArticle:
+- Width: 336px.
+- Height: 408px.
+- Centered column.
+- Header area height about 63px, gap 14px.
+- Series text:
+  “青年自学丛书”
+  - Font: Chinese display/sans, 12px, weight 300.
+  - Centered.
+- Title:
+  “政治经济学基础知识”
+  - Font: Chinese Song style, 24px, weight 700.
+  - Centered.
+- Subtitle:
+  “（资本主义部分）”
+  - Font: Chinese Song style, 12px, weight 500.
+  - Centered.
+- Body text:
+  Use dense Chinese article-style copy similar to the screenshot.
+  Font: LXGW Neo ZhiSong Screen or Chinese serif fallback.
+  Size: 12px.
+  Line-height: 150% / 18px.
+  Text indent: 24px.
+  Black.
+  The block should look typeset, compact, and literary.
+
+ExcerptBox:
+- Width: 396px.
+- Height: 408px.
+- White background.
+- Use a black hatched border or repeating diagonal-line frame, like a printed annotation box.
+- Inner padding about 24px.
+- Top-left aligned text:
+  “一、学一点政治经济学
+  二、资本主义以前的社会经济制度
+  　1. 原始公社建立了人类历史上最早的生产关系
+  　2. 奴隶制是历史上最古老的剥削制度
+  　3. 封建制度是又一个阶级对抗的剥削制度”
+- Font: Chinese serif/body.
+- Size: 12px.
+- Line-height: 150%.
+- Keep most of the box empty below the text, matching the screenshot.
+
+ORNAMENT MIDLINE
+- Width: 1152px.
+- Height: 12px.
+- Create a dense horizontal black printed ornament/rule.
+- It should look like many tiny vertical black ticks or a barcode-like newspaper separator.
+- No modern gradient except if needed for texture.
+
+BOOK SHELF
+Create a lower book shelf:
+- Width: 1152px.
+- Height: 246px.
+- Position relative.
+- Left title panel: width 164px, height 245px, x=0.
+- Book list starts around x=180px, vertically centered.
+- Book cards: each around 168px × 238px, gap 12px.
+- Show 5 full book covers and a 6th cover partially clipped on the right, as in the screenshot.
+- Reuse the same book-cover image for every book card.
+- Book cards have 8px border radius, no shadow.
+- Add a right fade mask about 12px wide from transparent to white.
+- Add a left fade/white mask integrated with the title panel so the book row appears to pass behind it.
+
+ShelfTitlePanel:
+- Contains a black emblem-like graphic area at top if possible.
+- Text: “上架书目”
+- Font: Glow Sans SC / bold Chinese sans.
+- Size: 16px.
+- Weight: 800.
+- Letter spacing: 0.25em.
+- Black.
+- Below it, a small button-like label:
+  “索引”
+- Also include the small decorative side marks “||” around 索引 if possible.
+- Keep it print-like, not clickable-looking modern UI.
+
+BOTTOM DIVIDER + FOOTER
+- Add a black bottom divider across 1152px.
+- Footer height: 20px.
+- Centered row with small dense newspaper-style information.
+- Font size: 10px.
+- Line-height: 100%.
+- Use Source Han Sans SC / LXGW Neo ZhiSong Screen.
+- Include:
+  “本报地址：国内　霹雳放映站・走火放映室　国外　优博放映站・弗林特放映室”
+  then a vertical divider,
+  then compact weather/news style text:
+  “北京地区　白天 阴转多云　风向 北转南　风力 二、三级　最高温度 24度　25日　26日　27日”
+- Keep footer text tiny, sharp, and aligned to the baseline.
+
+INTERACTION / PROTOTYPE BEHAVIOR
+Add only subtle functional prototype behavior:
+- Hovering a book cover may reduce opacity slightly or show a very subtle cursor pointer.
+- Clicking a shelf book may update the main BookFeature cover/title/excerpt using the same layout.
+- Do not animate layout shifts.
+- Do not add modern modals, cards, navbars, search bars, or app chrome.
+- The prototype should still look like a static newspaper page at rest.
+
+IMPORTANT NEGATIVE CONSTRAINTS
+- Do not redesign this as a SaaS homepage.
+- Do not use modern card shadows, gradients, rounded panels, neumorphism, glassmorphism, or dashboard UI.
+- Do not use Western newspaper styling; the reference is Chinese print, book catalog, and period editorial design.
+- Do not replace vertical Chinese labels with horizontal text.
+- Do not simplify the layout into a grid of generic cards.
+- Do not make it mobile-first or stack the sections.
+- Do not use placeholder gray boxes for assets if the Figma image/vector assets are available.
+- Do not change the red color: use #E22626.
+- Do not change the canvas ratio.
+
+ACCEPTANCE CRITERIA
+At 1280×1080, the result should visually match the selected Figma frame:
+- Same overall white margin.
+- Same 1152px centered content frame.
+- Same masthead proportions.
+- Same red quote block position and typographic density.
+- Same main feature section with vertical “新书速递”, large book cover, center article, right excerpt box.
+- Same lower shelf with repeated book covers and left “上架书目 / 索引” panel.
+- Same dense 10px footer.
+- All sections should be componentized and named clearly so the prototype is easy to adjust later.

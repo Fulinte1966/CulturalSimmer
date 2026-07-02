@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { joinBasePath } from "../lib/basePath";
 
 export type ActiveNav = "new" | "search" | "categories" | "overview";
 
@@ -15,8 +16,7 @@ const base = import.meta.env.BASE_URL;
 
 const navItems: { id: ActiveNav; label: string; route: string }[] = [
   { id: "new", label: "新书", route: "/" },
-  { id: "search", label: "搜索", route: "/search/" },
-  { id: "categories", label: "分类", route: "/categories/" },
+  { id: "categories", label: "索引", route: "/categories/" },
   { id: "overview", label: "总览", route: "/books/" },
 ];
 ---
@@ -29,20 +29,20 @@ const navItems: { id: ActiveNav; label: string; route: string }[] = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} - 电子书馆</title>
+    <title>{title} - 文火</title>
     {description && <meta name="description" content={description} />}
-    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/svg+xml" href={joinBasePath(base, "favicon.svg")} />
   </head>
   <body>
     <header class="site-header" data-pagefind-ignore="all">
       <div class="inner site-header-inner">
         <a
           class="site-brand"
-          href={`${base}/`}
+          href={base}
           aria-label="返回新书页"
         >
           <img
-            src={`${base}/brand/wordmark.svg`}
+            src={joinBasePath(base, "brand/wordmark.svg")}
             alt="文火"
             width="100"
             height="43"
@@ -52,7 +52,7 @@ const navItems: { id: ActiveNav; label: string; route: string }[] = [
           {
             navItems.map((item) => (
               <a
-                href={`${base}${item.route}`}
+                href={joinBasePath(base, item.route)}
                 aria-current={activeNav === item.id ? "page" : undefined}
               >
                 {item.label}

@@ -134,7 +134,7 @@ BookMeta retains:
 - volume when present;
 - edition;
 - release date;
-- page count and reading estimate;
+- page count, character count, and PDF file size;
 - PDF download.
 
 It may additionally show PDF-derived series, publisher, source, rights, and
@@ -149,6 +149,5 @@ Retain existing behavior:
 
 - hidden when the extracted bookmark array is empty;
 - display-only, without linking into PDF pages;
-- page numbers use tabular numerals;
-- long titles wrap and do not collide with page numbers.
-
+- page numbers are omitted in the Figma Make detail layout;
+- long titles wrap without colliding with neighboring content.

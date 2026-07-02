@@ -11,6 +11,12 @@ const books = defineCollection({
     date: z.date(),
     author: z.string().optional(),
     subtitle: z.string().optional(),
+    language: z.string().optional(),
+    series: z.string().optional(),
+    publisher: z.string().optional(),
+    source: z.string().optional(),
+    rights: z.string().optional(),
+    license_url: z.string().url().optional(),
     tags: z.array(z.string()).default([]),
     cover: z.string().optional(),
     total_volumes: z

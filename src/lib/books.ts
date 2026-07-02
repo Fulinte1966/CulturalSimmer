@@ -21,6 +21,7 @@ export interface ReadingMetrics {
   cjk_character_count?: number;
   latin_token_count?: number;
   estimated_minutes?: number;
+  file_size_bytes?: number;
 }
 
 export type CoverKind = "explicit" | "generated" | "placeholder";
@@ -31,6 +32,12 @@ export interface BookMeta {
   title: string;
   subtitle?: string;
   author?: string;
+  language?: string;
+  series?: string;
+  publisher?: string;
+  source?: string;
+  rights?: string;
+  licenseUrl?: string;
   edition: number;
   date: Date;
   tags: string[];
@@ -132,6 +139,12 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         total_volumes,
         readtime,
         author,
+        language,
+        series,
+        publisher,
+        source,
+        rights,
+        license_url,
       } = entry.data;
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, edition, cover);
@@ -148,6 +161,12 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         title,
         subtitle,
         author,
+        language,
+        series,
+        publisher,
+        source,
+        rights,
+        licenseUrl: license_url,
         edition,
         date,
         tags,
