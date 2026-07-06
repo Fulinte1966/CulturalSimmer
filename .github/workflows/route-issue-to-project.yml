@@ -4,6 +4,7 @@ on:
   issues:
     types:
       - opened
+      - labeled
 
 permissions:
   contents: read
@@ -17,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PROJECT_OWNER: "Fulinte1966"
       PROJECT_NUMBER: "1"
       BOOK_ID_FIELD_NAME: "Book ID"
       BOOK_ERRATA_LABEL: "书籍勘误"
@@ -66,7 +68,7 @@ jobs:
           echo "Issue has both labels: $BOOK_ERRATA_LABEL and $WEBSITE_BUG_LABEL."
           echo "Skip routing."
 
-      - name: Add issue to project
+      - name: Get project ID
         id: project
         if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
         shell: bash
@@ -75,23 +77,67 @@ jobs:
         run: |
           set -euo pipefail
 
-          issue_url="$(jq -r '.issue.html_url' "$GITHUB_EVENT_PATH")"
-
           project_id="$(
-            gh project view "$PROJECT_NUMBER" \
-              --format json \
-              --jq '.id'
+            gh api graphql \
+              -f query='
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                    }
+                  }
+                }
+              ' \
+              -f owner="$PROJECT_OWNER" \
+              -F number="$PROJECT_NUMBER" \
+              --jq '.data.user.projectV2.id'
           )"
 
-          item_id="$(
-            gh project item-add "$PROJECT_NUMBER" \
-              --url "$issue_url" \
-              --format json \
-              --jq '.id'
-          )"
+          if [ -z "$project_id" ] || [ "$project_id" = "null" ]; then
+            echo "Could not find user project: $PROJECT_OWNER / $PROJECT_NUMBER"
+            exit 1
+          fi
 
           echo "project_id=$project_id" >> "$GITHUB_OUTPUT"
+          echo "Project ID found."
+
+      - name: Add issue to project
+        id: item
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          content_id="$(jq -r '.issue.node_id' "$GITHUB_EVENT_PATH")"
+
+          item_id="$(
+            gh api graphql \
+              -f query='
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: {
+                    projectId: $projectId
+                    contentId: $contentId
+                  }) {
+                    item {
+                      id
+                    }
+                  }
+                }
+              ' \
+              -f projectId="${{ steps.project.outputs.project_id }}" \
+              -f contentId="$content_id" \
+              --jq '.data.addProjectV2ItemById.item.id'
+          )"
+
+          if [ -z "$item_id" ] || [ "$item_id" = "null" ]; then
+            echo "Could not add issue to project."
+            exit 1
+          fi
+
           echo "item_id=$item_id" >> "$GITHUB_OUTPUT"
+          echo "Issue added to project."
 
       - name: Skip Book ID for website bugs
         if: steps.detect.outputs.issue_type == 'website-bug'
@@ -111,10 +157,14 @@ jobs:
 
           book_id=""
 
+          # Preferred Make/Tally title format:
+          # F0-1-1_v1: J1J2MQo
           if [[ "$title" =~ ^([^_[:space:]]+)_v[^:[:space:]]+: ]]; then
             book_id="${BASH_REMATCH[1]}"
           fi
 
+          # Fallback for Make body:
+          # 索书号：F0-1-1
           if [ -z "$book_id" ]; then
             book_id="$(
               printf '%s\n' "$body" |
@@ -135,7 +185,8 @@ jobs:
           echo "book_id=$book_id" >> "$GITHUB_OUTPUT"
           echo "Book ID extracted: $book_id"
 
-      - name: Set Book ID project field
+      - name: Get Book ID field ID
+        id: book_id_field
         if: steps.detect.outputs.issue_type == 'book-errata' && steps.extract.outputs.skip != 'true'
         shell: bash
         env:
@@ -144,21 +195,63 @@ jobs:
           set -euo pipefail
 
           field_id="$(
-            gh project field-list "$PROJECT_NUMBER" \
-              --limit 100 \
-              --format json \
-              --jq '.fields[] | select(.name == env.BOOK_ID_FIELD_NAME) | .id'
+            gh api graphql \
+              -f query='
+                query($projectId: ID!) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      fields(first: 100) {
+                        nodes {
+                          ... on ProjectV2FieldCommon {
+                            id
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ' \
+              -f projectId="${{ steps.project.outputs.project_id }}" \
+              --jq '.data.node.fields.nodes[] | select(.name == "'"$BOOK_ID_FIELD_NAME"'") | .id'
           )"
 
-          if [ -z "$field_id" ]; then
+          if [ -z "$field_id" ] || [ "$field_id" = "null" ]; then
             echo "Could not find project field: $BOOK_ID_FIELD_NAME"
             exit 1
           fi
 
-          gh project item-edit \
-            --id "${{ steps.project.outputs.item_id }}" \
-            --project-id "${{ steps.project.outputs.project_id }}" \
-            --field-id "$field_id" \
-            --text "${{ steps.extract.outputs.book_id }}"
+          echo "field_id=$field_id" >> "$GITHUB_OUTPUT"
+          echo "Book ID field ID found."
+
+      - name: Set Book ID project field
+        if: steps.detect.outputs.issue_type == 'book-errata' && steps.extract.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          gh api graphql \
+            -f query='
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $text: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: {
+                    text: $text
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            ' \
+            -f projectId="${{ steps.project.outputs.project_id }}" \
+            -f itemId="${{ steps.item.outputs.item_id }}" \
+            -f fieldId="${{ steps.book_id_field.outputs.field_id }}" \
+            -f text="${{ steps.extract.outputs.book_id }}"
 
           echo "Book ID field updated: ${{ steps.extract.outputs.book_id }}"
