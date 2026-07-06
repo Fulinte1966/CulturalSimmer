@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_OWNER: Fulinte1966
+      PROJECT_OWNER: "@me"
       PROJECT_NUMBER: "1"
       BOOK_ID_FIELD_NAME: "Book ID"
       BOOK_ERRATA_LABEL: "书籍勘误"
@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: |
           echo "Issue has both labels: $BOOK_ERRATA_LABEL and $WEBSITE_BUG_LABEL."
-          echo "Skip Book ID processing."
+          echo "Skip routing."
 
       - name: Add issue to project
         id: project
