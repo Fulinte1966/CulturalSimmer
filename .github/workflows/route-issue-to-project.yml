@@ -1,0 +1,172 @@
+name: Route issue to project
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: route-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  route-issue:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_OWNER: Fulinte1966
+      PROJECT_NUMBER: "1"
+      BOOK_ID_FIELD_NAME: "Book ID"
+      BOOK_ERRATA_LABEL: "书籍勘误"
+      WEBSITE_BUG_LABEL: "网站捉虫"
+
+    steps:
+      - name: Detect issue type
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          labels="$(jq -r '[.issue.labels[].name] | @json' "$GITHUB_EVENT_PATH")"
+
+          has_book_errata=false
+          has_website_bug=false
+
+          if jq -e --arg label "$BOOK_ERRATA_LABEL" 'index($label)' <<< "$labels" > /dev/null; then
+            has_book_errata=true
+          fi
+
+          if jq -e --arg label "$WEBSITE_BUG_LABEL" 'index($label)' <<< "$labels" > /dev/null; then
+            has_website_bug=true
+          fi
+
+          if [ "$has_book_errata" = true ] && [ "$has_website_bug" = true ]; then
+            echo "issue_type=ambiguous" >> "$GITHUB_OUTPUT"
+          elif [ "$has_book_errata" = true ]; then
+            echo "issue_type=book-errata" >> "$GITHUB_OUTPUT"
+          elif [ "$has_website_bug" = true ]; then
+            echo "issue_type=website-bug" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue_type=unknown" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stop if issue has no supported label
+        if: steps.detect.outputs.issue_type == 'unknown'
+        shell: bash
+        run: |
+          echo "No supported label found. Expected: $BOOK_ERRATA_LABEL or $WEBSITE_BUG_LABEL."
+          echo "Skip routing."
+
+      - name: Stop if issue has ambiguous labels
+        if: steps.detect.outputs.issue_type == 'ambiguous'
+        shell: bash
+        run: |
+          echo "Issue has both labels: $BOOK_ERRATA_LABEL and $WEBSITE_BUG_LABEL."
+          echo "Skip Book ID processing."
+
+      - name: Add issue to project
+        id: project
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          issue_url="$(jq -r '.issue.html_url' "$GITHUB_EVENT_PATH")"
+
+          project_id="$(
+            gh project view "$PROJECT_NUMBER" \
+              --owner "$PROJECT_OWNER" \
+              --format json \
+              --jq '.id'
+          )"
+
+          item_id="$(
+            gh project item-add "$PROJECT_NUMBER" \
+              --owner "$PROJECT_OWNER" \
+              --url "$issue_url" \
+              --format json \
+              --jq '.id'
+          )"
+
+          echo "project_id=$project_id" >> "$GITHUB_OUTPUT"
+          echo "item_id=$item_id" >> "$GITHUB_OUTPUT"
+
+      - name: Skip Book ID for website bugs
+        if: steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        run: |
+          echo "网站捉虫 issue does not need Book ID."
+
+      - name: Extract Book ID
+        if: steps.detect.outputs.issue_type == 'book-errata'
+        id: extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          title="$(jq -r '.issue.title // ""' "$GITHUB_EVENT_PATH")"
+          body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
+
+          book_id=""
+
+          # Preferred Make/Tally title format:
+          # F0-1-1_v1: J1J2MQo
+          if [[ "$title" =~ ^([^_[:space:]]+)_v[^:[:space:]]+: ]]; then
+            book_id="${BASH_REMATCH[1]}"
+          fi
+
+          # Fallback for Make body:
+          # 索书号：F0-1-1
+          if [ -z "$book_id" ]; then
+            book_id="$(
+              printf '%s\n' "$body" |
+              sed -nE 's/^索书号：[[:space:]]*(.+)$/\1/p' |
+              head -n 1 |
+              sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
+            )"
+          fi
+
+          if [ -z "$book_id" ] || [[ "$book_id" == MISSING* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "book_id=" >> "$GITHUB_OUTPUT"
+            echo "Book ID missing or invalid. Skip setting Project field."
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "book_id=$book_id" >> "$GITHUB_OUTPUT"
+          echo "Book ID extracted: $book_id"
+
+      - name: Set Book ID project field
+        if: steps.detect.outputs.issue_type == 'book-errata' && steps.extract.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          field_id="$(
+            gh project field-list "$PROJECT_NUMBER" \
+              --owner "$PROJECT_OWNER" \
+              --limit 100 \
+              --format json \
+              --jq '.fields[] | select(.name == env.BOOK_ID_FIELD_NAME) | .id'
+          )"
+
+          if [ -z "$field_id" ]; then
+            echo "Could not find project field: $BOOK_ID_FIELD_NAME"
+            exit 1
+          fi
+
+          gh project item-edit \
+            --id "${{ steps.project.outputs.item_id }}" \
+            --project-id "${{ steps.project.outputs.project_id }}" \
+            --field-id "$field_id" \
+            --text "${{ steps.extract.outputs.book_id }}"
+
+          echo "Book ID field updated: ${{ steps.extract.outputs.book_id }}"
