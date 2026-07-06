@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_OWNER: "@me"
       PROJECT_NUMBER: "1"
       BOOK_ID_FIELD_NAME: "Book ID"
       BOOK_ERRATA_LABEL: "书籍勘误"
@@ -80,14 +79,12 @@ jobs:
 
           project_id="$(
             gh project view "$PROJECT_NUMBER" \
-              --owner "$PROJECT_OWNER" \
               --format json \
               --jq '.id'
           )"
 
           item_id="$(
             gh project item-add "$PROJECT_NUMBER" \
-              --owner "$PROJECT_OWNER" \
               --url "$issue_url" \
               --format json \
               --jq '.id'
@@ -114,14 +111,10 @@ jobs:
 
           book_id=""
 
-          # Preferred Make/Tally title format:
-          # F0-1-1_v1: J1J2MQo
           if [[ "$title" =~ ^([^_[:space:]]+)_v[^:[:space:]]+: ]]; then
             book_id="${BASH_REMATCH[1]}"
           fi
 
-          # Fallback for Make body:
-          # 索书号：F0-1-1
           if [ -z "$book_id" ]; then
             book_id="$(
               printf '%s\n' "$body" |
@@ -152,7 +145,6 @@ jobs:
 
           field_id="$(
             gh project field-list "$PROJECT_NUMBER" \
-              --owner "$PROJECT_OWNER" \
               --limit 100 \
               --format json \
               --jq '.fields[] | select(.name == env.BOOK_ID_FIELD_NAME) | .id'
