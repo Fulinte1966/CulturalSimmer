@@ -1,4 +1,4 @@
-name: 网络捉虫
+name: 网站捉虫
 description: 指出网站功能上存在的问题或可改进的地方。
 labels:
   - 类型：网站捉虫
@@ -67,7 +67,7 @@ body:
     id: screenshots
     attributes:
       label: 截图或录屏
-      placeholder: 
+      placeholder: 请将媒体文件粘贴或拖入此处
     validations:
       required: false
 
