@@ -1,6 +1,5 @@
 name: 网络捉虫
 description: 指出网站功能上存在的问题或可改进的地方。
-title: ""
 labels:
   - 类型：网络捉虫
   - 状态：待核查
