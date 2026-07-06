@@ -1,5 +1,5 @@
 name: 网络捉虫
-description: 报告网站功能、链接、下载、显示、搜索等问题。书籍内容勘误请使用读者勘误表。
+description: 指出网站功能上存在的问题或可改进的地方。
 title: "[网络捉虫] "
 labels:
   - 类型：网络捉虫
@@ -10,16 +10,11 @@ body:
     attributes:
       value: |
         ## 网络捉虫
-
-        请在这里报告网站功能、链接、下载、显示、搜索、交互等问题。
-
-        书籍正文、页码、排版、目录、封面等勘误请不要在这里提交，请使用“读者勘误表”。
-
+ 
   - type: dropdown
     id: category
     attributes:
       label: 问题类型
-      description: 请选择最接近的一类。
       options:
         - 下载问题
         - 链接失效
@@ -27,7 +22,7 @@ body:
         - 搜索或索引问题
         - 字体或排版显示问题
         - 移动端适配问题
-        - 其他网站问题
+        - 其他问题
     validations:
       required: true
 
@@ -35,8 +30,7 @@ body:
     id: description
     attributes:
       label: 问题描述
-      description: 请简要说明你遇到的问题。
-      placeholder: 例如：点击某本书的下载按钮后没有反应，或页面在手机上显示错位。
+      placeholder: ［示例］点击某本书的下载按钮后没有反应……
     validations:
       required: true
 
@@ -44,7 +38,6 @@ body:
     id: page_url
     attributes:
       label: 出错页面
-      description: 请粘贴出问题的页面链接。如果不确定，可留空。
       placeholder: https://...
     validations:
       required: false
@@ -53,7 +46,6 @@ body:
     id: steps
     attributes:
       label: 复现步骤
-      description: 如果可以，请写出如何触发这个问题。
       placeholder: |
         1. 打开……
         2. 点击……
@@ -65,8 +57,7 @@ body:
     id: actual
     attributes:
       label: 实际表现
-      description: 实际发生了什么？
-      placeholder: 例如：页面空白、下载 404、按钮无响应、文字重叠……
+      placeholder: ［示例］页面空白、按钮无响应、文字重叠……
     validations:
       required: false
 
@@ -74,8 +65,7 @@ body:
     id: expected
     attributes:
       label: 预期表现
-      description: 你原本预期应该发生什么？
-      placeholder: 例如：应正常下载 PDF，或应显示书籍详情页。
+      placeholder: ［示例］应正常下载 PDF……
     validations:
       required: false
 
@@ -83,8 +73,7 @@ body:
     id: screenshots
     attributes:
       label: 截图或录屏
-      description: 可直接拖拽图片到此处。可选。
-      placeholder: 如果有截图，请粘贴或拖入这里。
+      placeholder: 
     validations:
       required: false
 
@@ -92,8 +81,8 @@ body:
     id: environment
     attributes:
       label: 环境信息
-      description: 可选。请填写浏览器、系统、设备等信息。
       placeholder: |
+        ［示例］
         浏览器：Chrome / Safari / Firefox / Edge
         系统：Windows / macOS / iOS / Android
         设备：电脑 / 手机 / 平板
