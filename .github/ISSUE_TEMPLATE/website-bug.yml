@@ -5,11 +5,6 @@ labels:
   - 状态：待核查
 
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## 网络捉虫
- 
   - type: dropdown
     id: category
     attributes:
