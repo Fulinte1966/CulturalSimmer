@@ -19,7 +19,7 @@ jobs:
     env:
       PROJECT_OWNER: "Fulinte1966"
       PROJECT_NUMBER: "1"
-      BOOK_ID_FIELD_NAME: "Book ID"
+      CALL_NUMBER_FIELD_NAME: "索书号"
       BOOK_ERRATA_LABEL: "书籍勘误"
       WEBSITE_BUG_LABEL: "网站捉虫"
 
@@ -138,18 +138,21 @@ jobs:
           echo "item_id=$item_id" >> "$GITHUB_OUTPUT"
           echo "Issue added to project."
 
-      - name: Skip Book ID for website bugs
-        if: steps.detect.outputs.issue_type == 'website-bug'
-        shell: bash
-        run: |
-          echo "网站捉虫 issue does not need Book ID."
-
-      - name: Extract Book ID
-        if: steps.detect.outputs.issue_type == 'book-errata'
-        id: extract
+      - name: Decide call number value
+        id: call_number
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
         shell: bash
         run: |
           set -euo pipefail
+
+          issue_type="${{ steps.detect.outputs.issue_type }}"
+
+          if [ "$issue_type" = "website-bug" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "value=网站捉虫" >> "$GITHUB_OUTPUT"
+            echo "网站捉虫 issue: set 索书号 field to 网站捉虫."
+            exit 0
+          fi
 
           title="$(jq -r '.issue.title // ""' "$GITHUB_EVENT_PATH")"
           body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
@@ -175,25 +178,25 @@ jobs:
 
           if [ -z "$book_id" ] || [[ "$book_id" == MISSING* ]]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "book_id=" >> "$GITHUB_OUTPUT"
-            echo "Book ID missing or invalid. Skip setting Project field."
+            echo "value=" >> "$GITHUB_OUTPUT"
+            echo "Book ID missing or invalid. Skip setting 索书号 field."
             exit 0
           fi
 
           echo "skip=false" >> "$GITHUB_OUTPUT"
-          echo "book_id=$book_id" >> "$GITHUB_OUTPUT"
-          echo "Book ID extracted: $book_id"
+          echo "value=$book_id" >> "$GITHUB_OUTPUT"
+          echo "索书号 extracted: $book_id"
 
-      - name: Get Book ID field ID
-        id: book_id_field
-        if: steps.detect.outputs.issue_type == 'book-errata' && steps.extract.outputs.skip != 'true'
+      - name: Get call number field ID
+        id: call_number_field
+        if: steps.call_number.outputs.skip != 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
         run: |
           set -euo pipefail
 
-          field_id="$(
+          response="$(
             gh api graphql \
               -f query='
                 query($projectId: ID!) {
@@ -211,20 +214,25 @@ jobs:
                   }
                 }
               ' \
-              -f projectId="${{ steps.project.outputs.project_id }}" \
-              --jq '.data.node.fields.nodes[] | select(.name == "'"$BOOK_ID_FIELD_NAME"'") | .id'
+              -f projectId="${{ steps.project.outputs.project_id }}"
+          )"
+
+          field_id="$(
+            jq -r --arg name "$CALL_NUMBER_FIELD_NAME" \
+              '.data.node.fields.nodes[] | select(.name == $name) | .id' \
+              <<< "$response"
           )"
 
           if [ -z "$field_id" ] || [ "$field_id" = "null" ]; then
-            echo "Could not find project field: $BOOK_ID_FIELD_NAME"
+            echo "Could not find project field: $CALL_NUMBER_FIELD_NAME"
             exit 1
           fi
 
           echo "field_id=$field_id" >> "$GITHUB_OUTPUT"
-          echo "Book ID field ID found."
+          echo "索书号 field ID found."
 
-      - name: Set Book ID project field
-        if: steps.detect.outputs.issue_type == 'book-errata' && steps.extract.outputs.skip != 'true'
+      - name: Set call number project field
+        if: steps.call_number.outputs.skip != 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
@@ -250,7 +258,7 @@ jobs:
             ' \
             -f projectId="${{ steps.project.outputs.project_id }}" \
             -f itemId="${{ steps.item.outputs.item_id }}" \
-            -f fieldId="${{ steps.book_id_field.outputs.field_id }}" \
-            -f text="${{ steps.extract.outputs.book_id }}"
+            -f fieldId="${{ steps.call_number_field.outputs.field_id }}" \
+            -f text="${{ steps.call_number.outputs.value }}"
 
-          echo "Book ID field updated: ${{ steps.extract.outputs.book_id }}"
+          echo "索书号 field updated: ${{ steps.call_number.outputs.value }}"
