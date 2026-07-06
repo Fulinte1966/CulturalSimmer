@@ -81,9 +81,8 @@ body:
     attributes:
       label: 环境信息
       placeholder: |
-        ［示例］
-        浏览器：Chrome / Safari / Firefox / Edge
-        系统：Windows / macOS / iOS / Android
-        设备：电脑 / 手机 / 平板
+        浏览器：Chrome / Safari / Firefox / Edge / ...
+        系统：Windows / macOS / iOS / Android / ...
+        设备：电脑 / 手机 / 平板 / ...
     validations:
       required: false
