@@ -27,7 +27,7 @@ echo "Downloading ${PDF} from release ${TAG}..."
 mkdir -p .cache/pdfs
 
 if ! gh release download "$TAG" \
-  --repo poyinte/ebook-library \
+  --repo Fulinte1966/CulturalSimmer \
   --pattern "$PDF" \
   --dir ".cache/pdfs" \
   --clobber; then

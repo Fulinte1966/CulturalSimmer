@@ -4,8 +4,8 @@ import { joinBasePath } from "../src/lib/basePath";
 
 test("joins a GitHub Pages base path without duplicate slashes", () => {
   assert.equal(
-    joinBasePath("/ebook-library/", "/pagefind/pagefind.js"),
-    "/ebook-library/pagefind/pagefind.js"
+    joinBasePath("/CulturalSimmer/", "/pagefind/pagefind.js"),
+    "/CulturalSimmer/pagefind/pagefind.js"
   );
 });
 

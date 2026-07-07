@@ -98,7 +98,7 @@ CSS pseudo-elements for spine, back cover, page edges, shadow. At ≤560px pseud
 
 ### Base path
 
-All internal links use `import.meta.env.BASE_URL` (`/ebook-library/` in production).
+All internal links use `import.meta.env.BASE_URL` (`/CulturalSimmer/` in production).
 
 ## Constraints
 

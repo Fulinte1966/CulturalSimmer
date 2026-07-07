@@ -11,7 +11,7 @@ Do not call Figma MCP during implementation; freeze design values locally first.
 The older handoff files remain useful for PDF metadata and automation notes,
 but they are not the active homepage UI source.
 
-Site config (`astro.config.mjs`): `site: "https://poyinte.github.io"`, `base: "ebook-library"`, `output: "static"`.
+Site config (`astro.config.mjs`): `site: "https://fulinte1966.github.io"`, `base: "/CulturalSimmer"`, `output: "static"`.
 
 ## Commands
 
@@ -73,7 +73,7 @@ Display call numbers (`formatDisplayCallNumber`):
 
 ### Base path
 
-All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves to `/ebook-library/` in production). Use `joinBasePath(base, pathname)` from `src/lib/basePath.ts` — it avoids double slashes.
+All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves to `/CulturalSimmer/` in production). Use `joinBasePath(base, pathname)` from `src/lib/basePath.ts` — it avoids double slashes.
 
 ### Site config
 

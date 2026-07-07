@@ -260,7 +260,7 @@
 }
 
 .fm-vertical-rule span {
-  background: url("/ebook-library/brand/border-cap-start.svg") center / 12px 12px no-repeat;
+  background: url("/CulturalSimmer/brand/border-cap-start.svg") center / 12px 12px no-repeat;
   display: block;
   font-size: 0;
   height: 12px;
@@ -269,11 +269,11 @@
 }
 
 .fm-vertical-rule span:last-child {
-  background-image: url("/ebook-library/brand/border-cap-end.svg");
+  background-image: url("/CulturalSimmer/brand/border-cap-end.svg");
 }
 
 .fm-vertical-rule i {
-  background: url("/ebook-library/brand/border-fill-tile.svg") center top / 12px 12px repeat-y;
+  background: url("/CulturalSimmer/brand/border-fill-tile.svg") center top / 12px 12px repeat-y;
   display: block;
   flex: 0 0 360px;
   height: 360px;
@@ -397,7 +397,7 @@
 }
 
 .fm-midline {
-  background: url("/ebook-library/brand/midline.svg") center / 1152px 6px no-repeat;
+  background: url("/CulturalSimmer/brand/midline.svg") center / 1152px 6px no-repeat;
   flex: 0 0 12px;
   width: 1152px;
 }
@@ -428,7 +428,7 @@
 
 .fm-shelf-badge {
   align-items: center;
-  background: url("/ebook-library/brand/shelf-badge.svg") center / contain no-repeat;
+  background: url("/CulturalSimmer/brand/shelf-badge.svg") center / contain no-repeat;
   color: #000;
   display: flex;
   font-family: var(--font-heiti-display);
