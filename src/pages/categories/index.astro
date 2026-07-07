@@ -14,12 +14,11 @@ interface IndexNode {
 
 const [books, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
 const base = import.meta.env.BASE_URL;
-const coverFallback = joinBasePath(base, "brand/homepage-cover.png");
 const coveredBooks = books.filter((book) => book.coverUrl);
-const bookSource = coveredBooks.length > 0 ? coveredBooks : books;
-const displayBooks = Array.from({ length: 20 }, (_, index) =>
-  bookSource[index % Math.max(bookSource.length, 1)]
-).filter(Boolean);
+const displayBooks =
+  coveredBooks.length > 0
+    ? Array.from({ length: 20 }, (_, index) => coveredBooks[index % coveredBooks.length])
+    : [];
 
 const indexTree: IndexNode = {
   code: "",
@@ -135,7 +134,7 @@ const rootRows = indexTree.children ?? [];
           {displayBooks.map((book) => (
             <li>
               <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                <img src={book.coverUrl ?? coverFallback} alt={`《${book.title}》封面`} />
+                {book.coverUrl && <img src={book.coverUrl} alt={`《${book.title}》封面`} />}
               </a>
             </li>
           ))}

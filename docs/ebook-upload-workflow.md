@@ -65,9 +65,34 @@ npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
 | 权利说明 | `dc:rights` |
 | 权利说明 URL | `xmpRights:WebStatement` |
 | 总册数 | `/EbookTotalVolumes` |
-| 人工阅读时间 | `/EbookReadtime` |
 
 LaTeX 源码可以使用项目自己的宏名，但最终写入 PDF XMP 时必须映射到标准字段，例如 `dc:identifier`、`dc:title`、`prism:bookEdition`、`dc:description`。
+
+项目提供了一个可直接放入 LaTeX 工程的元数据模块：
+
+```txt
+reference/latex/culturalsimmer-ebook-metadata.sty
+```
+
+使用时把该文件复制到 LaTeX 工程目录，正文前调用：
+
+```tex
+\usepackage{culturalsimmer-ebook-metadata}
+
+\EbookMetadata{
+  id = F0-1-1,
+  title = 政治经济学基础知识,
+  subtitle = 资本主义部分,
+  author = 《政治经济学基础知识》编写组,
+  edition = 1,
+  volume = 1,
+  total-volumes = 1,
+  description = 系统介绍资本主义政治经济学的基础知识。,
+  keywords = {政治经济学,资本主义},
+  language = zh-CN,
+  series = 青年自学丛书
+}
+```
 
 ## 版次校验规则
 

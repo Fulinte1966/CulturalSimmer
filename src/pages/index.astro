@@ -39,21 +39,20 @@ if (leadBook) {
   }
 }
 
-const coverFallback = joinBasePath(base, "brand/homepage-cover.png");
-const coverSrc = leadBook?.coverUrl ?? coverFallback;
 const bookHref = leadBook
   ? joinBasePath(base, `books/${leadBook.id}/`)
-  : joinBasePath(base, "books/");
+  : undefined;
 const coveredBooks = books.filter((book) => book.coverUrl);
 const shelfSource = coveredBooks.length > 0 ? coveredBooks : books;
-const shelfBooks = Array.from({ length: 10 }, (_, index) =>
-  shelfSource[index % Math.max(shelfSource.length, 1)]
-).filter(Boolean);
+const shelfBooks =
+  shelfSource.length > 0
+    ? Array.from({ length: 10 }, (_, index) => shelfSource[index % shelfSource.length])
+    : [];
 
 const rawSummary =
   leadBook?.description ||
   leadEntry?.body.trim() ||
-  "馆藏条目正在整理中，待 PDF 元数据和内容简介补齐后展示。";
+  "";
 const summaryParagraphs = rawSummary
   .replace(/\r\n/g, "\n")
   .split(/\n+/)
@@ -64,13 +63,7 @@ const summaryParagraphs = rawSummary
 const excerptItems =
   outline.length > 0
     ? outline.slice(0, 5)
-    : [
-        { level: 1, title: "一、 学一点政治经济学" },
-        { level: 1, title: "二、 资本主义以前的社会经济制度" },
-        { level: 2, title: "1. 原始公社建立了人类历史上最早的生产关系" },
-        { level: 2, title: "2. 奴隶制是历史上最古老的剥削制度" },
-        { level: 2, title: "3. 封建制度是又一个阶级对抗的剥削制度" },
-      ];
+    : [];
 
 const quoteLines =
   siteConfig.frontPageSlogan?.length > 0
@@ -154,15 +147,18 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
 
       <div class="fm-thick-divider" aria-hidden="true"></div>
 
-      <section class="fm-newsletter" aria-labelledby="fm-lead-title">
+      <section class="fm-newsletter" aria-label="新书速递">
         <div class="fm-section-label" aria-hidden="true">
           <span>新书速递</span>
         </div>
 
+        {leadBook && bookHref && (
         <div class="fm-detail">
-          <a class="fm-feature-cover" href={bookHref} aria-label={leadBook ? `查看《${leadBook.title}》` : "查看书籍"}>
-            <img src={coverSrc} alt={leadBook ? `《${leadBook.title}》封面` : ""} />
-          </a>
+          {leadBook.coverUrl && (
+            <a class="fm-feature-cover" href={bookHref} aria-label={`查看《${leadBook.title}》`}>
+              <img src={leadBook.coverUrl} alt={`《${leadBook.title}》封面`} />
+            </a>
+          )}
 
           <div class="fm-vertical-rule" aria-hidden="true">
             <span>✻</span>
@@ -172,9 +168,9 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
 
           <article class="fm-intro">
             <div class="fm-intro-head">
-              {leadBook?.series && <p class="fm-series">{leadBook.series}</p>}
-              <h1 id="fm-lead-title">{leadBook?.title ?? "馆藏整理中"}</h1>
-              {leadBook?.subtitle && <p class="fm-subtitle">（{leadBook.subtitle}）</p>}
+              {leadBook.series && <p class="fm-series">{leadBook.series}</p>}
+              <h1 id="fm-lead-title">{leadBook.title}</h1>
+              {leadBook.subtitle && <p class="fm-subtitle">（{leadBook.subtitle}）</p>}
             </div>
             <div class="fm-intro-body">
               {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
@@ -189,6 +185,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             </div>
           </aside>
         </div>
+        )}
       </section>
 
       <div class="fm-midline" aria-hidden="true"></div>
@@ -207,7 +204,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
           {shelfBooks.map((book) => (
             <li>
               <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                <img src={book.coverUrl ?? coverFallback} alt={`《${book.title}》封面`} />
+                {book.coverUrl && <img src={book.coverUrl} alt={`《${book.title}》封面`} />}
               </a>
             </li>
           ))}

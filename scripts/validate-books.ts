@@ -11,7 +11,6 @@
  * 7. classification exists in classifications.yml
  * 8. outline JSON exists (warning only)
  * 9. no duplicate ids
- * 10. readTime (if present) is a positive integer
  */
 
 import fs from "node:fs";
@@ -43,14 +42,11 @@ function loadClassifications(): Map<string, string> {
 interface BookEntry {
   id: string;
   title: string;
-  edition?: number;
-  date?: string;
   editions: EditionEntry[];
   tags: string[];
   cover?: string;
   totalVolumes?: number;
   author?: string;
-  readTime?: number;
   filename: string;
 }
 
@@ -150,14 +146,11 @@ function loadBooks(): BookEntry[] {
     return {
       id: fm.id as string,
       title: fm.title as string,
-      edition: fm.edition as number | undefined,
-      date: fm.date as string | undefined,
       editions: (fm.editions as EditionEntry[]) || [],
       tags: (fm.tags as string[]) || [],
       cover: fm.cover as string | undefined,
       totalVolumes: fm.totalVolumes as number | undefined,
       author: fm.author as string | undefined,
-      readTime: fm.readTime as number | undefined,
       filename: file,
     };
   });
@@ -201,11 +194,7 @@ function main() {
     const volumeNumber = parsed[3] ? parseInt(parsed[3], 10) : null;
 
     // 2. editions
-    const editions = book.editions.length > 0
-      ? book.editions
-      : book.edition && book.date
-        ? [{ edition: book.edition, editionDate: book.date.slice(0, 7) }]
-        : [];
+    const editions = book.editions;
     if (editions.length === 0) {
       console.error(`${prefix} ERROR: editions must contain at least one edition`);
       errors++;
@@ -239,16 +228,6 @@ function main() {
       if (!Number.isInteger(book.totalVolumes) || book.totalVolumes < 1) {
         console.error(
           `${prefix} ERROR: totalVolumes must be a positive integer, got ${book.totalVolumes}`
-        );
-        errors++;
-      }
-    }
-
-    // 10. manual reading-time override
-    if (book.readTime !== undefined) {
-      if (!Number.isInteger(book.readTime) || book.readTime < 1) {
-        console.error(
-          `${prefix} ERROR: readTime must be a positive integer, got ${book.readTime}`
         );
         errors++;
       }

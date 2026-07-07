@@ -14,15 +14,15 @@ Contract version: `1`.
 |---|---|---|---|---|
 | Call number | `dc:identifier` | `pdfidentifier` | `F0-1-1` | Existing call-number regex and known classification |
 | Main title | `dc:title/rdf:Alt` | `pdftitle` | `政治经济学基础知识` | Non-empty string |
-| Author | `dc:creator/rdf:Seq` | `pdfauthor` | `《政治经济学基础知识》编写组` | At least one non-empty value; use `佚名` explicitly when appropriate |
 | Edition | `prism:bookEdition` | `pdfbookedition` | `1` | Positive integer |
 | Summary | `dc:description/rdf:Alt` | `pdfsubject` | `系统介绍……` | Non-empty plain text |
-| Language | `dc:language/rdf:Bag` | `pdflang` | `zh-CN` | Non-empty BCP 47-style value |
 
 ## Optional XMP fields
 
 | Form field | XMP path | hyperxmp key | Example |
 |---|---|---|---|
+| Author | `dc:creator/rdf:Seq` | `pdfauthor` | `《政治经济学基础知识》编写组` |
+| Language | `dc:language/rdf:Bag` | `pdflang` | `zh-CN` |
 | Subtitle | `prism:subtitle/rdf:Alt` | `pdfsubtitle` | `资本主义部分` |
 | Tags | `dc:subject/rdf:Bag` | `pdfkeywords` | `政治经济学,资本主义` |
 | Series | `prism:publicationName/rdf:Alt` | `pdfpublication` | `青年自学丛书` |
@@ -40,10 +40,9 @@ that XMP field. It must not reinterpret `pdfsubject` as a subtitle.
 | PDF Info key | Type | Meaning |
 |---|---|---|
 | `/EbookTotalVolumes` | positive integer string | Total number of volumes |
-| `/EbookReadtime` | positive integer string | Manual reading-time override in minutes |
 
-These keys contain ASCII digits only. They are optional. Automatic reading
-time remains the default.
+This key contains ASCII digits only. It is optional. Automatic reading time is
+always generated from PDF text metrics.
 
 ## LaTeX form
 
@@ -115,7 +114,6 @@ class PdfBookMetadata:
     series: str | None
     volume: int | None
     total_volumes: int | None
-    readtime: int | None
     publisher: str | None
     source: str | None
     rights: str | None
@@ -137,7 +135,6 @@ Reject the import when:
 - classification is not present in `classifications.yml`;
 - `prism:volume` conflicts with the volume parsed from the ID;
 - total volumes is smaller than the current volume;
-- manual readtime is not a positive integer;
 - the PDF is encrypted or requires a password;
 - it has zero pages;
 - any page differs from the A5 aspect ratio by more than one percent.
@@ -171,9 +168,7 @@ interface ReadingMetrics {
 ```
 
 The Figma Make detail layout displays page count, character count, file size,
-dated edition, volume label, and internal call number. Reading time may remain
-available for other surfaces, but it is not shown in the detail-page metadata
-block.
+dated edition, volume label, and internal call number.
 
 ## Generated Markdown
 
@@ -183,9 +178,13 @@ id: F0-1-1
 title: 政治经济学基础知识
 subtitle: 资本主义部分
 author: 《政治经济学基础知识》编写组
-edition: 1
-date: 2026-06-21
-total_volumes: 2
+language: zh-CN
+totalVolumes: 2
+editions:
+  - edition: 1
+    editionDate: "2026-06"
+    releaseTag: F0-1-1_v1
+    manifest: src/data/manifests/F0-1-1_v1.json
 tags:
   - 政治经济学
   - 资本主义

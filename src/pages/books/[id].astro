@@ -8,7 +8,6 @@ import type { OutlineItem } from "../../components/Outline.astro";
 import {
   formatDisplayCallNumber,
   formatEditionDateString,
-  formatEditionWithDate,
   formatShortVolume,
 } from "../../lib/bookId";
 import { getBookById } from "../../lib/books";
@@ -81,15 +80,12 @@ const fileSizeLabel = book.reading?.fileSizeBytes
 const volumeLabel = book.parsed.isVolume
   ? formatShortVolume(book.parsed.volumeNumber!, book.totalVolumes)
   : undefined;
-const editionLabel = book.editionDate
-  ? formatEditionDateString(book.editionDate, book.edition)
-  : formatEditionWithDate(book.date, book.edition);
 const editionLabels =
   book.editions.length > 0
     ? book.editions.map((item) =>
         formatEditionDateString(item.editionDate, item.edition)
       )
-    : [editionLabel];
+    : [];
 const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`;
 ---
 

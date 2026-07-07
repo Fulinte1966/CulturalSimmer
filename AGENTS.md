@@ -64,7 +64,7 @@ Display call numbers (`formatDisplayCallNumber`):
 | `src/lib/books.ts` | Query layer — `getAllBooks()`, `getBookById()`, `getBooksByClassification()`, cover resolution, reading metrics |
 | `src/lib/classification.ts` | Classification tree — parent-child hierarchy from YAML |
 | `src/lib/site.ts` | `siteConfig` — `githubOwner` and `githubRepo` |
-| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes, readtime |
+| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes |
 | `scripts/ebook_upload.py` | Local preflight + temporary ingest Release creation |
 | `scripts/edition_policy.py` | Shared edition sequencing checks for local upload and CI ingest |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, reading metrics via PyMuPDF |

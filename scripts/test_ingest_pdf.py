@@ -139,6 +139,7 @@ class IngestPdfTests(unittest.TestCase):
             self.assertEqual(frontmatter["title"], metadata["title"])
             self.assertEqual(frontmatter["editions"][0]["edition"], 2)
             self.assertNotIn("edition", frontmatter)
+            self.assertNotIn("date", frontmatter)
             manifest = json.loads(
                 (root / "src/data/manifests/F0-9_v2.json").read_text("utf-8")
             )
@@ -148,13 +149,13 @@ class IngestPdfTests(unittest.TestCase):
             self.assertEqual(manifest["sourceAssetId"], 20)
             self.assertTrue(manifest["generatedAt"])
 
-    def test_expected_edition_from_legacy_entry(self) -> None:
+    def test_expected_edition_from_existing_editions(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             books_dir = root / "src/content/books"
             books_dir.mkdir(parents=True)
             (books_dir / "F0-9.md").write_text(
-                "---\nid: F0-9\nedition: 1\ndate: 2026-06-01\n---\n",
+                "---\nid: F0-9\neditions:\n  - edition: 1\n    editionDate: \"2026-06\"\n---\n",
                 encoding="utf-8",
             )
 

@@ -31,7 +31,7 @@
 - [ ] Missing required XMP fails before generated files are committed.
 - [ ] Invalid ID, edition, classification, or volume relationship fails.
 - [ ] Encrypted, empty, and non-A5 PDFs fail clearly.
-- [ ] Custom total-volume and readtime values accept only positive integers.
+- [ ] Custom total-volume values accept only positive integers.
 - [ ] Tags are normalized and deduplicated in source order.
 - [ ] Generated Markdown uses safe YAML serialization.
 - [ ] Manifest records source IDs and SHA-256.

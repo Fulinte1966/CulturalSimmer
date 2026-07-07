@@ -1,0 +1,122 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage
+  {culturalsimmer-ebook-metadata}
+  {2026/07/07}
+  {0.1.0}
+  {CulturalSimmer ebook PDF/XMP metadata helper}
+
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+\RequirePackage[unicode]{hyperref}
+\RequirePackage{hyperxmp}
+
+\ExplSyntaxOn
+
+\tl_new:N \l__csmeta_id_tl
+\tl_new:N \l__csmeta_title_tl
+\tl_new:N \l__csmeta_subtitle_tl
+\tl_new:N \l__csmeta_author_tl
+\tl_new:N \l__csmeta_edition_tl
+\tl_new:N \l__csmeta_volume_tl
+\tl_new:N \l__csmeta_total_volumes_tl
+\tl_new:N \l__csmeta_description_tl
+\tl_new:N \l__csmeta_keywords_tl
+\tl_new:N \l__csmeta_language_tl
+\tl_new:N \l__csmeta_series_tl
+\tl_new:N \l__csmeta_publisher_tl
+\tl_new:N \l__csmeta_source_tl
+\tl_new:N \l__csmeta_rights_tl
+\tl_new:N \l__csmeta_license_url_tl
+
+\keys_define:nn { culturalsimmer / ebook-metadata }
+  {
+    id            .tl_set:N = \l__csmeta_id_tl,
+    title         .tl_set:N = \l__csmeta_title_tl,
+    subtitle      .tl_set:N = \l__csmeta_subtitle_tl,
+    author        .tl_set:N = \l__csmeta_author_tl,
+    edition       .tl_set:N = \l__csmeta_edition_tl,
+    volume        .tl_set:N = \l__csmeta_volume_tl,
+    total-volumes .tl_set:N = \l__csmeta_total_volumes_tl,
+    description   .tl_set:N = \l__csmeta_description_tl,
+    keywords      .tl_set:N = \l__csmeta_keywords_tl,
+    language      .tl_set:N = \l__csmeta_language_tl,
+    series        .tl_set:N = \l__csmeta_series_tl,
+    publisher     .tl_set:N = \l__csmeta_publisher_tl,
+    source        .tl_set:N = \l__csmeta_source_tl,
+    rights        .tl_set:N = \l__csmeta_rights_tl,
+    license-url   .tl_set:N = \l__csmeta_license_url_tl,
+    language      .initial:n = zh-CN,
+  }
+
+\cs_new_protected:Npn \__csmeta_clear:
+  {
+    \tl_clear:N \l__csmeta_id_tl
+    \tl_clear:N \l__csmeta_title_tl
+    \tl_clear:N \l__csmeta_subtitle_tl
+    \tl_clear:N \l__csmeta_author_tl
+    \tl_clear:N \l__csmeta_edition_tl
+    \tl_clear:N \l__csmeta_volume_tl
+    \tl_clear:N \l__csmeta_total_volumes_tl
+    \tl_clear:N \l__csmeta_description_tl
+    \tl_clear:N \l__csmeta_keywords_tl
+    \tl_set:Nn \l__csmeta_language_tl { zh-CN }
+    \tl_clear:N \l__csmeta_series_tl
+    \tl_clear:N \l__csmeta_publisher_tl
+    \tl_clear:N \l__csmeta_source_tl
+    \tl_clear:N \l__csmeta_rights_tl
+    \tl_clear:N \l__csmeta_license_url_tl
+  }
+
+\cs_new_protected:Npn \__csmeta_required:nN #1#2
+  {
+    \tl_if_empty:NT #2
+      { \PackageError { culturalsimmer-ebook-metadata } { Missing~required~field:~#1 } { Fill~the~field~in~\string\EbookMetadata. } }
+  }
+
+\cs_new_protected:Npn \__csmeta_apply:
+  {
+    \__csmeta_required:nN { id } \l__csmeta_id_tl
+    \__csmeta_required:nN { title } \l__csmeta_title_tl
+    \__csmeta_required:nN { edition } \l__csmeta_edition_tl
+    \__csmeta_required:nN { description } \l__csmeta_description_tl
+    \exp_args:Nx \hypersetup
+      {
+        pdftitle       = { \exp_not:V \l__csmeta_title_tl },
+        pdfsubtitle    = { \exp_not:V \l__csmeta_subtitle_tl },
+        pdfauthor      = { \exp_not:V \l__csmeta_author_tl },
+        pdfsubject     = { \exp_not:V \l__csmeta_description_tl },
+        pdfkeywords    = { \exp_not:V \l__csmeta_keywords_tl },
+        pdfidentifier  = { \exp_not:V \l__csmeta_id_tl },
+        pdfbookedition = { \exp_not:V \l__csmeta_edition_tl },
+        pdfvolumenum   = { \exp_not:V \l__csmeta_volume_tl },
+        pdflang        = { \exp_not:V \l__csmeta_language_tl },
+        pdfmetalang    = { \exp_not:V \l__csmeta_language_tl },
+        pdfpubtype     = { book },
+        pdfpublication = { \exp_not:V \l__csmeta_series_tl },
+        pdfpublisher   = { \exp_not:V \l__csmeta_publisher_tl },
+        pdfsource      = { \exp_not:V \l__csmeta_source_tl },
+        pdfcopyright   = { \exp_not:V \l__csmeta_rights_tl },
+        pdflicenseurl  = { \exp_not:V \l__csmeta_license_url_tl },
+      }
+    \tl_if_blank:NF \l__csmeta_total_volumes_tl
+      {
+        \special
+          {
+            pdf:put~@docinfo~
+            <<
+              /EbookTotalVolumes~(\tl_use:N \l__csmeta_total_volumes_tl)
+            >>
+          }
+      }
+  }
+
+\NewDocumentCommand \EbookMetadata { m }
+  {
+    \__csmeta_clear:
+    \keys_set:nn { culturalsimmer / ebook-metadata } { #1 }
+    \__csmeta_apply:
+  }
+
+\ExplSyntaxOff
+
+\endinput

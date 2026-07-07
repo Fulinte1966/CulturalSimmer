@@ -13,7 +13,7 @@ const characterCount =
 const hasStats =
   Boolean(book.reading?.pageCount) ||
   Boolean(characterCount) ||
-  Boolean(book.readingMinutes);
+  Boolean(book.reading?.estimatedMinutes);
 ---
 
 {
@@ -23,12 +23,7 @@ const hasStats =
       {characterCount > 0 && (
         <li>约 {characterCount.toLocaleString("zh-CN")} 字</li>
       )}
-      {book.readingMinutes && (
-        <li>
-          {book.readingTimeSource === "automatic" ? "约 " : ""}
-          {book.readingMinutes} 分钟
-        </li>
-      )}
+      {book.reading?.estimatedMinutes && <li>约 {book.reading.estimatedMinutes} 分钟</li>}
     </ul>
   )
 }

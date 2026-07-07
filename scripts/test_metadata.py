@@ -107,7 +107,6 @@ def _make_test_pdf(
             for key, value in pdf_info.items():
                 pdf_key = {
                     "ebookTotalVolumes": "EbookTotalVolumes",
-                    "ebookReadtime": "EbookReadtime",
                 }.get(key, key)
                 document.xref_set_key(info_xref, pdf_key, f"({value})")
         document.save(pdf_path)
@@ -457,21 +456,12 @@ class ExtractMetadataTests(unittest.TestCase):
             self.assertIn("total_volumes", str(ctx.exception))
 
     def test_parse_custom_pdf_info(self) -> None:
-        tv, rt = parse_custom_pdf_info(
-            {"ebookTotalVolumes": "2", "ebookReadtime": "45"}
-        )
+        tv = parse_custom_pdf_info({"ebookTotalVolumes": "2"})
         self.assertEqual(tv, 2)
-        self.assertEqual(rt, 45)
 
     def test_parse_custom_pdf_info_empty(self) -> None:
-        tv, rt = parse_custom_pdf_info(None)
+        tv = parse_custom_pdf_info(None)
         self.assertIsNone(tv)
-        self.assertIsNone(rt)
-
-    def test_non_integer_readtime_fails(self) -> None:
-        with self.assertRaises(MetadataError) as ctx:
-            parse_custom_pdf_info({"ebookReadtime": "not-a-number"})
-        self.assertIn("EbookReadtime", str(ctx.exception))
 
     def test_custom_info_survives_pdf_round_trip(self) -> None:
         xmp = _make_xmp(

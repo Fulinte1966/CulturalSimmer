@@ -53,7 +53,6 @@ class PdfBookMetadata:
     series: Optional[str] = None
     volume: Optional[int] = None
     total_volumes: Optional[int] = None
-    readtime: Optional[int] = None
     publisher: Optional[str] = None
     source: Optional[str] = None
     rights: Optional[str] = None
@@ -298,7 +297,7 @@ def _extract_from_document(
 
     # --- Custom PDF Info fields --------------------------------------------
     info = _read_custom_pdf_info(document)
-    total_volumes, readtime = parse_custom_pdf_info(info)
+    total_volumes = parse_custom_pdf_info(info)
 
     # --- Classification check ---------------------------------------------
     classification = parse_classification_simple(raw_id)
@@ -339,7 +338,6 @@ def _extract_from_document(
         series=series,
         volume=volume,
         total_volumes=total_volumes,
-        readtime=readtime,
         publisher=publisher,
         source=source,
         rights=rights,
@@ -349,17 +347,15 @@ def _extract_from_document(
 
 def parse_custom_pdf_info(
     info: dict | None,
-) -> tuple[Optional[int], Optional[int]]:
-    """Parse /EbookTotalVolumes and /EbookReadtime from a PDF info dict.
+) -> Optional[int]:
+    """Parse /EbookTotalVolumes from a PDF info dict.
 
-    Returns ``(total_volumes, readtime)``.  Raises ``MetadataError`` when a
-    value is present but not a positive integer.
+    Raises ``MetadataError`` when a value is present but not a positive integer.
     """
     total_volumes: Optional[int] = None
-    readtime: Optional[int] = None
 
     if info is None:
-        return (None, None)
+        return None
 
     raw_tv = info.get("ebookTotalVolumes")
     if raw_tv:
@@ -374,18 +370,7 @@ def parse_custom_pdf_info(
                 f"/EbookTotalVolumes must be positive: {total_volumes}"
             )
 
-    raw_rt = info.get("ebookReadtime")
-    if raw_rt:
-        try:
-            readtime = int(raw_rt)
-        except (ValueError, TypeError):
-            raise MetadataError(
-                f"/EbookReadtime is not a positive integer: {raw_rt}"
-            )
-        if readtime < 1:
-            raise MetadataError(f"/EbookReadtime must be positive: {readtime}")
-
-    return (total_volumes, readtime)
+    return total_volumes
 
 
 def _read_custom_pdf_info(document) -> dict[str, str]:
@@ -405,7 +390,6 @@ def _read_custom_pdf_info(document) -> dict[str, str]:
     result: dict[str, str] = {}
     for pdf_key, output_key in (
         ("EbookTotalVolumes", "ebookTotalVolumes"),
-        ("EbookReadtime", "ebookReadtime"),
     ):
         value_type, raw_value = document.xref_get_key(info_xref, pdf_key)
         if value_type == "null":

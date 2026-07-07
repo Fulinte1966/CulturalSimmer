@@ -87,21 +87,6 @@ def _merge_edition_record(frontmatter: dict, meta: dict) -> list[dict]:
             if isinstance(item, dict) and isinstance(item.get("edition"), int):
                 existing.append(dict(item))
 
-    legacy_edition = frontmatter.get("edition")
-    legacy_date = frontmatter.get("date")
-    if isinstance(legacy_edition, int) and not any(
-        item["edition"] == legacy_edition for item in existing
-    ):
-        legacy_month = str(legacy_date)[:7] if legacy_date else meta["editionDate"]
-        existing.append(
-            {
-                "edition": legacy_edition,
-                "editionDate": legacy_month,
-                "releaseTag": f"{meta['id']}_v{legacy_edition}",
-                "manifest": f"src/data/manifests/{meta['id']}_v{legacy_edition}.json",
-            }
-        )
-
     edition = int(meta["edition"])
     if any(item["edition"] == edition for item in existing):
         raise SystemExit(f"Book entry already contains edition {edition}")
@@ -237,7 +222,6 @@ def cmd_validate(args: list[str]):
         "series": meta.series,
         "volume": meta.volume,
         "totalVolumes": meta.total_volumes,
-        "readTime": meta.readtime,
         "publisher": meta.publisher,
         "source": meta.source,
         "rights": meta.rights,
@@ -303,7 +287,6 @@ def cmd_generate(args: list[str]):
         "subtitle",
         "author",
         "totalVolumes",
-        "readTime",
         "series",
         "publisher",
         "source",

@@ -89,7 +89,7 @@ All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves 
 | `src/lib/site.ts` | `siteConfig` — `githubOwner`, `githubRepo`, `weatherCity`, `frontPageSlogan` |
 | `src/lib/basePath.ts` | `joinBasePath(base, pathname)` — joins base URL and pathname avoiding double slashes |
 | `src/lib/uapis.ts` | API client for uapis.cn — Chinese calendar (lunar dates, holidays) and weather data. Both server-side (Astro frontmatter) and client-side (`<script>` fetch in index.astro) |
-| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes, readtime |
+| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes |
 | `src/components/Layout.astro` | Standard catalog layout — branded header + 3-item nav (新书/索引/总览) |
 | `src/components/NewspaperLayout.astro` | Full-page Figma-designed wrapper — no nav, minimal `<html>` skeleton. Used by homepage and book detail |
 | `src/components/BookCover.astro` | Dual-mode cover component — `flat` (2D card) and `model` (3D CSS pseudo-elements) |
@@ -163,7 +163,7 @@ Two generated-data directories use the pattern `{id}_v{edition}.json`:
 - `src/data/outlines/` — PDF bookmarks as `OutlineItem[]` (`{ level, title }`)
 - `src/data/reading/` — `ReadingMetrics` (`{ page_count, cjk_character_count, latin_token_count, estimated_minutes, file_size_bytes }`)
 
-Both are produced by `book_assets.py` and read by `books.ts` at build time. Missing outlines produce a warning in `validate-books`; missing reading metrics silently fall back to `readtime` frontmatter or no reading time display.
+Both are produced by `book_assets.py` and read by `books.ts` at build time. Missing outlines produce a warning in `validate-books`; missing reading metrics hide the reading-stats display.
 
 ### Homepage handoff
 

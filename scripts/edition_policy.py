@@ -50,10 +50,6 @@ def get_existing_editions(root: Path, book_id: str) -> list[int]:
             if isinstance(item, dict) and isinstance(item.get("edition"), int):
                 editions.add(item["edition"])
 
-    legacy_edition = data.get("edition")
-    if isinstance(legacy_edition, int):
-        editions.add(legacy_edition)
-
     return sorted(editions)
 
 

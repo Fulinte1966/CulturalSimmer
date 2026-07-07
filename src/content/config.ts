@@ -8,8 +8,6 @@ const books = defineCollection({
     id: z.string().regex(bookIdRegex, "id must be a valid call number like A8-3 or A12-8-2"),
     title: z.string().min(1),
     description: z.string().min(1).optional(),
-    edition: z.number().int().positive("edition must be a positive integer").optional(),
-    date: z.date().optional(),
     author: z.string().optional(),
     subtitle: z.string().optional(),
     language: z.string().optional(),
@@ -24,11 +22,6 @@ const books = defineCollection({
       .number()
       .int()
       .positive("totalVolumes must be a positive integer")
-      .optional(),
-    readTime: z
-      .number()
-      .int()
-      .positive("readTime must be a positive integer")
       .optional(),
     editions: z
       .array(

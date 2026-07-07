@@ -25,7 +25,6 @@ export interface ReadingMetrics {
 }
 
 export type CoverKind = "explicit" | "generated" | "placeholder";
-export type ReadingTimeSource = "manual" | "automatic";
 
 export interface BookMeta {
   id: string;
@@ -40,7 +39,7 @@ export interface BookMeta {
   rights?: string;
   licenseUrl?: string;
   edition: number;
-  editionDate?: string;
+  editionDate: string;
   date: Date;
   editions: EditionRecord[];
   tags: string[];
@@ -49,10 +48,7 @@ export interface BookMeta {
   spineUrl?: string;
   coverKind: CoverKind;
   totalVolumes?: number;
-  readTime?: number;
   reading?: ReadingMetrics;
-  readingMinutes?: number;
-  readingTimeSource?: ReadingTimeSource;
   parsed: ParsedBookId;
   downloadUrl: string;
   outlinePath: string;
@@ -138,36 +134,13 @@ function dateFromEditionDate(value: string): Date {
 }
 
 function resolveEditions(
-  data: {
-    edition?: number;
-    date?: Date;
-    editions?: EditionRecord[];
-  },
-  id: string
+  editionsInput?: EditionRecord[]
 ): EditionRecord[] {
-  const editions = [...(data.editions ?? [])].sort(
+  const editions = [...(editionsInput ?? [])].sort(
     (a, b) => a.edition - b.edition
   );
 
-  if (editions.length > 0) {
-    return editions;
-  }
-
-  if (data.edition && data.date) {
-    const editionDate = `${data.date.getFullYear()}-${String(
-      data.date.getMonth() + 1
-    ).padStart(2, "0")}`;
-    return [
-      {
-        edition: data.edition,
-        editionDate,
-        releaseTag: getReleaseTag(id, data.edition),
-        manifest: `src/data/manifests/${id}_v${data.edition}.json`,
-      },
-    ];
-  }
-
-  return [];
+  return editions;
 }
 
 function getLatestEdition(editions: EditionRecord[]): EditionRecord {
@@ -188,13 +161,10 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         title,
         description,
         subtitle,
-        edition,
-        date,
         editions: rawEditions,
         tags,
         cover,
         totalVolumes,
-        readTime,
         author,
         language,
         series,
@@ -203,17 +173,11 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         rights,
         licenseUrl,
       } = entry.data;
-      const editions = resolveEditions({ edition, date, editions: rawEditions }, id);
+      const editions = resolveEditions(rawEditions);
       const latestEdition = getLatestEdition(editions);
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, latestEdition.edition, cover);
       const reading = loadReadingMetrics(id, latestEdition.edition);
-      const readingMinutes = readTime ?? reading?.estimatedMinutes;
-      const readingTimeSource: ReadingTimeSource | undefined = readTime
-        ? "manual"
-        : reading?.estimatedMinutes
-          ? "automatic"
-          : undefined;
 
       return {
         id,
@@ -229,16 +193,13 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         licenseUrl,
         edition: latestEdition.edition,
         editionDate: latestEdition.editionDate,
-        date: date ?? dateFromEditionDate(latestEdition.editionDate),
+        date: dateFromEditionDate(latestEdition.editionDate),
         editions,
         tags,
         cover,
         ...resolvedCover,
         totalVolumes,
-        readTime,
         reading,
-        readingMinutes,
-        readingTimeSource,
         parsed,
         downloadUrl: getDownloadUrl(id, latestEdition.edition),
         outlinePath: `src/data/outlines/${id}_v${latestEdition.edition}.json`,
