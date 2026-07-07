@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
+    "ebook:upload": "python scripts/ebook_upload.py",
     "check": "astro check",
     "validate": "tsx scripts/validate-books.ts",
     "test:reading": "python scripts/test-reading-metrics.py",

@@ -52,7 +52,7 @@ Display call numbers (`formatDisplayCallNumber`):
 - `F0-1-1` → `F0/1:1`
 - `A8-3` → `A8/3`
 
-**Never hand-write** `download_url`, `release_tag`, `pdf_filename`, `classification`, or `volume` in book markdown.
+**Never hand-write** `download_url`, `release_tag`, `pdf_filename`, `classification`, or `volume` in book markdown. Markdown stores book-level metadata plus `editions[]`; the current display/download edition is derived from the largest `editions[].edition`.
 
 `subtitle` is explicit metadata. Never derive it from parentheses in `title`.
 
@@ -64,10 +64,12 @@ Display call numbers (`formatDisplayCallNumber`):
 | `src/lib/books.ts` | Query layer — `getAllBooks()`, `getBookById()`, `getBooksByClassification()`, cover resolution, reading metrics |
 | `src/lib/classification.ts` | Classification tree — parent-child hierarchy from YAML |
 | `src/lib/site.ts` | `siteConfig` — `githubOwner` and `githubRepo` |
-| `src/content/config.ts` | Zod schema — validates id, title, subtitle, edition, date, tags, author, cover, total_volumes, readtime |
+| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes, readtime |
+| `scripts/ebook_upload.py` | Local preflight + temporary ingest Release creation |
+| `scripts/edition_policy.py` | Shared edition sequencing checks for local upload and CI ingest |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, reading metrics via PyMuPDF |
 | `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation |
-| `scripts/test_metadata.py` | Unit tests for XMP extraction and validation (24 tests) |
+| `scripts/test_metadata.py` | Unit tests for XMP extraction and validation |
 | `scripts/ingest_pdf.py` | GitHub Actions orchestration for PDF ingestion |
 | `scripts/requirements.txt` | Python dependencies |
 | `scripts/validate-books.ts` | Standalone validator (used in CI) |

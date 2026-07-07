@@ -5,7 +5,12 @@ import path from "node:path";
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
 import BookCover from "../../components/BookCover.astro";
 import type { OutlineItem } from "../../components/Outline.astro";
-import { formatDisplayCallNumber, formatEditionWithDate, formatShortVolume } from "../../lib/bookId";
+import {
+  formatDisplayCallNumber,
+  formatEditionDateString,
+  formatEditionWithDate,
+  formatShortVolume,
+} from "../../lib/bookId";
 import { getBookById } from "../../lib/books";
 import { joinBasePath } from "../../lib/basePath";
 import { getCalendarStatus } from "../../lib/uapis";
@@ -20,7 +25,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { id, title, subtitle, edition, author } = entry.data;
+const { id, title, subtitle, author } = entry.data;
 const { Content } = await entry.render();
 const [book, calendar] = await Promise.all([
   getBookById(id),
@@ -38,7 +43,7 @@ try {
     "src",
     "data",
     "outlines",
-    `${id}_v${edition}.json`
+    `${id}_v${book.edition}.json`
   );
   outline = JSON.parse(fs.readFileSync(outlineAbsPath, "utf-8"));
 } catch {
@@ -76,8 +81,15 @@ const fileSizeLabel = book.reading?.fileSizeBytes
 const volumeLabel = book.parsed.isVolume
   ? formatShortVolume(book.parsed.volumeNumber!, book.totalVolumes)
   : undefined;
-const editionLabel = formatEditionWithDate(book.date, book.edition);
-const editionLabels = [editionLabel];
+const editionLabel = book.editionDate
+  ? formatEditionDateString(book.editionDate, book.edition)
+  : formatEditionWithDate(book.date, book.edition);
+const editionLabels =
+  book.editions.length > 0
+    ? book.editions.map((item) =>
+        formatEditionDateString(item.editionDate, item.edition)
+      )
+    : [editionLabel];
 const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`;
 ---
 

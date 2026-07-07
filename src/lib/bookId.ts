@@ -39,6 +39,11 @@ export function formatEditionWithDate(date: Date, edition: number): string {
   return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月第 ${edition} 版`;
 }
 
+export function formatEditionDateString(editionDate: string, edition: number): string {
+  const [year, month] = editionDate.split("-");
+  return `${year} 年 ${Number(month)} 月第 ${edition} 版`;
+}
+
 export function formatVolume(
   volumeNumber: number,
   totalVolumes?: number

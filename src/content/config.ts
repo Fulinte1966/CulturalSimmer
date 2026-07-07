@@ -7,8 +7,9 @@ const books = defineCollection({
   schema: z.object({
     id: z.string().regex(bookIdRegex, "id must be a valid call number like A8-3 or A12-8-2"),
     title: z.string().min(1),
-    edition: z.number().int().positive("edition must be a positive integer"),
-    date: z.date(),
+    description: z.string().min(1).optional(),
+    edition: z.number().int().positive("edition must be a positive integer").optional(),
+    date: z.date().optional(),
     author: z.string().optional(),
     subtitle: z.string().optional(),
     language: z.string().optional(),
@@ -29,11 +30,13 @@ const books = defineCollection({
       .int()
       .positive("readTime must be a positive integer")
       .optional(),
-    editionHistory: z
+    editions: z
       .array(
         z.object({
           edition: z.number().int().positive(),
-          date: z.date(),
+          editionDate: z.string().regex(/^\d{4}-\d{2}$/),
+          releaseTag: z.string().optional(),
+          manifest: z.string().optional(),
         })
       )
       .optional(),

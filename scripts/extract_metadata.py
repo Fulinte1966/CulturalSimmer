@@ -6,6 +6,7 @@ Implements the contract defined in reference/figma-handoff/pdf-metadata-contract
 import re
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -19,6 +20,7 @@ NS = {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "dc": "http://purl.org/dc/elements/1.1/",
     "prism": "http://prismstandard.org/namespaces/basic/2.1/",
+    "xmp": "http://ns.adobe.com/xap/1.0/",
     "xmpRights": "http://ns.adobe.com/xap/1.0/rights/",
 }
 
@@ -39,11 +41,14 @@ _ASPECT_TOLERANCE = 0.01
 class PdfBookMetadata:
     id: str
     title: str
-    author: str
     edition: int
+    edition_date: str
+    edition_date_source: str
+    pdf_create_date: str
     description: str
     tags: list[str]
     language: str
+    author: Optional[str] = None
     subtitle: Optional[str] = None
     series: Optional[str] = None
     volume: Optional[int] = None
@@ -62,6 +67,14 @@ class PdfBookMetadata:
 
 def _xmp_text(desc: ET.Element, tag: str) -> Optional[str]:
     """Read a simple text element, rdf:Alt, or single-value rdf:Seq/Bag."""
+    if ":" in tag:
+        prefix, local = tag.split(":", 1)
+        namespace = NS.get(prefix)
+        if namespace:
+            attr_text = _normalize_text(desc.attrib.get(f"{{{namespace}}}{local}"))
+            if attr_text:
+                return attr_text
+
     el = desc.find(tag, NS)
     if el is None:
         return None
@@ -120,6 +133,20 @@ def _xmp_int(desc: ET.Element, tag: str) -> Optional[int]:
         return int(text)
     except ValueError:
         return None
+
+
+def _edition_date_from_create_date(raw_create_date: str) -> str:
+    """Return YYYY-MM from an XMP date string."""
+    normalized = raw_create_date.strip()
+    if normalized.endswith("Z"):
+        normalized = f"{normalized[:-1]}+00:00"
+
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise MetadataError(f"xmp:CreateDate is not a valid ISO date: {raw_create_date}") from exc
+
+    return f"{parsed.year:04d}-{parsed.month:02d}"
 
 
 # ---------------------------------------------------------------------------
@@ -221,10 +248,6 @@ def _extract_from_document(
     if not title:
         raise MetadataError("dc:title is missing or empty")
 
-    raw_author = _xmp_text(desc, "dc:creator")
-    if not raw_author:
-        raise MetadataError("dc:creator is missing or empty")
-
     raw_edition = _xmp_text(desc, "prism:bookEdition")
     if not raw_edition:
         raise MetadataError("prism:bookEdition is missing or empty")
@@ -238,12 +261,17 @@ def _extract_from_document(
     description = _xmp_text(desc, "dc:description")
     if not description:
         raise MetadataError("dc:description is missing or empty")
+    if description in {"暂无简介", "待补充"} or "TODO" in description.upper():
+        raise MetadataError("dc:description appears to be placeholder text")
 
-    language = _xmp_text(desc, "dc:language")
-    if not language:
-        raise MetadataError("dc:language is missing or empty")
+    pdf_create_date = _xmp_text(desc, "xmp:CreateDate")
+    if not pdf_create_date:
+        raise MetadataError("xmp:CreateDate is missing or empty")
+    edition_date = _edition_date_from_create_date(pdf_create_date)
 
     # --- Optional fields ----------------------------------------------------
+    raw_author = _xmp_text(desc, "dc:creator")
+    language = _xmp_text(desc, "dc:language") or "zh-CN"
     subtitle = _xmp_text(desc, "prism:subtitle")
 
     raw_tags = _xmp_seq(desc, "dc:subject")
@@ -302,6 +330,9 @@ def _extract_from_document(
         subtitle=subtitle,
         author=raw_author,
         edition=edition,
+        edition_date=edition_date,
+        edition_date_source="xmp:CreateDate",
+        pdf_create_date=pdf_create_date,
         description=description,
         tags=tags,
         language=language,

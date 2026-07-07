@@ -1,5 +1,10 @@
 ---
-import { formatDisplayCallNumber, formatEdition, formatVolume } from "../lib/bookId";
+import {
+  formatDisplayCallNumber,
+  formatEdition,
+  formatEditionDateString,
+  formatShortVolume,
+} from "../lib/bookId";
 import type { BookMeta } from "../lib/books";
 import DownloadButton from "./DownloadButton.astro";
 import ReadingStats from "./ReadingStats.astro";
@@ -19,17 +24,27 @@ const { book } = Astro.props;
   {book.parsed.isVolume && (
     <div class="meta-item">
       <span class="field-label">册次</span>
-      <span>{formatVolume(book.parsed.volumeNumber!, book.totalVolumes)}</span>
+      <span>{formatShortVolume(book.parsed.volumeNumber!, book.totalVolumes)}</span>
     </div>
   )}
   <div class="meta-item">
     <span class="field-label">版次</span>
-    <span>{formatEdition(book.edition)}</span>
+    <span>
+      {book.editionDate
+        ? formatEditionDateString(book.editionDate, book.edition)
+        : formatEdition(book.edition)}
+    </span>
   </div>
-  <div class="meta-item">
-    <span class="field-label">发布日期</span>
-    <span>{book.date.toLocaleDateString("zh-CN")}</span>
-  </div>
+  {book.editions.length > 1 && (
+    <div class="meta-item">
+      <span class="field-label">历次版次</span>
+      <span>
+        {book.editions
+          .map((edition) => formatEditionDateString(edition.editionDate, edition.edition))
+          .join("；")}
+      </span>
+    </div>
+  )}
   {book.series && (
     <div class="meta-item">
       <span class="field-label">丛书</span>

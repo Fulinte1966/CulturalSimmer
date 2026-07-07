@@ -51,6 +51,7 @@ const shelfBooks = Array.from({ length: 10 }, (_, index) =>
 ).filter(Boolean);
 
 const rawSummary =
+  leadBook?.description ||
   leadEntry?.body.trim() ||
   "馆藏条目正在整理中，待 PDF 元数据和内容简介补齐后展示。";
 const summaryParagraphs = rawSummary

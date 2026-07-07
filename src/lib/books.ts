@@ -30,6 +30,7 @@ export type ReadingTimeSource = "manual" | "automatic";
 export interface BookMeta {
   id: string;
   title: string;
+  description?: string;
   subtitle?: string;
   author?: string;
   language?: string;
@@ -39,7 +40,9 @@ export interface BookMeta {
   rights?: string;
   licenseUrl?: string;
   edition: number;
+  editionDate?: string;
   date: Date;
+  editions: EditionRecord[];
   tags: string[];
   cover?: string;
   coverUrl?: string;
@@ -47,7 +50,6 @@ export interface BookMeta {
   coverKind: CoverKind;
   totalVolumes?: number;
   readTime?: number;
-  editionHistory?: EditionHistoryItem[];
   reading?: ReadingMetrics;
   readingMinutes?: number;
   readingTimeSource?: ReadingTimeSource;
@@ -56,9 +58,11 @@ export interface BookMeta {
   outlinePath: string;
 }
 
-export interface EditionHistoryItem {
+export interface EditionRecord {
   edition: number;
-  date: Date;
+  editionDate: string;
+  releaseTag?: string;
+  manifest?: string;
 }
 
 function withBasePath(value: string): string {
@@ -129,6 +133,51 @@ function loadReadingMetrics(
   }
 }
 
+function dateFromEditionDate(value: string): Date {
+  return new Date(`${value}-01T00:00:00+08:00`);
+}
+
+function resolveEditions(
+  data: {
+    edition?: number;
+    date?: Date;
+    editions?: EditionRecord[];
+  },
+  id: string
+): EditionRecord[] {
+  const editions = [...(data.editions ?? [])].sort(
+    (a, b) => a.edition - b.edition
+  );
+
+  if (editions.length > 0) {
+    return editions;
+  }
+
+  if (data.edition && data.date) {
+    const editionDate = `${data.date.getFullYear()}-${String(
+      data.date.getMonth() + 1
+    ).padStart(2, "0")}`;
+    return [
+      {
+        edition: data.edition,
+        editionDate,
+        releaseTag: getReleaseTag(id, data.edition),
+        manifest: `src/data/manifests/${id}_v${data.edition}.json`,
+      },
+    ];
+  }
+
+  return [];
+}
+
+function getLatestEdition(editions: EditionRecord[]): EditionRecord {
+  const latest = editions.at(-1);
+  if (!latest) {
+    throw new Error("Book entry must define at least one edition");
+  }
+  return latest;
+}
+
 export async function getAllBooks(): Promise<BookMeta[]> {
   const books = await getCollection("books");
 
@@ -137,14 +186,15 @@ export async function getAllBooks(): Promise<BookMeta[]> {
       const {
         id,
         title,
+        description,
         subtitle,
         edition,
         date,
+        editions: rawEditions,
         tags,
         cover,
         totalVolumes,
         readTime,
-        editionHistory,
         author,
         language,
         series,
@@ -153,9 +203,11 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         rights,
         licenseUrl,
       } = entry.data;
+      const editions = resolveEditions({ edition, date, editions: rawEditions }, id);
+      const latestEdition = getLatestEdition(editions);
       const parsed = parseBookId(id);
-      const resolvedCover = resolveCover(id, edition, cover);
-      const reading = loadReadingMetrics(id, edition);
+      const resolvedCover = resolveCover(id, latestEdition.edition, cover);
+      const reading = loadReadingMetrics(id, latestEdition.edition);
       const readingMinutes = readTime ?? reading?.estimatedMinutes;
       const readingTimeSource: ReadingTimeSource | undefined = readTime
         ? "manual"
@@ -166,6 +218,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
       return {
         id,
         title,
+        description,
         subtitle,
         author,
         language,
@@ -174,20 +227,21 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         source,
         rights,
         licenseUrl,
-        edition,
-        date,
+        edition: latestEdition.edition,
+        editionDate: latestEdition.editionDate,
+        date: date ?? dateFromEditionDate(latestEdition.editionDate),
+        editions,
         tags,
         cover,
         ...resolvedCover,
         totalVolumes,
         readTime,
-        editionHistory,
         reading,
         readingMinutes,
         readingTimeSource,
         parsed,
-        downloadUrl: getDownloadUrl(id, edition),
-        outlinePath: `src/data/outlines/${id}_v${edition}.json`,
+        downloadUrl: getDownloadUrl(id, latestEdition.edition),
+        outlinePath: `src/data/outlines/${id}_v${latestEdition.edition}.json`,
       };
     })
     .sort((a, b) => b.date.getTime() - a.date.getTime());

@@ -28,6 +28,7 @@ _XMP_TEMPLATE = """<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
     <rdf:Description rdf:about=""
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         xmlns:prism="http://prismstandard.org/namespaces/basic/2.1/"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
         xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/">
       {fields}
     </rdf:Description>
@@ -51,6 +52,7 @@ def _seq(*items: str) -> str:
 
 
 def _make_xmp(**fields: str) -> str:
+    fields.setdefault("xmp:CreateDate", "2026-06-18T21:32:10+08:00")
     elements = "".join(
         f"<{key}>{value}</{key}>" for key, value in fields.items() if value
     )
@@ -230,7 +232,26 @@ class ExtractMetadataTests(unittest.TestCase):
             self.assertEqual(meta.title, "政治经济学基础知识")
             self.assertEqual(meta.author, "《政治经济学基础知识》编写组")
             self.assertEqual(meta.edition, 1)
+            self.assertEqual(meta.edition_date, "2026-06")
+            self.assertEqual(meta.edition_date_source, "xmp:CreateDate")
+            self.assertEqual(meta.pdf_create_date, "2026-06-18T21:32:10+08:00")
             self.assertEqual(meta.description, "系统介绍资本主义政治经济学。")
+            self.assertEqual(meta.language, "zh-CN")
+
+    def test_missing_creator_and_language_are_allowed(self) -> None:
+        xmp = _make_xmp(
+            **{
+                "dc:identifier": "F0-1-1",
+                "dc:title": _alt("政治经济学基础知识"),
+                "prism:bookEdition": "1",
+                "dc:description": _alt("系统介绍资本主义政治经济学。"),
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            pdf = _make_test_pdf(root, "test.pdf", xmp=xmp)
+            meta = extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertIsNone(meta.author)
             self.assertEqual(meta.language, "zh-CN")
 
     def test_extracts_optional_fields(self) -> None:
@@ -298,6 +319,25 @@ class ExtractMetadataTests(unittest.TestCase):
             with self.assertRaises(MetadataError) as ctx:
                 extract(pdf, SAMPLE_CLASSIFICATIONS)
             self.assertIn("dc:title", str(ctx.exception))
+
+    def test_missing_create_date_fails(self) -> None:
+        xmp = _make_xmp(
+            **{
+                "dc:identifier": "F0-1-1",
+                "dc:title": _alt("标题"),
+                "dc:creator": _seq("作者"),
+                "prism:bookEdition": "1",
+                "dc:description": _alt("简介。"),
+                "dc:language": _bag("zh-CN"),
+                "xmp:CreateDate": "",
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            pdf = _make_test_pdf(root, "test.pdf", xmp=xmp)
+            with self.assertRaises(MetadataError) as ctx:
+                extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertIn("xmp:CreateDate", str(ctx.exception))
 
     def test_invalid_call_number_fails(self) -> None:
         xmp = _make_xmp(

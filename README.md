@@ -34,22 +34,32 @@ npm run preview
 
 ## 新增书籍
 
-当前使用 GitHub Release 触发自动导入。不要手写 Markdown、下载链接、Release tag、PDF 文件名、分类号或册次；这些都由 PDF 元数据和索书号规则自动推导。
+当前使用本地上传脚本创建临时 GitHub Release，再由 GitHub Actions 自动导入。不要手写 Markdown、下载链接、Release tag、PDF 文件名、分类号或册次；这些都由 PDF 元数据和索书号规则自动推导。
 
 完整流程见 [电子书上传工作流](docs/ebook-upload-workflow.md)。
 
 ### 上传步骤
 
 1. 准备带完整 XMP 元数据的 PDF。
-2. 在 GitHub 创建临时 Release，tag 必须以 `ingest-` 开头，例如：
+2. 先运行本地预检：
+
+   ```bash
+   npm run ebook:upload path/to/book.pdf -- --dry-run
+   ```
+
+3. 通过本地脚本创建临时 Release：
+
+   ```bash
+   npm run ebook:upload path/to/book.pdf
+   ```
+
+4. GitHub Actions 自动校验元数据、生成网页数据和静态资产、创建正式 Release、提交到 `main` 并触发 Pages 部署。
+
+临时 Release tag 由脚本生成，格式类似：
 
    ```txt
    ingest-20260707-F0-1-1-v1
    ```
-
-3. 在临时 Release 中上传且只上传一个 PDF。
-4. 发布临时 Release。
-5. GitHub Actions 自动校验元数据、生成网页数据和静态资产、创建正式 Release、提交到 `main` 并触发 Pages 部署。
 
 正式 Release tag 和 PDF 文件名由系统生成：
 
@@ -105,7 +115,9 @@ F0-1-1_v2
 
 ### 版次
 
-版次在 frontmatter 中用 `edition` 字段记录。PDF 文件名和 Release tag 格式为：
+版次在 frontmatter 中统一记录到 `editions[]`，每个条目包含 `edition` 和 `editionDate`。网页和下载默认使用 `editions[].edition` 最大的版本。
+
+PDF 文件名和 Release tag 格式为：
 
 ```txt
 A12-8-2_v1.pdf    A12-8-2_v1

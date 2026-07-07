@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from edition_policy import check_expected_edition, format_edition_check_lines
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -60,6 +61,62 @@ def _load_frontmatter(path: Path) -> dict:
     return data
 
 
+def _load_markdown_parts(path: Path) -> tuple[dict, str]:
+    text = path.read_text("utf-8")
+    if not text.startswith("---\n"):
+        raise ValueError(f"Invalid frontmatter in {path}")
+    _, frontmatter, body = text.split("---", 2)
+    data = yaml.safe_load(frontmatter)
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        raise ValueError(f"Invalid frontmatter in {path}")
+    return data, body.strip()
+
+
+def _month_to_date(month: str) -> str:
+    return f"{month}-01"
+
+
+def _merge_edition_record(frontmatter: dict, meta: dict) -> list[dict]:
+    existing: list[dict] = []
+
+    raw_editions = frontmatter.get("editions")
+    if isinstance(raw_editions, list):
+        for item in raw_editions:
+            if isinstance(item, dict) and isinstance(item.get("edition"), int):
+                existing.append(dict(item))
+
+    legacy_edition = frontmatter.get("edition")
+    legacy_date = frontmatter.get("date")
+    if isinstance(legacy_edition, int) and not any(
+        item["edition"] == legacy_edition for item in existing
+    ):
+        legacy_month = str(legacy_date)[:7] if legacy_date else meta["editionDate"]
+        existing.append(
+            {
+                "edition": legacy_edition,
+                "editionDate": legacy_month,
+                "releaseTag": f"{meta['id']}_v{legacy_edition}",
+                "manifest": f"src/data/manifests/{meta['id']}_v{legacy_edition}.json",
+            }
+        )
+
+    edition = int(meta["edition"])
+    if any(item["edition"] == edition for item in existing):
+        raise SystemExit(f"Book entry already contains edition {edition}")
+
+    existing.append(
+        {
+            "edition": edition,
+            "editionDate": meta["editionDate"],
+            "releaseTag": meta["canonicalTag"],
+            "manifest": f"src/data/manifests/{meta['canonicalTag']}.json",
+        }
+    )
+    return sorted(existing, key=lambda item: item["edition"])
+
+
 # ---------------------------------------------------------------------------
 # validate
 # ---------------------------------------------------------------------------
@@ -72,7 +129,11 @@ def cmd_validate(args: list[str]):
     ap.add_argument("--release-id", required=True)
     ap.add_argument("--release-tag", required=True)
     ap.add_argument("--output", required=True)
+    ap.add_argument("--allow-edition-skip", action="store_true")
     opts = ap.parse_args(args)
+
+    if not opts.release_tag.startswith("ingest-"):
+        raise SystemExit("Intake Release tag must start with ingest-")
 
     ws = Path(opts.workspace)
     pdfs = sorted(ws.glob("*.pdf"))
@@ -105,6 +166,20 @@ def cmd_validate(args: list[str]):
     tag = f"{meta.id}_v{meta.edition}"
     filename = f"{tag}.pdf"
 
+    allow_edition_skip = opts.allow_edition_skip or os.environ.get(
+        "ALLOW_EDITION_SKIP", ""
+    ).lower() in {"1", "true", "yes"}
+    edition_check = check_expected_edition(
+        ROOT,
+        meta.id,
+        meta.edition,
+        allow_edition_skip=allow_edition_skip,
+    )
+    for line in format_edition_check_lines(edition_check):
+        print(line)
+    if not edition_check.ok:
+        raise SystemExit(f"Edition validation failed: {edition_check.message}")
+
     # Dedup checks
     try:
         _gh("release", "view", tag)
@@ -125,8 +200,10 @@ def cmd_validate(args: list[str]):
     md_path = ROOT / "src" / "content" / "books" / f"{meta.id}.md"
     if _exists(md_path):
         existing = _load_frontmatter(md_path)
-        if existing.get("edition") == meta.edition:
-            raise SystemExit(f"Book entry {md_path} already has edition {meta.edition}")
+        if existing.get("title") and existing.get("title") != meta.title:
+            raise SystemExit(
+                f"Book title mismatch: existing {existing.get('title')} != PDF {meta.title}"
+            )
 
     duplicate_paths = (
         ROOT / "src" / "data" / "manifests" / f"{tag}.json",
@@ -149,10 +226,14 @@ def cmd_validate(args: list[str]):
         "subtitle": meta.subtitle,
         "author": meta.author,
         "edition": meta.edition,
+        "editionDate": meta.edition_date,
+        "editionDateSource": meta.edition_date_source,
+        "pdfCreateDate": meta.pdf_create_date,
         "description": meta.description,
         "tags": meta.tags,
         "language": meta.language,
-        "date": published_at[:10],
+        "date": _month_to_date(meta.edition_date),
+        "sourcePublishedAt": published_at,
         "series": meta.series,
         "volume": meta.volume,
         "totalVolumes": meta.total_volumes,
@@ -191,16 +272,31 @@ def cmd_generate(args: list[str]):
     id_ = meta["id"]
     edition = meta["edition"]
     pdf_path = Path(meta["sourcePdfPath"])
+    tag = meta["canonicalTag"]
+
+    # Cover / spine / outline / reading via book_assets.py
+    from book_assets import extract_book_assets
+    asset_paths = extract_book_assets(pdf_path, id_, edition, ROOT)
+    print("Assets generated via book_assets")
+
+    reading = json.loads(asset_paths["reading"].read_text(encoding="utf-8"))
+    page_count = reading.get("pageCount")
+    word_count = (reading.get("cjkCharacterCount") or 0) + (
+        reading.get("latinTokenCount") or 0
+    )
 
     # Markdown entry
-    date_str = meta.get("date", "")
     tags = meta.get("tags") or []
 
-    frontmatter = {
+    md_path = ROOT / "src" / "content" / "books" / f"{id_}.md"
+    existing_frontmatter: dict = {}
+    if md_path.exists():
+        existing_frontmatter, _ = _load_markdown_parts(md_path)
+
+    frontmatter: dict = {
         "id": id_,
         "title": meta["title"],
-        "edition": edition,
-        "date": date_str,
+        "description": meta["description"],
         "tags": tags,
     }
     for opt in (
@@ -217,6 +313,7 @@ def cmd_generate(args: list[str]):
     ):
         if meta.get(opt) is not None:
             frontmatter[opt] = meta[opt]
+    frontmatter["editions"] = _merge_edition_record(existing_frontmatter, meta)
 
     yaml_text = yaml.safe_dump(
         frontmatter,
@@ -225,7 +322,6 @@ def cmd_generate(args: list[str]):
         default_flow_style=False,
     )
     md_content = f"---\n{yaml_text}---\n\n{meta.get('description', '')}\n"
-    md_path = ROOT / "src" / "content" / "books" / f"{id_}.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md_content, encoding="utf-8")
     print(f"Written {md_path}")
@@ -234,9 +330,27 @@ def cmd_generate(args: list[str]):
     manifest_dir = ROOT / "src" / "data" / "manifests"
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "schemaVersion": 1,
-        "id": id_,
+        "schemaVersion": 2,
+        "bookId": id_,
+        "title": meta["title"],
         "edition": edition,
+        "editionDate": meta["editionDate"],
+        "editionDateSource": meta["editionDateSource"],
+        "pdfCreateDate": meta["pdfCreateDate"],
+        "description": meta["description"],
+        "creator": meta.get("author"),
+        "language": meta.get("language") or "zh-CN",
+        "releaseTag": meta["canonicalTag"],
+        "pdfFilename": meta["canonicalFilename"],
+        "downloadUrl": (
+            "https://github.com/"
+            f"{os.environ.get('GITHUB_REPOSITORY', 'Fulinte1966/CulturalSimmer')}"
+            f"/releases/download/{meta['canonicalTag']}/{meta['canonicalFilename']}"
+        ),
+        "githubAssetDigest": None,
+        "bytes": pdf_path.stat().st_size,
+        "pageCount": page_count,
+        "wordCount": word_count,
         "sourceReleaseId": meta["sourceReleaseId"],
         "sourceAssetId": meta["sourceAssetId"],
         "sourceSha256": meta["sourceSha256"],
@@ -264,11 +378,6 @@ def cmd_generate(args: list[str]):
         encoding="utf-8",
     )
     print(f"Written {manifest_path}")
-
-    # Cover / spine / outline / reading via book_assets.py
-    from book_assets import extract_book_assets
-    extract_book_assets(pdf_path, id_, edition, ROOT)
-    print("Assets generated via book_assets")
 
     # Summary stub
     summary_lines = [
@@ -304,6 +413,23 @@ def cmd_publish(args: list[str]):
         "--title", f"{meta['title']} (v{meta['edition']})",
         "--notes", f"Automated intake of {meta['canonicalFilename']}",
     )
+    digest = None
+    release_json = _gh("api", f"repos/:owner/:repo/releases/tags/{meta['canonicalTag']}")
+    if release_json:
+        release = json.loads(release_json)
+        for asset in release.get("assets", []):
+            if asset.get("name") == meta["canonicalFilename"]:
+                digest = asset.get("digest")
+                break
+
+    manifest_path = ROOT / "src" / "data" / "manifests" / f"{meta['canonicalTag']}.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["githubAssetDigest"] = digest
+        manifest_path.write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     print(f"Canonical Release {meta['canonicalTag']} created")
 
 

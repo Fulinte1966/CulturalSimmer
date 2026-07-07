@@ -1,180 +1,168 @@
 # 电子书上传工作流
 
-本文档记录当前电子书馆的 PDF 上传、自动导入、正式发布和网页部署流程。
+本文档记录当前 PDF 上传、临时 Release、自动导入、正式发布和网页部署流程。
 
 ## 核心原则
 
-- PDF 是人工录入书目元数据的唯一来源。
-- 不根据文件名、Release 标题或正文内容猜测书目信息。
-- 不手写 `downloadUrl`、`releaseTag`、`pdfFilename`、`classification` 或 `volume`。
-- 索书号和版次共同组成正式发布键：`F0-1-1_v1`。
-- 网页显示使用出版语义：`2026 年 6 月第 1 版`。
-- PDF 托管在 GitHub Releases；网页是 GitHub Pages 上的 Astro 静态站。
+- PDF 不进入 Git 历史，只托管在 GitHub Releases。
+- PDF XMP 是书目元数据来源；不根据文件名、Release 标题或正文内容猜测书目信息。
+- 不手写 `downloadUrl`、`releaseTag`、`pdfFilename`、`classification`、`volume` 等派生字段。
+- 正式发布键为 `{bookId}_v{edition}`，例如 `F0-1-1_v1`。
+- `prism:bookEdition` 必须由 PDF 声明；脚本只校验，不替 PDF 决定版次。
 
-## 上传者工作流
+## 本地上传入口
 
-1. 制作 PDF，并写入完整 XMP 元数据。
-2. 在 GitHub 创建临时 Release。
-3. 临时 Release tag 必须以 `ingest-` 开头，建议格式：
+推荐使用本地命令创建临时 ingest Release：
 
-   ```txt
-   ingest-YYYYMMDD-索书号-v版次
-   ```
+```bash
+npm run ebook:upload path/to/book.pdf
+```
 
-   示例：
+常用检查：
 
-   ```txt
-   ingest-20260707-F0-1-1-v1
-   ```
+```bash
+npm run ebook:upload path/to/book.pdf -- --dry-run
+npm run ebook:upload path/to/book.pdf -- --draft
+npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
+```
 
-4. 在临时 Release 中上传且只上传一个 PDF。
-5. 发布临时 Release。
-6. 等待 `Ingest PDF` GitHub Actions 工作流完成。
-7. 工作流成功后，`main` 分支会被自动提交，随后 `Deploy` 工作流自动部署网站。
+`--dry-run` 只做 preflight，不创建 Release。输出会包含：
 
-临时 Release 的标题和 PDF 文件名不会被用作书目数据来源。
+- 书名、索书号、PDF 声明版次；
+- 内容提要摘要；
+- `xmp:CreateDate`、`editionDate`；
+- 正式 tag、正式 PDF 文件名、临时 ingest tag；
+- 版次校验结果；
+- 本地和远程重复检查结果。
+
+`--allow-edition-skip` 默认不要使用。确需跳版时，本地脚本会把 `Allow-Edition-Skip: true` 写入临时 Release notes，ingest workflow 再据此放行；没有该标记时 CI 仍按不跳版规则失败。
+
+## 必填 PDF XMP 字段
+
+| 含义 | XMP 字段 | 规则 |
+|---|---|---|
+| 索书号 | `dc:identifier` | 必须符合索书号正则，且分类号存在 |
+| 主标题 | `dc:title` | 非空 |
+| 版次 | `prism:bookEdition` | 正整数，且必须符合仓库预期版次 |
+| 内容提要 | `dc:description` | 非空，不得为明显占位文本 |
+| PDF 创建日期 | `xmp:CreateDate` | 用于生成 `editionDate = YYYY-MM` |
+
+`dc:creator` 不再必填；缺失时前端隐藏作者栏。
+`dc:language` 不再必填；缺失时系统默认 `zh-CN`，前端默认不展示语言。
+
+## 可选 PDF XMP 字段
+
+| 含义 | XMP 字段或 PDF Info 键 |
+|---|---|
+| 作者、编者、整理者 | `dc:creator` |
+| 语言 | `dc:language` |
+| 副标题 | `prism:subtitle` |
+| 标签 | `dc:subject` |
+| 丛书 | `prism:publicationName` |
+| PDF 内部卷号 | `prism:volume` |
+| 出版者 | `dc:publisher` |
+| 来源 | `dc:source` |
+| 权利说明 | `dc:rights` |
+| 权利说明 URL | `xmpRights:WebStatement` |
+| 总册数 | `/EbookTotalVolumes` |
+| 人工阅读时间 | `/EbookReadtime` |
+
+LaTeX 源码可以使用项目自己的宏名，但最终写入 PDF XMP 时必须映射到标准字段，例如 `dc:identifier`、`dc:title`、`prism:bookEdition`、`dc:description`。
+
+## 版次校验规则
+
+导入前会读取 `src/content/books/{bookId}.md` 中的 `editions[]`。
+
+- 新书没有历史记录时，预期版次为 `1`。
+- 已有历史记录时，预期版次为已有最大 `edition + 1`。
+- PDF 声明的 `prism:bookEdition` 等于预期版次才通过。
+- 重复版次永远失败。
+- 默认不允许跳版。
+- 本地上传可传 `--allow-edition-skip` 允许跳版，但仍会显示警告。
+
+示例输出：
+
+```txt
+PDF 声明版次：2
+仓库已有最高版次：1
+脚本预期版次：2
+版次校验：通过
+```
+
+失败示例：
+
+```txt
+PDF 声明版次：2
+仓库已有最高版次：2
+脚本预期版次：3
+版次校验：失败，该版次已存在，应为第 3 版
+```
 
 ## 自动导入流程
 
 ```text
-临时 ingest-* Release 发布
-  -> 下载 Release 中的 PDF
-  -> 要求恰好 1 个 PDF
-  -> 计算 PDF SHA-256
+本地脚本创建 ingest-* Release
+  -> GitHub Actions 下载 Release 中唯一 PDF
   -> 读取并校验 PDF XMP 元数据
-  -> 计算正式 tag 和文件名
-  -> 检查重复 Release、Git tag、Markdown 和生成资产
+  -> 校验 PDF 版次是否等于仓库预期版次
   -> 生成 Markdown、manifest、封面、书脊、目录和阅读数据
   -> 运行检查、测试和生产构建
-  -> 创建正式 Release
-  -> 上传规范化 PDF
+  -> 创建正式 Release 并上传规范化 PDF
+  -> 读取 GitHub Release asset digest 写入 manifest
   -> 提交生成文件到 main
   -> 删除临时 Release 和临时 tag
   -> main push 触发 GitHub Pages 部署
 ```
 
-## 必需 PDF 元数据
+`Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
 
-| 含义 | XMP 字段 | 示例 | 规则 |
-|---|---|---|---|
-| 索书号 | `dc:identifier` | `F0-1-1` | 必须符合索书号正则，且分类号已存在 |
-| 主标题 | `dc:title` | `政治经济学基础知识` | 非空 |
-| 作者 | `dc:creator` | `《政治经济学基础知识》编写组` | 非空；无名作者显式写 `佚名` |
-| 版次 | `prism:bookEdition` | `1` | 正整数 |
-| 简介 | `dc:description` | `系统介绍……` | 非空 |
-| 语言 | `dc:language` | `zh-CN` | 非空 |
+## Markdown 书目记录
 
-## 可选 PDF 元数据
+Markdown 是书目级索引。版次统一记录在 `editions[]` 中：
 
-| 含义 | XMP 字段或 PDF Info 键 | 示例 |
-|---|---|---|
-| 副标题 | `prism:subtitle` | `资本主义部分` |
-| 标签 | `dc:subject` | `政治经济学, 资本主义` |
-| 丛书 | `prism:publicationName` | `青年自学丛书` |
-| PDF 内部卷号 | `prism:volume` | `1` |
-| 出版者 | `dc:publisher` | `人民出版社` |
-| 来源 | `dc:source` | `1975年版扫描本` |
-| 权利说明 | `dc:rights` | `版权归原作者所有` |
-| 授权说明 URL | `xmpRights:WebStatement` | `https://example.com/license` |
-| 总册数 | `/EbookTotalVolumes` | `2` |
-| 人工阅读时间 | `/EbookReadtime` | `120` |
-
-## 正式发布命名
-
-正式发布键由索书号和版次组成：
-
-```txt
-{bookId}_v{edition}
+```yaml
+---
+id: F0-1-1
+title: 政治经济学基础知识
+subtitle: 资本主义部分
+description: 系统介绍……
+author: 《政治经济学基础知识》编写组
+language: zh-CN
+editions:
+  - edition: 1
+    editionDate: "2026-06"
+    releaseTag: F0-1-1_v1
+    manifest: src/data/manifests/F0-1-1_v1.json
+  - edition: 2
+    editionDate: "2026-07"
+    releaseTag: F0-1-1_v2
+    manifest: src/data/manifests/F0-1-1_v2.json
+---
 ```
 
-示例：
+当前版不单独存冗余字段；系统自动取 `editions[].edition` 最大值作为默认展示和下载版本。
+
+## manifest
+
+每个版本都有独立 manifest：
 
 ```txt
-F0-1-1_v1
-```
-
-对应正式 PDF 文件名：
-
-```txt
-F0-1-1_v1.pdf
-```
-
-网页下载链接自动生成：
-
-```txt
-https://github.com/Fulinte1966/CulturalSimmer/releases/download/F0-1-1_v1/F0-1-1_v1.pdf
-```
-
-## 自动生成文件
-
-以 `F0-1-1` 第 1 版为例，导入成功后提交以下文件：
-
-```txt
-src/content/books/F0-1-1.md
 src/data/manifests/F0-1-1_v1.json
-src/data/outlines/F0-1-1_v1.json
-src/data/reading/F0-1-1_v1.json
-public/covers/F0-1-1_v1.png
-public/covers/F0-1-1_v1_spine.png
+src/data/manifests/F0-1-1_v2.json
 ```
 
-下载用 PDF 不进入 Git 历史，只保存在 GitHub Release。
+manifest 是版本文件事实记录，包含 `bookId`、`title`、`edition`、`editionDate`、`pdfCreateDate`、`description`、`creator`、`language`、`releaseTag`、`pdfFilename`、`downloadUrl`、`githubAssetDigest`、`bytes`、`pageCount`、`wordCount` 等字段。
 
-## 新版发布规则
+GitHub Release asset digest 由 GitHub 提供，系统读取并记录；不要求人工计算 SHA，也不在前台展示。
 
-同一本书发布新版时：
+## 前端展示
 
-- `dc:identifier` 保持不变。
-- `prism:bookEdition` 递增。
-- 新正式 Release 为新的 `{bookId}_v{edition}`。
-- Markdown 书目记录更新为最新版。
-- 网页下载入口指向当前 Markdown 记录的最新版。
+详情页只展示读者关心的信息：
 
-示例：
+- 卷册：`上册`、`中册`、`下册` 或 `第 n 册`；
+- 页数、字数、文件大小；
+- `YYYY 年 M 月第 n 版`；
+- 内部书号，如 `F0/1:1`；
+- 内容提要。
 
-```txt
-F0-1-1_v1 -> 2026 年 6 月第 1 版
-F0-1-1_v2 -> 2026 年 7 月第 2 版
-```
-
-## 重复检查
-
-导入会拒绝覆盖已有发布。以下任一项存在都会失败：
-
-- 正式 GitHub Release；
-- 正式 Git tag；
-- 同一书目 Markdown 已记录相同 `edition`；
-- 同名 manifest；
-- 同名封面、书脊、目录或阅读数据文件。
-
-## 失败与回滚
-
-- 元数据、重复检查、测试或构建失败：不创建正式 Release，不提交。
-- 正式 Release 创建成功但提交或推送失败：删除正式 Release 和正式 tag。
-- 推送成功后临时 Release 删除失败：不回滚已发布书籍，只在 Actions 摘要中提示。
-- 不使用 force push。
-
-## 部署流程
-
-导入工作流提交到 `main` 后，`Deploy` 工作流自动运行：
-
-```text
-npm ci
-npm run test:ui
-npm run validate
-npm run check
-npm run build
-```
-
-部署工作流还会每天北京时间 00:00 定时运行一次，用于刷新静态天气等每日数据。
-
-## 上传前建议检查
-
-上传前建议人工确认：
-
-- PDF 能正常打开，且不是加密文件。
-- PDF XMP 元数据完整。
-- 索书号分类存在于 `src/data/classifications.yml`。
-- 版次没有和已有发布重复。
-- 临时 Release 中只有一个 PDF。
-- 临时 tag 以 `ingest-` 开头。
+详情页不展示 digest、releaseTag、downloadUrl、pdfFilename、manifest path、Git tag、GitHub asset id 等系统字段。

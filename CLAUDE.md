@@ -54,7 +54,7 @@ Markdown books (src/content/books/*.md)
         → Components (BookCard, BookCover, BookMeta, Outline, ReadingStats, DownloadButton)
 ```
 
-All derived fields — `downloadUrl`, `release_tag`, `pdf_filename`, `classification`, `volume` — are computed from `id` + `edition` by `bookId.ts` and `books.ts`. Never hand-write them in book markdown frontmatter.
+All derived fields — `downloadUrl`, `release_tag`, `pdf_filename`, `classification`, `volume` — are computed from `id` + the latest `editions[].edition` by `bookId.ts` and `books.ts`. Never hand-write them in book markdown frontmatter.
 
 `subtitle` is explicit metadata from frontmatter (or XMP). Never derive it from parentheses in `title`.
 
@@ -89,7 +89,7 @@ All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves 
 | `src/lib/site.ts` | `siteConfig` — `githubOwner`, `githubRepo`, `weatherCity`, `frontPageSlogan` |
 | `src/lib/basePath.ts` | `joinBasePath(base, pathname)` — joins base URL and pathname avoiding double slashes |
 | `src/lib/uapis.ts` | API client for uapis.cn — Chinese calendar (lunar dates, holidays) and weather data. Both server-side (Astro frontmatter) and client-side (`<script>` fetch in index.astro) |
-| `src/content/config.ts` | Zod schema — validates id, title, subtitle, edition, date, tags, author, cover, total_volumes, readtime |
+| `src/content/config.ts` | Zod schema — validates id, title, subtitle, description, tags, author, cover, editions, total_volumes, readtime |
 | `src/components/Layout.astro` | Standard catalog layout — branded header + 3-item nav (新书/索引/总览) |
 | `src/components/NewspaperLayout.astro` | Full-page Figma-designed wrapper — no nav, minimal `<html>` skeleton. Used by homepage and book detail |
 | `src/components/BookCover.astro` | Dual-mode cover component — `flat` (2D card) and `model` (3D CSS pseudo-elements) |
@@ -99,6 +99,8 @@ All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves 
 | `src/data/reading-config.json` | Reading speed config (CJK: 300 chars/min, Latin: 265 words/min) |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics via PyMuPDF |
 | `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation |
+| `scripts/ebook_upload.py` | Local preflight + temporary ingest Release creation |
+| `scripts/edition_policy.py` | Shared edition sequencing checks for local upload and CI ingest |
 | `scripts/ingest_pdf.py` | GitHub Actions orchestration — validates, generates, publishes, and cleans up PDF ingestion |
 | `scripts/validate-books.ts` | Standalone validator (used in CI) — checks call numbers, editions, classifications, outlines |
 | `scripts/requirements.txt` | Python dependencies: PyMuPDF, PyYAML, defusedxml |
@@ -219,20 +221,11 @@ Custom JavaScript API (`search.astro`) — dynamic import of `pagefind/pagefind.
 ### XMP-based ingestion
 
 1. Compile PDF with XMP metadata (see `reference/figma-handoff/pdf-metadata-contract.md` for required fields)
-2. Create temporary GitHub Release with tag `ingest-YYYYMMDD-HHMM`, attach PDF
-3. GitHub Actions (`ingest-pdf.yml`) extracts XMP, validates, generates all assets, creates canonical Release
+2. Run `npm run ebook:upload path/to/book.pdf -- --dry-run`
+3. Run `npm run ebook:upload path/to/book.pdf`
+4. GitHub Actions (`ingest-pdf.yml`) extracts XMP, validates expected edition sequencing, generates all assets/manifests, creates canonical Release, commits generated files, and deletes the temporary ingest Release
 
-### Manual entry
-
-1. Determine call number (e.g., `A12-8-2`)
-2. Create `src/content/books/A12-8-2.md` with frontmatter (id, title, subtitle?, edition, date, tags, author?, cover?, total_volumes?, readtime?)
-3. Generate static assets from PDF:
-   ```bash
-   pip install PyMuPDF
-   python scripts/extract-book-assets.py path/to/A12-8-2_v1.pdf A12-8-2 1
-   ```
-   This produces: `public/covers/{id}_v{edition}.png`, `public/covers/{id}_v{edition}_spine.png`, `src/data/outlines/{id}_v{edition}.json`, `src/data/reading/{id}_v{edition}.json`
-4. Commit the .md and all generated assets, push to `main`
+Manual entries are discouraged. If emergency repair is needed, keep markdown in the `editions[]` shape and let generated asset names continue to use `{id}_v{edition}`.
 
 ## Constraints
 

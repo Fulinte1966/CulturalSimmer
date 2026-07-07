@@ -12,6 +12,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).parent))
 import ingest_pdf
+from edition_policy import check_expected_edition
 
 
 class IngestPdfTests(unittest.TestCase):
@@ -88,6 +89,9 @@ class IngestPdfTests(unittest.TestCase):
                 "subtitle": "副题",
                 "author": "作者",
                 "edition": 2,
+                "editionDate": "2026-06",
+                "editionDateSource": "xmp:CreateDate",
+                "pdfCreateDate": "2026-06-18T21:32:10+08:00",
                 "date": "2026-06-21",
                 "tags": ["甲", "乙"],
                 "description": "简介。",
@@ -97,12 +101,30 @@ class IngestPdfTests(unittest.TestCase):
                 "sourceSha256": "abc",
                 "sourcePdfPath": str(root / "fixture.pdf"),
                 "canonicalTag": "F0-9_v2",
+                "canonicalFilename": "F0-9_v2.pdf",
             }
+            (root / "fixture.pdf").write_bytes(b"fixture")
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False), encoding="utf-8"
             )
+            reading_path = root / "src/data/reading/F0-9_v2.json"
+
+            def fake_extract_book_assets(*args, **kwargs):
+                reading_path.parent.mkdir(parents=True, exist_ok=True)
+                reading_path.write_text(
+                    json.dumps(
+                        {
+                            "pageCount": 12,
+                            "cjkCharacterCount": 100,
+                            "latinTokenCount": 2,
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                return {"reading": reading_path}
+
             fake_assets = types.SimpleNamespace(
-                extract_book_assets=lambda *args, **kwargs: None
+                extract_book_assets=fake_extract_book_assets
             )
 
             with patch.object(ingest_pdf, "ROOT", root), patch.dict(
@@ -115,11 +137,44 @@ class IngestPdfTests(unittest.TestCase):
             markdown = (root / "src/content/books/F0-9.md").read_text("utf-8")
             frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
             self.assertEqual(frontmatter["title"], metadata["title"])
+            self.assertEqual(frontmatter["editions"][0]["edition"], 2)
+            self.assertNotIn("edition", frontmatter)
             manifest = json.loads(
                 (root / "src/data/manifests/F0-9_v2.json").read_text("utf-8")
             )
+            self.assertEqual(manifest["editionDate"], "2026-06")
+            self.assertEqual(manifest["pageCount"], 12)
+            self.assertEqual(manifest["wordCount"], 102)
             self.assertEqual(manifest["sourceAssetId"], 20)
             self.assertTrue(manifest["generatedAt"])
+
+    def test_expected_edition_from_legacy_entry(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            books_dir = root / "src/content/books"
+            books_dir.mkdir(parents=True)
+            (books_dir / "F0-9.md").write_text(
+                "---\nid: F0-9\nedition: 1\ndate: 2026-06-01\n---\n",
+                encoding="utf-8",
+            )
+
+            check = check_expected_edition(root, "F0-9", 2)
+            self.assertTrue(check.ok)
+            self.assertEqual(check.expected_edition, 2)
+
+    def test_repeated_edition_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            books_dir = root / "src/content/books"
+            books_dir.mkdir(parents=True)
+            (books_dir / "F0-9.md").write_text(
+                "---\nid: F0-9\neditions:\n  - edition: 1\n    editionDate: \"2026-06\"\n---\n",
+                encoding="utf-8",
+            )
+
+            check = check_expected_edition(root, "F0-9", 1)
+            self.assertFalse(check.ok)
+            self.assertIn("已存在", check.message)
 
 
 if __name__ == "__main__":
