@@ -1,0 +1,17 @@
+---
+import { joinBasePath } from "../lib/basePath";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title} - 文火</title>
+{description && <meta name="description" content={description} />}
+<link rel="icon" type="image/svg+xml" href={joinBasePath(base, "favicon.svg")} />

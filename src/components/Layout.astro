@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import BaseHead from "./BaseHead.astro";
 import { joinBasePath } from "../lib/basePath";
 
 export type ActiveNav = "new" | "search" | "categories" | "overview";
@@ -27,11 +28,7 @@ const navItems: { id: ActiveNav; label: string; route: string }[] = [
   data-pagefind-ignore={searchable ? undefined : "all"}
 >
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} - 文火</title>
-    {description && <meta name="description" content={description} />}
-    <link rel="icon" type="image/svg+xml" href={joinBasePath(base, "favicon.svg")} />
+    <BaseHead title={title} description={description} />
   </head>
   <body>
     <header class="site-header" data-pagefind-ignore="all">
