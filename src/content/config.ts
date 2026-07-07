@@ -7,7 +7,7 @@ const books = defineCollection({
   schema: z.object({
     id: z.string().regex(bookIdRegex, "id must be a valid call number like A8-3 or A12-8-2"),
     title: z.string().min(1),
-    description: z.string().min(1).optional(),
+    description: z.string().min(1),
     author: z.string().optional(),
     subtitle: z.string().optional(),
     language: z.string().optional(),
@@ -32,7 +32,7 @@ const books = defineCollection({
           manifest: z.string().optional(),
         })
       )
-      .optional(),
+      .min(1),
   }),
 });
 

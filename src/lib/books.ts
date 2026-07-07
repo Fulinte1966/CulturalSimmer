@@ -29,7 +29,7 @@ export type CoverKind = "explicit" | "generated" | "placeholder";
 export interface BookMeta {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   subtitle?: string;
   author?: string;
   language?: string;
