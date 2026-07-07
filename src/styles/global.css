@@ -8,175 +8,175 @@
   font-family: "Home Source Han Sans SC";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/SourceHanSansSC-Medium.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/SourceHanSansSC-Medium.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Source Han Sans SC:Medium";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/SourceHanSansSC-Medium.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/SourceHanSansSC-Medium.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Glow Sans SC";
   font-style: normal;
   font-weight: 800;
-  src: url("/ebook-library/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Glow Sans SC:Compressed_ExtraBold";
   font-style: normal;
   font-weight: 800;
-  src: url("/ebook-library/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Zhuque Fangsong";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Zhuque Fangsong (technical preview):Regular";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongRegular.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongRegular.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:Bold";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:Medium";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:TextMedium";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu Compact";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu Compact";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:CompactRegular";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:CompactBold";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu Wide";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Jinshu Wide";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "BookDetail Jinshu Wide Regular";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:WideRegular";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉锦书宋:WideBold";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home Chill Duanhei";
   font-style: normal;
   font-weight: 300;
-  src: url("/ebook-library/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
 }
 
 @font-face {
   font-family: "寒蝉端黑宋:Wide_Light";
   font-style: normal;
   font-weight: 300;
-  src: url("/ebook-library/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
 }
 
 @font-face {
   font-family: "Home LXGW ZhiSong";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "LXGW Neo ZhiSong Screen:Regular";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
 }
 
 @font-face {
@@ -184,7 +184,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range:
@@ -203,7 +203,7 @@
   font-style: normal;
   font-weight: 700 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range:
@@ -222,7 +222,7 @@
   font-style: normal;
   font-weight: 400 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range:
@@ -241,7 +241,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -252,7 +252,7 @@
   font-style: normal;
   font-weight: 700 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -274,7 +274,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -285,7 +285,7 @@
   font-style: normal;
   font-weight: 700 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -295,7 +295,7 @@
   font-family: "CS Jinshu";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongRegular.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongRegular.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -303,7 +303,7 @@
   font-family: "CS Jinshu";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongMedium.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -311,7 +311,7 @@
   font-family: "CS Jinshu";
   font-style: normal;
   font-weight: 700 900;
-  src: url("/ebook-library/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSongBold.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -320,7 +320,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -331,7 +331,7 @@
   font-style: normal;
   font-weight: 700 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -341,7 +341,7 @@
   font-family: "CS Jinshu Compact";
   font-style: normal;
   font-weight: 400 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactRegular.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -349,7 +349,7 @@
   font-family: "CS Jinshu Compact";
   font-style: normal;
   font-weight: 700 900;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_CompactBold.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -358,7 +358,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -369,7 +369,7 @@
   font-style: normal;
   font-weight: 700 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -379,7 +379,7 @@
   font-family: "CS Jinshu Wide";
   font-style: normal;
   font-weight: 400 500;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideRegular.series.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -387,7 +387,7 @@
   font-family: "CS Jinshu Wide";
   font-style: normal;
   font-weight: 700 900;
-  src: url("/ebook-library/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/web/ChillJinshuSong_WideBold.web.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -396,7 +396,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -406,7 +406,7 @@
   font-family: "CS Fangsong";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/ZhuqueFangsong-Regular.ttf") format("truetype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -415,7 +415,7 @@
   font-style: normal;
   font-weight: 400 600;
   src:
-    url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype"),
     local("TeX Gyre Termes"),
     local("TeXGyreTermes-Regular");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -425,7 +425,7 @@
   font-family: "CS Zhisong";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
+  src: url("/CulturalSimmer/fonts/LXGWNeoZhiSongScreen.ttf") format("truetype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -434,7 +434,7 @@
   font-style: normal;
   font-weight: 400 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -444,7 +444,7 @@
   font-family: "CS Heiti";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/SourceHanSansSC-Medium.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/SourceHanSansSC-Medium.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -453,7 +453,7 @@
   font-style: normal;
   font-weight: 400 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -463,7 +463,7 @@
   font-family: "CS Heiti Display";
   font-style: normal;
   font-weight: 800 900;
-  src: url("/ebook-library/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/GlowSansSC-Compressed-ExtraBold.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -472,7 +472,7 @@
   font-style: normal;
   font-weight: 400 900;
   src:
-    url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype"),
+    url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype"),
     local("TeX Gyre Termes Bold"),
     local("TeXGyreTermes-Bold");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
@@ -482,7 +482,7 @@
   font-family: "CS Duanhei";
   font-style: normal;
   font-weight: 300;
-  src: url("/ebook-library/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/ChillDuanHeiSong_WideLight.otf") format("opentype");
   unicode-range: U+2E80-2EFF, U+3000-303F, U+31C0-31EF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF;
 }
 
@@ -490,7 +490,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 400;
-  src: url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -498,7 +498,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 500;
-  src: url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -506,7 +506,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 600;
-  src: url("/ebook-library/fonts/texgyretermes-regular.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-regular.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -514,7 +514,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 700;
-  src: url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -522,7 +522,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 800;
-  src: url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -530,7 +530,7 @@
   font-family: "CS Latin Termes";
   font-style: normal;
   font-weight: 900;
-  src: url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
@@ -538,7 +538,7 @@
   font-family: "CS Latin Termes Bold";
   font-style: normal;
   font-weight: 1 1000;
-  src: url("/ebook-library/fonts/texgyretermes-bold.otf") format("opentype");
+  src: url("/CulturalSimmer/fonts/texgyretermes-bold.otf") format("opentype");
   unicode-range: U+0020-007E, U+00A0-00FF, U+20A0-20CF, U+2100-214F, U+2150-218F, U+FF10-FF19, U+FF21-FF3A, U+FF41-FF5A;
 }
 
