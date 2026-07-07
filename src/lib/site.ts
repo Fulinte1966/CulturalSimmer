@@ -1,6 +1,6 @@
 export const siteConfig = {
-  githubOwner: "poyinte",
-  githubRepo: "ebook-library",
+  githubOwner: "Fulinte1966",
+  githubRepo: "CulturalSimmer",
   weatherCity: "北京",
   frontPageSlogan: [
     "你们要关心国家大事",

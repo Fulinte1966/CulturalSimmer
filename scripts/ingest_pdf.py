@@ -155,19 +155,19 @@ def cmd_validate(args: list[str]):
         "date": published_at[:10],
         "series": meta.series,
         "volume": meta.volume,
-        "total_volumes": meta.total_volumes,
-        "readtime": meta.readtime,
+        "totalVolumes": meta.total_volumes,
+        "readTime": meta.readtime,
         "publisher": meta.publisher,
         "source": meta.source,
         "rights": meta.rights,
-        "license_url": meta.license_url,
-        "canonical_tag": tag,
-        "canonical_filename": filename,
-        "source_release_id": int(opts.release_id),
-        "source_asset_id": int(matching_assets[0]["id"]),
-        "source_release_tag": opts.release_tag,
-        "source_sha256": sha,
-        "source_pdf_path": str(pdf_path),
+        "licenseUrl": meta.license_url,
+        "canonicalTag": tag,
+        "canonicalFilename": filename,
+        "sourceReleaseId": int(opts.release_id),
+        "sourceAssetId": int(matching_assets[0]["id"]),
+        "sourceReleaseTag": opts.release_tag,
+        "sourceSha256": sha,
+        "sourcePdfPath": str(pdf_path),
     }
     Path(opts.output).write_text(
         json.dumps(result, ensure_ascii=False, indent=2),
@@ -190,7 +190,7 @@ def cmd_generate(args: list[str]):
     meta = json.loads(Path(opts.metadata).read_text("utf-8"))
     id_ = meta["id"]
     edition = meta["edition"]
-    pdf_path = Path(meta["source_pdf_path"])
+    pdf_path = Path(meta["sourcePdfPath"])
 
     # Markdown entry
     date_str = meta.get("date", "")
@@ -206,13 +206,13 @@ def cmd_generate(args: list[str]):
     for opt in (
         "subtitle",
         "author",
-        "total_volumes",
-        "readtime",
+        "totalVolumes",
+        "readTime",
         "series",
         "publisher",
         "source",
         "rights",
-        "license_url",
+        "licenseUrl",
         "language",
     ):
         if meta.get(opt) is not None:
@@ -234,14 +234,14 @@ def cmd_generate(args: list[str]):
     manifest_dir = ROOT / "src" / "data" / "manifests"
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "schema_version": 1,
+        "schemaVersion": 1,
         "id": id_,
         "edition": edition,
-        "source_release_id": meta["source_release_id"],
-        "source_asset_id": meta["source_asset_id"],
-        "source_sha256": meta["source_sha256"],
-        "canonical_tag": meta["canonical_tag"],
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "sourceReleaseId": meta["sourceReleaseId"],
+        "sourceAssetId": meta["sourceAssetId"],
+        "sourceSha256": meta["sourceSha256"],
+        "canonicalTag": meta["canonicalTag"],
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metadata": {
             key: meta.get(key)
             for key in (
@@ -253,7 +253,7 @@ def cmd_generate(args: list[str]):
                 "publisher",
                 "source",
                 "rights",
-                "license_url",
+                "licenseUrl",
             )
             if meta.get(key) is not None
         },
@@ -273,8 +273,8 @@ def cmd_generate(args: list[str]):
     # Summary stub
     summary_lines = [
         f"## Ingest {id_} edition {edition}",
-        f"- SHA-256: `{meta['source_sha256']}`",
-        f"- Canonical tag: `{meta['canonical_tag']}`",
+        f"- SHA-256: `{meta['sourceSha256']}`",
+        f"- Canonical tag: `{meta['canonicalTag']}`",
         f"- Entry: `{md_path.relative_to(ROOT)}`",
     ]
     (ROOT / "_ingest_summary.md").write_text("\n".join(summary_lines))
@@ -292,19 +292,19 @@ def cmd_publish(args: list[str]):
     opts = ap.parse_args(args)
 
     meta = json.loads(Path(opts.metadata).read_text("utf-8"))
-    pdf_path = Path(meta["source_pdf_path"])
-    normalized_pdf = Path(opts.workspace) / meta["canonical_filename"]
+    pdf_path = Path(meta["sourcePdfPath"])
+    normalized_pdf = Path(opts.workspace) / meta["canonicalFilename"]
     if pdf_path.resolve() != normalized_pdf.resolve():
         shutil.copyfile(pdf_path, normalized_pdf)
 
     # Create canonical Release
     _gh(
-        "release", "create", meta["canonical_tag"],
+        "release", "create", meta["canonicalTag"],
         normalized_pdf.resolve().as_posix(),
         "--title", f"{meta['title']} (v{meta['edition']})",
-        "--notes", f"Automated intake of {meta['canonical_filename']}",
+        "--notes", f"Automated intake of {meta['canonicalFilename']}",
     )
-    print(f"Canonical Release {meta['canonical_tag']} created")
+    print(f"Canonical Release {meta['canonicalTag']} created")
 
 
 # ---------------------------------------------------------------------------
@@ -335,11 +335,11 @@ def cmd_cleanup(args: list[str]):
                 _gh(
                     "release",
                     "delete",
-                    meta["canonical_tag"],
+                    meta["canonicalTag"],
                     "--yes",
                     "--cleanup-tag",
                 )
-                print(f"Rolled back canonical Release {meta['canonical_tag']}")
+                print(f"Rolled back canonical Release {meta['canonicalTag']}")
             except subprocess.CalledProcessError:
                 pass
         print(f"Push did not succeed; keeping {opts.release_tag} for inspection")

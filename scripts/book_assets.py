@@ -110,13 +110,13 @@ def extract_book_assets(
     units_per_page = total_units / document.page_count
 
     reading: dict[str, Any] = {
-        "page_count": document.page_count,
-        "file_size_bytes": pdf_path.stat().st_size,
+        "pageCount": document.page_count,
+        "fileSizeBytes": pdf_path.stat().st_size,
     }
     if units_per_page >= config["sparse_text_units_per_page"]:
-        reading["cjk_character_count"] = cjk_count
-        reading["latin_token_count"] = latin_count
-        reading["estimated_minutes"] = estimate_reading_minutes(
+        reading["cjkCharacterCount"] = cjk_count
+        reading["latinTokenCount"] = latin_count
+        reading["estimatedMinutes"] = estimate_reading_minutes(
             cjk_count,
             latin_count,
             config["cjk_chars_per_minute"],

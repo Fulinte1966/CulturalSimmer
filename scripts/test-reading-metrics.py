@@ -97,7 +97,7 @@ class ReadingMetricTests(unittest.TestCase):
             self.assertTrue(outputs["reading"].exists())
 
             reading = json.loads(outputs["reading"].read_text(encoding="utf-8"))
-            self.assertEqual(reading["file_size_bytes"], pdf_path.stat().st_size)
+            self.assertEqual(reading["fileSizeBytes"], pdf_path.stat().st_size)
 
             cover = fitz.Pixmap(outputs["cover"])
             spine = fitz.Pixmap(outputs["spine"])

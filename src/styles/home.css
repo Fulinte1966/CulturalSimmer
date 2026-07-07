@@ -68,13 +68,13 @@
 
 .fm-date-line time,
 .fm-date-line span {
-  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+  font-family: var(--font-heiti);
   font-size: 16px;
   font-weight: 500;
 }
 
 .fm-date-line .fm-lunar {
-  font-family: "Zhuque Fangsong (technical preview):Regular", "Home Zhuque Fangsong", FangSong, STFangsong, serif;
+  font-family: var(--font-fangsong);
   font-weight: 400;
 }
 
@@ -102,7 +102,7 @@
   color: #fff;
   display: flex;
   flex-direction: column;
-  font-family: "Home Chill Jinshu Wide", "Home Chill Jinshu", serif;
+  font-family: var(--font-display-wide);
   font-size: 20px;
   font-weight: 700;
   gap: 6px;
@@ -137,7 +137,7 @@
 
 .fm-quote-copy p {
   color: #e22626;
-  font-family: "Home Chill Jinshu Compact", "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-family: var(--font-display-compact);
   font-size: 32px;
   font-weight: 400;
   letter-spacing: 8px;
@@ -188,7 +188,7 @@
   border: 1px solid transparent;
   column-gap: 0;
   display: flex;
-  font-family: "Home Chill Jinshu Compact", "Home Chill Jinshu", serif;
+  font-family: var(--font-display-compact);
   font-size: 24px;
   font-weight: 700;
   height: 180px;
@@ -205,12 +205,12 @@
 .fm-detail {
   flex: 0 0 1068px;
   height: 444px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
 .fm-feature-cover {
-  border-radius: 8px;
+  border-radius: 0;
   display: block;
   height: 408px;
   left: 0;
@@ -229,8 +229,21 @@
 }
 
 .fm-feature-cover:hover,
-.fm-book-list a:hover {
-  opacity: 0.9;
+.fm-feature-cover:focus-visible {
+  opacity: 1;
+  outline: 2px solid #000;
+  outline-offset: 4px;
+}
+
+.fm-book-list a:hover,
+.fm-book-list a:focus-visible {
+  opacity: 1;
+  outline: 0;
+}
+
+.fm-book-list a:hover::after,
+.fm-book-list a:focus-visible::after {
+  opacity: 1;
 }
 
 .fm-vertical-rule {
@@ -293,6 +306,8 @@
   background: #fff;
   display: flex;
   flex-direction: column;
+  font-feature-settings: "halt" 1, "palt" 1;
+  font-variant-east-asian: proportional-width;
   gap: 0;
   justify-content: center;
   text-align: center;
@@ -305,7 +320,7 @@
 }
 
 .fm-series {
-  font-family: "Home Chill Duanhei", "Source Han Sans SC", sans-serif;
+  font-family: var(--font-duanhei);
   font-size: 12px;
   font-weight: 300;
   line-height: 18px;
@@ -313,7 +328,7 @@
 }
 
 .fm-intro h1 {
-  font-family: "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
   line-height: 36px;
@@ -321,7 +336,7 @@
 }
 
 .fm-subtitle {
-  font-family: "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-family: var(--font-display-text-medium);
   font-size: 12px;
   font-weight: 500;
   line-height: 18px;
@@ -329,9 +344,10 @@
 }
 
 .fm-intro-body {
-  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", "Source Han Serif SC", serif;
+  font-family: var(--font-zhisong);
   font-size: 12px;
-  font-feature-settings: "dlig" 1;
+  font-feature-settings: "fwid" 1, "dlig" 1;
+  font-variant-east-asian: full-width;
   line-height: 18px;
   max-height: 250px;
   overflow: hidden;
@@ -362,9 +378,10 @@
 
 .fm-excerpt-inner {
   background: #fff;
-  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", "Source Han Serif SC", serif;
+  font-family: var(--font-zhisong);
   font-size: 12px;
-  font-feature-settings: "dlig" 1;
+  font-feature-settings: "fwid" 1, "dlig" 1;
+  font-variant-east-asian: full-width;
   height: 384px;
   line-height: 18px;
   padding: 24px;
@@ -387,7 +404,7 @@
 
 .fm-book-shelf {
   flex: 0 0 246px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   width: 1152px;
 }
@@ -405,7 +422,7 @@
   position: absolute;
   text-decoration: none;
   top: 0;
-  width: 164px;
+  width: 150px;
   z-index: 2;
 }
 
@@ -414,7 +431,7 @@
   background: url("/ebook-library/brand/shelf-badge.svg") center / contain no-repeat;
   color: #000;
   display: flex;
-  font-family: "Glow Sans SC", "Glow Sans SC:Compressed_ExtraBold", "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", sans-serif;
+  font-family: var(--font-heiti-display);
   font-size: 16px;
   font-weight: 800;
   height: 56px;
@@ -436,7 +453,7 @@
   align-items: center;
   color: #000;
   display: flex;
-  font-family: "寒蝉锦书宋:Medium", "Home Chill Jinshu", "Source Han Serif SC", serif;
+  font-family: var(--font-display-text-medium);
   font-size: 16px;
   font-weight: 500;
   gap: 12px;
@@ -475,58 +492,88 @@
   width: 12px;
 }
 
-.fm-book-list {
-  align-items: center;
+.fm-book-list-frame {
   cursor: grab;
-  display: flex;
-  gap: 12px;
-  height: 246px;
-  left: 180px;
-  list-style: none;
-  margin: 0;
+  height: 254px;
+  left: 176px;
+  overscroll-behavior-inline: contain;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 4px 0;
   position: absolute;
+  scroll-behavior: smooth;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
-  top: 0;
-  width: 984px;
+  touch-action: pan-y;
+  top: -5px;
+  width: 976px;
 }
 
-.fm-book-list::-webkit-scrollbar {
+.fm-book-list-frame::-webkit-scrollbar {
   display: none;
 }
 
-.fm-book-list::after {
-  background: linear-gradient(90deg, rgb(255 255 255 / 0%) 0%, #fff 100%);
-  content: "";
-  height: 246px;
-  pointer-events: none;
-  position: sticky;
-  right: 0;
-  top: 0;
-  width: 12px;
-  z-index: 2;
+.fm-book-list {
+  align-items: center;
+  display: flex;
+  gap: 0;
+  height: 254px;
+  list-style: none;
+  margin: 0;
+  padding: 2px 0;
+  transform: translateX(var(--fm-edge-pull, 0px));
+  width: max-content;
 }
 
-.fm-book-list.is-dragging {
+.fm-book-list-frame.is-dragging,
+.fm-book-list-frame.is-gliding,
+.fm-book-list-frame.is-rebounding,
+.fm-book-list-frame.is-snapping,
+.fm-book-list-frame.is-snap-paused {
+  scroll-behavior: auto;
+  scroll-snap-type: none;
+}
+
+.fm-book-list-frame.is-dragging {
   cursor: grabbing;
   user-select: none;
 }
 
+.fm-book-list-frame.is-rebounding .fm-book-list {
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .fm-book-list li {
-  flex: 0 0 168px;
-  height: 238px;
+  flex: 0 0 180px;
+  height: 250px;
+  overflow: visible;
+  padding: 6px;
   scroll-snap-align: start;
 }
 
 .fm-book-list a {
-  border-radius: 8px;
+  -webkit-user-drag: none;
+  border-radius: 0;
   display: block;
   height: 238px;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  user-select: none;
   width: 168px;
+}
+
+.fm-book-list a::after {
+  border: 2px solid #000;
+  content: "";
+  inset: -6px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.fm-book-list img {
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .fm-contact {
@@ -545,7 +592,7 @@
 .fm-address,
 .fm-weather-labels,
 .fm-weather-detail strong {
-  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", "Source Han Sans SC", sans-serif;
+  font-family: var(--font-heiti);
   font-size: 10px;
   font-weight: 500;
   line-height: 10px;
@@ -598,21 +645,31 @@
 .fm-weather-detail {
   column-gap: 10px;
   display: grid;
-  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", serif;
+  font-family: var(--font-zhisong-natural);
   font-size: 10px;
-  font-feature-settings: "hwid" 1;
+  font-feature-settings: normal;
   grid-template-columns: repeat(4, max-content);
   grid-template-rows: repeat(2, max-content);
   line-height: 10px;
   white-space: nowrap;
 }
 
+.fm-weather-number {
+  display: inline-block;
+  font-family: var(--font-latin);
+  margin-inline: 0.14em;
+}
+
+.fm-weather-days .fm-weather-number {
+  margin-inline: 0 0.14em;
+}
+
 .fm-weather-days {
   column-gap: 15px;
   display: grid;
-  font-family: "LXGW Neo ZhiSong Screen:Regular", "Home LXGW ZhiSong", "LXGW Neo ZhiSong Screen", serif;
+  font-family: var(--font-zhisong-natural);
   font-size: 10px;
-  font-feature-settings: "hwid" 1;
+  font-feature-settings: normal;
   grid-template-columns: repeat(3, max-content);
   line-height: 10px;
   padding-left: 10px;

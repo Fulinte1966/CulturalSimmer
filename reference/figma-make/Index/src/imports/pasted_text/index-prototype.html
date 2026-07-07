@@ -1,0 +1,629 @@
+Create a high-fidelity structured prototype from my selected Figma frame named “Index”.
+
+This is a fixed 1280×980 Chinese retro book-index page. It should feel like a 1960s–1970s Chinese printed book catalogue, not a modern search page, not an ecommerce grid, and not a SaaS interface.
+
+The design language is: white paper background, black newspaper rules, large Chinese Song-style typography, TeX-style call numbers, a printed book-icon mode toggle, and a grid of repeated book covers.
+
+Use the selected Figma frame and its existing assets as the source of truth. Reuse the existing book-icon vector, the small “文火” logo, and the book-cover image. Do not replace them with generic icons, emojis, or placeholder cards.
+
+CORE PROTOTYPE IDEA
+
+This page has two index modes:
+
+1. CALL-NUMBER MODE / 书目索引
+2. KEYWORD MODE / 关键词
+
+The book icon on the upper-left of the index area is the mode toggle.
+
+Clicking the book icon switches between:
+- “书目索引” mode
+- “关键词” mode
+
+Do not create separate tabs, pills, nav buttons, or a modern segmented control. The book icon itself is the toggle.
+
+GLOBAL LAYOUT
+
+- Canvas: fixed 1280px wide × 980px high.
+- Background: #FFFFFF.
+- Main frame: 1152px wide, centered horizontally.
+- Main frame top: around 25px.
+- Internal layout must remain fixed in pixels.
+- The whole canvas may scale proportionally to fit the browser viewport, but do not make the internal layout responsive or mobile-stacked.
+- Preserve the large white space.
+- Do not add modern browser chrome, navbars, card shadows, gradients, glass effects, search boxes, blue links, or ecommerce UI.
+
+COLOR TOKENS
+
+- Paper background: #FFFFFF.
+- Primary black: #000000.
+- Pale inactive gray: rgba(0,0,0,0.15).
+- Use only black, white, pale gray, and the existing book-cover colors.
+- No blue links or modern accent colors.
+
+TYPOGRAPHY
+
+Use Chinese-first font stacks. Do not default to Inter.
+
+CSS font tokens:
+
+--font-serif: "寒蝉锦书宋", "Source Han Serif SC", "Noto Serif SC", serif;
+--font-body: "LXGW Neo ZhiSong Screen", "Source Han Serif SC", "Noto Serif SC", serif;
+--font-sans: "Source Han Sans SC", "Noto Sans SC", sans-serif;
+--font-display: "Glow Sans SC", "Source Han Sans SC", sans-serif;
+--font-latin: "TeX Gyre Termes", "Times New Roman", serif;
+
+Use tight printed line-height. Simulate leading-trim visually with exact line-height, flex centering, and careful vertical alignment.
+
+COMPONENT STRUCTURE
+
+Implement as a clean componentized prototype, preferably React + CSS or semantic HTML/CSS.
+
+Component tree:
+
+- App
+  - IndexPage
+    - TopHeader
+      - Breadcrumb
+      - HeaderRight
+        - MiniLogo
+        - DateLine
+      - HeaderRule
+    - IndexSystem
+      - IndexModeToggle
+      - IndexControlPanel
+        - PrintedRuleTop
+        - CallNumberTree
+        - KeywordSearchLine
+        - PrintedRuleBottom
+      - BookResultsGrid
+      - Pagination
+
+STATE MODEL
+
+Use these states:
+
+- mode: "callNumber" | "keyword"
+- browseNode: string | null
+- selectedNode: string | null
+- keywordQuery: string
+- currentPage: number
+
+Initial state:
+- mode = "callNumber"
+- browseNode = "root"
+- selectedNode = null
+- keywordQuery = ""
+- currentPage = 1
+
+TOP HEADER
+
+Create a shared TopHeader component:
+
+- Width: 1152px.
+- Height: 36px.
+- Position at top of frame.
+- Background: white, with a subtle lower white fade only if needed.
+- Black horizontal rule at y≈24px.
+- Rule thickness: visually 2px black.
+
+Breadcrumb, left side:
+- Text: “主页・索引”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Line-height: 100%.
+- Color: black.
+- It should look like a printed catalogue locator, not a web breadcrumb.
+- Do not make it blue or underlined.
+
+HeaderRight, right side:
+- Small black “文火” logo, then date.
+- Date text: “2026 年 6 月 24 日　星期三”
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Gap: 12px.
+- Color: black.
+- Keep the logo small, around 35–43px wide and 18px high.
+
+INDEX SYSTEM LAYOUT
+
+IndexSystem sits below the top header.
+
+The main index/search band:
+- Width: about 1056px.
+- Display as a horizontal row.
+- Left side: book icon toggle.
+- Right side: index content panel.
+- Align items to flex-start.
+
+IndexModeToggle:
+- Use the existing upper-left book icon vector from the Figma frame.
+- Size: about 108px × 62.59px.
+- It sits to the left of the index/search content.
+- Cursor pointer.
+- Clicking it toggles mode:
+  - callNumber → keyword
+  - keyword → callNumber
+
+In call-number mode:
+- Icon label text: “书目索引”
+- Font: Glow Sans SC.
+- Size: about 17px.
+- Weight: 800.
+- Letter-spacing: 0.1em.
+- Color: black.
+
+In keyword mode:
+- Icon label text: “关键词”
+- Font: Glow Sans SC.
+- Size: about 22px.
+- Weight: 800.
+- Letter-spacing: 0.2em.
+- Color: black.
+
+Do not animate the icon like a modern switch. It is a clickable printed emblem.
+
+INDEX CONTROL PANEL
+
+The right-side panel contains the hierarchy/search line.
+
+- In call-number mode:
+  - Gap between icon and content: about 18px.
+  - Content width: about 930px.
+
+- In keyword mode:
+  - Gap between icon and content: about 36px.
+  - Content width: about 912px.
+
+PrintedRuleTop and PrintedRuleBottom:
+- Width: full content panel width.
+- Height: about 12px.
+- Use dense ornamental printed horizontal rule / micro-line.
+- Black.
+- Do not use a modern border or divider.
+
+CALL-NUMBER MODE OVERVIEW
+
+Call-number mode is not a simple accordion.
+
+It uses a two-channel index interaction:
+
+- Left call-number code column = hierarchy navigation.
+- Right Chinese label/reference column = result targeting / final selection.
+
+This distinction is essential.
+
+Do not treat the entire row as one identical clickable item.
+
+CALL-NUMBER DATA MODEL
+
+Use a simple call-number tree like this:
+
+callNumberTree = {
+  root: [
+    { code: "A", label: "马克思主义、列宁主义、毛泽东主义", children: ["A1", "A2", "A3", "A4", "A5", "A6", "A7"] },
+    { code: "B", label: "哲学" },
+    { code: "C", label: "社会科学总论" },
+    { code: "D", label: "政治" },
+    { code: "F", label: "经济" },
+    { code: "I", label: "文学" },
+    { code: "K", label: "历史、地理" }
+  ],
+  A: [
+    { code: "A", label: "马克思主义、列宁主义、毛泽东主义", type: "parent" },
+    { code: "A1", label: "马克思、恩格斯著作", children: ["A11", "A12", "A13", "A15", "A16", "A18"] },
+    { code: "A2", label: "列宁著作" },
+    { code: "A3", label: "斯大林著作" },
+    { code: "A4", label: "毛泽东著作" },
+    { code: "A5", label: "马克思、恩格斯、列宁、斯大林、毛泽东著作汇编" },
+    { code: "A6", label: "马克思、恩格斯、列宁、斯大林、毛泽东的生平和传记" },
+    { code: "A7", label: "马克思主义、列宁主义、毛泽东主义的学习、研究和参考资料" }
+  ],
+  A1: [
+    { code: "A", label: "马克思主义、列宁主义、毛泽东主义", type: "parent" },
+    { code: "A1", label: "马克思、恩格斯著作", type: "current" },
+    { code: "A11", label: "选集、文集、选读" },
+    { code: "A12", label: "单行著作" },
+    { code: "A13", label: "书信集、日记、函电" },
+    { code: "A15", label: "手迹" },
+    { code: "A16", label: "专题汇编" },
+    { code: "A18", label: "语录" }
+  ],
+  A18: [
+    { code: "A", label: "马克思主义、列宁主义、毛泽东主义", type: "parent" },
+    { code: "A1", label: "马克思、恩格斯著作", type: "parent" },
+    { code: "A18", label: "语录", type: "current" }
+  ]
+}
+
+CALL-NUMBER ROOT VIEW
+
+When browseNode = "root" and selectedNode = null, show only top-level categories:
+
+A　马克思主义、列宁主义、毛泽东主义
+B　哲学
+C　社会科学总论
+D　政治
+F　经济
+I　文学
+K　历史、地理
+
+Root typography:
+- Code column:
+  - Font: TeX Gyre Termes.
+  - Weight: 700.
+  - Size: 36px.
+  - Line-height: 100%.
+  - Color: black.
+- Label column:
+  - Font: 寒蝉锦书宋.
+  - Weight: 900.
+  - Size: 36px.
+  - Line-height: 175%.
+  - Color: black.
+- Code x-position: about 18px.
+- Label x-position: about 83–116px, depending on view.
+- Row spacing should be large and print-like.
+- In root view, do not show the book grid unless needed; large white space is acceptable.
+
+CALL-NUMBER A BROWSING VIEW
+
+When the user clicks the code “A”:
+
+- browseNode = "A"
+- selectedNode = null
+
+Show:
+
+A　马克思主义、列宁主义、毛泽东主义
+A1　马克思、恩格斯著作
+A2　列宁著作
+A3　斯大林著作
+A4　毛泽东著作
+A5　马克思、恩格斯、列宁、斯大林、毛泽东著作汇编
+A6　马克思、恩格斯、列宁、斯大林、毛泽东的生平和传记
+A7　马克思主义、列宁主义、毛泽东主义的学习、研究和参考资料
+
+Typography:
+- A code:
+  - Black.
+  - TeX Gyre Termes.
+  - Weight: 700.
+  - Size: 36px.
+- A label:
+  - Black.
+  - 寒蝉锦书宋.
+  - Weight: 900.
+  - Size: 36px.
+- A1–A7 codes:
+  - TeX Gyre Termes.
+  - Weight: 700.
+  - Size: 36px.
+  - Color: rgba(0,0,0,0.15).
+- A1–A7 labels:
+  - 寒蝉锦书宋.
+  - Weight: 500.
+  - Size: 32px.
+  - Line-height: 150%.
+  - Color: black.
+
+Show the book grid below this index tree.
+
+CALL-NUMBER A1 BROWSING VIEW
+
+When the user clicks the code “A1” while browsing A:
+
+- browseNode = "A1"
+- selectedNode = null
+
+Show A as superordinate, A1 as current, and A1 subordinates:
+
+A　马克思主义、列宁主义、毛泽东主义
+A1　马克思、恩格斯著作
+A11　选集、文集、选读
+A12　单行著作
+A13　书信集、日记、函电
+A15　手迹
+A16　专题汇编
+A18　语录
+
+Typography:
+- A code and label remain prominent.
+- A1 code is pale gray rgba(0,0,0,0.15).
+- A1 label:
+  - Font: 寒蝉锦书宋.
+  - Weight: 500.
+  - Size: 32px.
+- A11–A18 codes:
+  - Font: TeX Gyre Termes.
+  - Weight: 700.
+  - Size: 36px.
+  - Color: rgba(0,0,0,0.15).
+- A11–A18 labels:
+  - Font: 寒蝉锦书宋.
+  - Weight: 400.
+  - Size: 24px.
+  - Line-height: 100%.
+  - Color: black.
+
+Show the book grid below this index tree.
+
+CALL-NUMBER TERMINAL / A18 VIEW
+
+When the user clicks the code “A18” while browsing A1:
+
+- browseNode = "A18"
+- selectedNode = null or "A18" if terminal browsing defaults to results.
+
+Show only the path:
+
+A　马克思主义、列宁主义、毛泽东主义
+A1　马克思、恩格斯著作
+A18　语录
+
+If A18 has no subordinate categories, keep the path compact and show results under A18.
+
+CALL-NUMBER COLUMN INTERACTION
+
+Render each row as two separate clickable elements:
+
+<CallNumberCode onClick={handleCodeClick(node)}>
+  A1
+</CallNumberCode>
+
+<CallNumberLabel onClick={handleLabelClick(node)}>
+  马克思、恩格斯著作
+</CallNumberLabel>
+
+Do not make the entire row one button.
+
+LEFT CODE COLUMN BEHAVIOR
+
+The left code column is for hierarchy browsing and going back.
+
+Examples:
+
+Click code “A”:
+- browseNode = "A"
+- selectedNode = null
+- Show A plus A1–A7.
+
+Click code “A1” while browsing A:
+- browseNode = "A1"
+- selectedNode = null
+- Show A, A1, and A11–A18.
+
+Click code “A18” while browsing A1:
+- browseNode = "A18"
+- selectedNode = null
+- Show A, A1, A18.
+- Show results for A18 if it is terminal.
+
+Going back:
+- If the current finalized state is A + A1 only, and the user clicks the code “A1”, return to browsing A:
+  - selectedNode = null
+  - browseNode = "A"
+  - Show A + A1/A2/A3/A4/A5/A6/A7.
+- If the user clicks code “A” from an A1 or A18 view, return to the root browsing view:
+  - selectedNode = null
+  - browseNode = "root"
+  - Show A/B/C/D/F/I/K.
+
+RIGHT LABEL COLUMN BEHAVIOR
+
+The right Chinese label column is for selecting / finalizing results.
+
+Examples:
+
+Click the label “马克思、恩格斯著作” beside A1:
+- selectedNode = "A1"
+- browseNode may remain "A1"
+- Show only:
+  A　马克思主义、列宁主义、毛泽东主义
+  A1　马克思、恩格斯著作
+- Then show the book results for A1.
+
+Click the label “语录” beside A18:
+- selectedNode = "A18"
+- Show only:
+  A　马克思主义、列宁主义、毛泽东主义
+  A1　马克思、恩格斯著作
+  A18　语录
+- Then show book results for A18.
+
+Clicking the right label should not expand children.
+It finalizes the target category and filters the results.
+
+VISUAL DIFFERENCE BETWEEN CODE AND LABEL
+
+Keep the two clickable areas subtly separate:
+
+Code column:
+- Cursor pointer.
+- No underline.
+- Slight opacity change on hover is allowed.
+- Meaning: browse hierarchy / go back.
+
+Label column:
+- Cursor pointer.
+- No underline.
+- No blue link.
+- Slight opacity change on hover is allowed.
+- Meaning: target this category and show results.
+
+Do not add arrows, chevrons, modern breadcrumbs, tabs, chips, or pills.
+The distinction must be implied by the printed two-column index structure.
+
+CALL-NUMBER EXAMPLE FLOW
+
+Initial:
+A / B / C / D / F / I / K
+
+Click code A:
+A + A1/A2/A3/A4/A5/A6/A7
+
+Click code A1:
+A + A1 + A11/A12/A13/A15/A16/A18
+
+Click label 马克思、恩格斯著作:
+A + A1 only
+Show A1 results
+
+Click code A1:
+A + A1/A2/A3/A4/A5/A6/A7
+No finalized selection
+
+Click code A1 again:
+A + A1 + A11/A12/A13/A15/A16/A18
+
+Click label 语录:
+A + A1 + A18 only
+Show A18 results
+
+This behavior is essential. Do not simplify it into ordinary accordion rows or normal category links.
+
+KEYWORD MODE
+
+When mode = "keyword":
+
+- Hide CallNumberTree.
+- Show KeywordSearchLine between the same two printed horizontal rules.
+- The book icon label changes to “关键词”.
+- Do not create a modern search input box.
+- Do not add a magnifying glass icon.
+- Do not add a search button.
+- The keyword line is just a large printed text line.
+
+KeywordSearchLine empty state:
+- Text: “请输入关键词检索”
+- Font: 寒蝉锦书宋.
+- Weight: 900.
+- Size: 36px.
+- Line-height: 100%.
+- Color: rgba(0,0,0,0.15).
+- Padding-left: about 18px.
+
+KeywordSearchLine active state:
+- Example query: “政治经济学”
+- Same font, weight, size, and line-height.
+- Color: black.
+
+Typing behavior:
+- Allow typing into this line if possible.
+- Press Enter or update the value to filter results.
+- If real typing is difficult in Figma Make, implement a clickable demo:
+  - Clicking the placeholder changes the query to “政治经济学”.
+
+Keyword results behavior:
+- Empty keyword mode:
+  - Show full book grid with 10 books.
+  - Show pagination.
+- Query “政治经济学”:
+  - Show only 2 book covers in the first row.
+  - Align them to the left.
+  - Preserve the large blank white space after the two results.
+  - Do not show chips, tags, filter panels, or a “no results” card.
+
+BOOK RESULTS GRID
+
+Create BookResultsGrid:
+
+- Width: 984px.
+- Height: 512px when showing 10 books.
+- Position under the index/search control band.
+- Columns: 5.
+- Rows: 2.
+- Book card size: 168px × 238px.
+- Actual image size inside: about 167.37px × 238px.
+- Horizontal x positions:
+  0, 204, 408, 612, 816.
+- Vertical y positions:
+  0, 274.
+- Horizontal gap: 36px.
+- Vertical gap: 36px.
+- Border radius: 8px.
+- No added shadow.
+- Reuse the same book-cover asset from Figma for all cards.
+
+Book card interaction:
+- Clicking any book card navigates to the existing Details page if available.
+- Hover may reduce opacity very subtly.
+- Do not show hover cards, metadata overlays, ratings, prices, or modern product UI.
+
+PAGINATION
+
+Show pagination only when grid results exist:
+
+“首页　上一页　第 1 页　共 2 页　下一页　尾页”
+
+- Font: LXGW Neo ZhiSong Screen.
+- Size: 12px.
+- Line-height: 14px.
+- Color: black.
+- Width: about 257px.
+- Centered below the grid.
+- Looks like printed catalogue navigation, not modern pagination buttons.
+- Items may be clickable but should not be blue, boxed, underlined, or pill-shaped.
+
+RENDERING RULES
+
+Call-number mode:
+- browseNode = "root", selectedNode = null:
+  - Show A/B/C/D/F/I/K.
+  - Do not show the grid, or keep it absent/low priority.
+
+- browseNode = "A", selectedNode = null:
+  - Show A + A1/A2/A3/A4/A5/A6/A7.
+  - Show 10-book grid.
+
+- browseNode = "A1", selectedNode = null:
+  - Show A + A1 + A11/A12/A13/A15/A16/A18.
+  - Show 10-book grid.
+
+- selectedNode = "A1":
+  - Show only A + A1.
+  - Show results for A1.
+
+- selectedNode = "A18":
+  - Show only A + A1 + A18.
+  - Show results for A18.
+
+Keyword mode:
+- keywordQuery = "":
+  - Show “请输入关键词检索”.
+  - Show 10-book grid.
+
+- keywordQuery = "政治经济学":
+  - Show “政治经济学”.
+  - Show only 2 book covers.
+  - Keep the rest of the page blank white.
+
+VISUAL NEGATIVE CONSTRAINTS
+
+- Do not turn the keyword line into a modern search input.
+- Do not add a magnifying-glass icon.
+- Do not add tabs for “书目索引 / 关键词”.
+- Do not add accordion arrows, dropdowns, chips, filters, card shadows, colored labels, or modern pagination controls.
+- Do not make the page responsive.
+- Do not change the book-cover grid rhythm.
+- Do not make call numbers small.
+- Do not replace the book icon with an emoji or generic web icon.
+- Do not use Inter or Western-first typography.
+- Do not redesign this as a normal website index.
+
+ACCEPTANCE CRITERIA
+
+At 1280×980:
+
+- The top header matches the existing Details/Index header style.
+- The page has a fixed 1152px-centered print layout.
+- The upper-left book icon toggles between “书目索引” and “关键词”.
+- In 书目索引 mode, the left code column and right label column have different click behavior.
+- Clicking code A browses A’s children.
+- Clicking code A1 browses A1’s children.
+- Clicking the label “马克思、恩格斯著作” finalizes A1 and shows only A + A1 with results.
+- Clicking code A1 from that finalized state goes back to A + A1/A2/A3/A4/A5/A6/A7.
+- In 关键词 mode, the hierarchy becomes a large pale-gray search prompt.
+- Query “政治经济学” filters the grid to two books.
+- Book covers remain 168×238px in a 5-column printed catalogue grid.
+- Pagination remains tiny, centered, black, and print-like.
+- The final result must look like a Chinese printed catalogue page, not a modern web app.

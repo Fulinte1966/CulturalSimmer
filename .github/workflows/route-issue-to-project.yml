@@ -1,0 +1,264 @@
+name: Route issue to project
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: route-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  route-issue:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_OWNER: "Fulinte1966"
+      PROJECT_NUMBER: "1"
+      CALL_NUMBER_FIELD_NAME: "索书号"
+      BOOK_ERRATA_LABEL: "书籍勘误"
+      WEBSITE_BUG_LABEL: "网站捉虫"
+
+    steps:
+      - name: Detect issue type
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          labels="$(jq -r '[.issue.labels[].name] | @json' "$GITHUB_EVENT_PATH")"
+
+          has_book_errata=false
+          has_website_bug=false
+
+          if jq -e --arg label "$BOOK_ERRATA_LABEL" 'index($label)' <<< "$labels" > /dev/null; then
+            has_book_errata=true
+          fi
+
+          if jq -e --arg label "$WEBSITE_BUG_LABEL" 'index($label)' <<< "$labels" > /dev/null; then
+            has_website_bug=true
+          fi
+
+          if [ "$has_book_errata" = true ] && [ "$has_website_bug" = true ]; then
+            echo "issue_type=ambiguous" >> "$GITHUB_OUTPUT"
+          elif [ "$has_book_errata" = true ]; then
+            echo "issue_type=book-errata" >> "$GITHUB_OUTPUT"
+          elif [ "$has_website_bug" = true ]; then
+            echo "issue_type=website-bug" >> "$GITHUB_OUTPUT"
+          else
+            echo "issue_type=unknown" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stop if issue has no supported label
+        if: steps.detect.outputs.issue_type == 'unknown'
+        shell: bash
+        run: |
+          echo "No supported label found. Expected: $BOOK_ERRATA_LABEL or $WEBSITE_BUG_LABEL."
+          echo "Skip routing."
+
+      - name: Stop if issue has ambiguous labels
+        if: steps.detect.outputs.issue_type == 'ambiguous'
+        shell: bash
+        run: |
+          echo "Issue has both labels: $BOOK_ERRATA_LABEL and $WEBSITE_BUG_LABEL."
+          echo "Skip routing."
+
+      - name: Get project ID
+        id: project
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          project_id="$(
+            gh api graphql \
+              -f query='
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                    }
+                  }
+                }
+              ' \
+              -f owner="$PROJECT_OWNER" \
+              -F number="$PROJECT_NUMBER" \
+              --jq '.data.user.projectV2.id'
+          )"
+
+          if [ -z "$project_id" ] || [ "$project_id" = "null" ]; then
+            echo "Could not find user project: $PROJECT_OWNER / $PROJECT_NUMBER"
+            exit 1
+          fi
+
+          echo "project_id=$project_id" >> "$GITHUB_OUTPUT"
+          echo "Project ID found."
+
+      - name: Add issue to project
+        id: item
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          content_id="$(jq -r '.issue.node_id' "$GITHUB_EVENT_PATH")"
+
+          item_id="$(
+            gh api graphql \
+              -f query='
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: {
+                    projectId: $projectId
+                    contentId: $contentId
+                  }) {
+                    item {
+                      id
+                    }
+                  }
+                }
+              ' \
+              -f projectId="${{ steps.project.outputs.project_id }}" \
+              -f contentId="$content_id" \
+              --jq '.data.addProjectV2ItemById.item.id'
+          )"
+
+          if [ -z "$item_id" ] || [ "$item_id" = "null" ]; then
+            echo "Could not add issue to project."
+            exit 1
+          fi
+
+          echo "item_id=$item_id" >> "$GITHUB_OUTPUT"
+          echo "Issue added to project."
+
+      - name: Decide call number value
+        id: call_number
+        if: steps.detect.outputs.issue_type == 'book-errata' || steps.detect.outputs.issue_type == 'website-bug'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          issue_type="${{ steps.detect.outputs.issue_type }}"
+
+          if [ "$issue_type" = "website-bug" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "value=网站捉虫" >> "$GITHUB_OUTPUT"
+            echo "网站捉虫 issue: set 索书号 field to 网站捉虫."
+            exit 0
+          fi
+
+          title="$(jq -r '.issue.title // ""' "$GITHUB_EVENT_PATH")"
+          body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
+
+          book_id=""
+
+          # Preferred Make/Tally title format:
+          # F0-1-1_v1: J1J2MQo
+          if [[ "$title" =~ ^([^_[:space:]]+)_v[^:[:space:]]+: ]]; then
+            book_id="${BASH_REMATCH[1]}"
+          fi
+
+          # Fallback for Make body:
+          # 索书号：F0-1-1
+          if [ -z "$book_id" ]; then
+            book_id="$(
+              printf '%s\n' "$body" |
+              sed -nE 's/^索书号：[[:space:]]*(.+)$/\1/p' |
+              head -n 1 |
+              sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
+            )"
+          fi
+
+          if [ -z "$book_id" ] || [[ "$book_id" == MISSING* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "value=" >> "$GITHUB_OUTPUT"
+            echo "Book ID missing or invalid. Skip setting 索书号 field."
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "value=$book_id" >> "$GITHUB_OUTPUT"
+          echo "索书号 extracted: $book_id"
+
+      - name: Get call number field ID
+        id: call_number_field
+        if: steps.call_number.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          response="$(
+            gh api graphql \
+              -f query='
+                query($projectId: ID!) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      fields(first: 100) {
+                        nodes {
+                          ... on ProjectV2FieldCommon {
+                            id
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ' \
+              -f projectId="${{ steps.project.outputs.project_id }}"
+          )"
+
+          field_id="$(
+            jq -r --arg name "$CALL_NUMBER_FIELD_NAME" \
+              '.data.node.fields.nodes[] | select(.name == $name) | .id' \
+              <<< "$response"
+          )"
+
+          if [ -z "$field_id" ] || [ "$field_id" = "null" ]; then
+            echo "Could not find project field: $CALL_NUMBER_FIELD_NAME"
+            exit 1
+          fi
+
+          echo "field_id=$field_id" >> "$GITHUB_OUTPUT"
+          echo "索书号 field ID found."
+
+      - name: Set call number project field
+        if: steps.call_number.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          gh api graphql \
+            -f query='
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $text: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: {
+                    text: $text
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            ' \
+            -f projectId="${{ steps.project.outputs.project_id }}" \
+            -f itemId="${{ steps.item.outputs.item_id }}" \
+            -f fieldId="${{ steps.call_number_field.outputs.field_id }}" \
+            -f text="${{ steps.call_number.outputs.value }}"
+
+          echo "索书号 field updated: ${{ steps.call_number.outputs.value }}"

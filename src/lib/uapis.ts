@@ -68,7 +68,7 @@ function uapiFetch(pathname: string, params?: URLSearchParams): Promise<Response
   }
   return fetch(url, {
     headers: uapiAuthHeaders(),
-    signal: AbortSignal.timeout(3500),
+    signal: AbortSignal.timeout(8000),
   });
 }
 

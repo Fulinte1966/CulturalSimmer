@@ -32,6 +32,7 @@
   flex-direction: column;
   gap: 84px;
   margin: 0 auto;
+  min-height: calc(100vh - 50px);
   overflow: visible;
   position: relative;
   width: var(--bd-frame);
@@ -39,9 +40,21 @@
 }
 
 .bd-head {
+  background: #ffffff;
   height: 36px;
-  position: relative;
+  isolation: isolate;
+  position: sticky;
+  top: 25px;
   width: 100%;
+  z-index: 5;
+}
+
+.bd-head::before {
+  background: #ffffff;
+  content: "";
+  inset: -25px -64px 0;
+  position: absolute;
+  z-index: -1;
 }
 
 .bd-head::after {
@@ -111,11 +124,21 @@
 }
 
 .bd-proof {
+  background: transparent;
+  border: 0;
+  color: var(--bd-ink);
+  cursor: pointer;
   height: 67px;
+  padding: 0;
   position: absolute;
   right: 12px;
   top: 40px;
   width: 48px;
+}
+
+.bd-proof:focus-visible {
+  outline: 2px solid var(--bd-accent);
+  outline-offset: 4px;
 }
 
 .bd-proof-mark {
@@ -125,22 +148,34 @@
   width: 48px;
 }
 
-.bd-proof span {
-  align-items: center;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  font-family: "Glow Sans SC:Compressed ExtraBold", "Home Glow Sans SC", sans-serif;
-  font-size: 16px;
-  font-weight: 800;
+.bd-proof-text {
   height: 24px;
-  justify-content: center;
-  left: 11px;
-  line-height: 24px;
+  left: 13px;
+  overflow: visible;
+  pointer-events: none;
   position: absolute;
-  text-align: center;
   top: 12px;
   width: 26px;
+}
+
+.bd-proof-text text {
+  font-family: var(--font-heiti-display);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 24px;
+}
+
+.bd-proof-text-under {
+  fill: #ffffff;
+  paint-order: stroke fill;
+  stroke: #ffffff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3px;
+}
+
+.bd-proof-text-front {
+  fill: #000000;
 }
 
 .bd-main {
@@ -152,28 +187,60 @@
   position: relative;
 }
 
+.bd-main::before {
+  content: "";
+  flex: 0 0 300px;
+  width: 300px;
+}
+
 .bd-cover-stage {
   align-items: center;
   display: flex;
-  height: 480px;
+  height: calc(100vh - 50px);
   justify-content: center;
-  position: relative;
-  width: 284px;
+  left: max(calc(50vw - 504px), 136px);
+  overflow: visible;
+  position: fixed;
+  top: 25px;
+  width: 300px;
+  z-index: 2;
 }
 
 .bd-cover-stage .book-cover--model {
   --book-size: 28px;
+  --border-color: rgb(191 191 191);
+  --model-border: 3px;
+  --model-offset-x: 13px;
+  --model-offset-y: 13px;
   --model-width: 284px;
-  --model-pages-height: 270px;
-  --model-shadow-extra-height: 18px;
-  --model-shadow-extra-width: 8px;
-  --model-shadow-offset: 8px;
+  --model-pages-height: 275px;
+  --model-pages-fine: 5px;
+  --model-radius: 0px;
+  --model-scale: 0.96;
+  --model-skew: -8deg;
+  --model-spine-brightness: 0.8;
+  --shadow-blur: 64px;
+  --shadow-bottom-left-x: -436px;
+  --shadow-bottom-left-y: -282px;
+  --shadow-bottom-right-x: -459px;
+  --shadow-bottom-right-y: -300px;
+  --shadow-depth: 0.4;
+  --shadow-element-height: 520px;
+  --shadow-fade-body: 13%;
+  --shadow-fade-mid: 0%;
+  --shadow-fade-right: 95%;
+  --shadow-fade-size: 5%;
+  --shadow-fade-top: 2%;
+  --shadow-offset-x: 37px;
+  --shadow-offset-y: 4px;
+  --shadow-opacity: 1;
+  --shadow-texture-opacity: 0.42;
+  --shadow-texture-size: 48px;
+  --shadow-top-left: 4px;
+  --shadow-top-right: 3px;
+  --shadow-width: -166px;
   aspect-ratio: var(--cover-ratio);
-  width: 284px;
-}
-
-.bd-cover-stage .book-cover--model .book-cover-surface {
-  border-color: rgb(0 0 0 / 20%);
+  width: var(--model-width);
 }
 
 .bd-text {
@@ -181,6 +248,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow: visible;
   position: relative;
   text-align: center;
   width: 660px;
@@ -194,16 +262,52 @@
   width: 100%;
 }
 
+.bd-text-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.bd-text-content[hidden] {
+  display: none;
+}
+
+.bd-text--errata {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.bd-errata-panel {
+  text-align: left;
+  width: 540px;
+}
+
+.bd-errata-panel[hidden] {
+  display: none;
+}
+
+.bd-errata-panel iframe {
+  border: 0;
+  display: block;
+  height: auto;
+  overflow: hidden;
+  width: 100%;
+}
+
 .bd-title-block {
   align-items: center;
   display: flex;
   flex-direction: column;
+  font-feature-settings: "halt" 1, "palt" 1;
+  font-variant-east-asian: proportional-width;
   gap: 6px;
   width: 100%;
 }
 
 .bd-series {
-  font-family: "Home Chill Jinshu Wide", "BookDetail Jinshu Wide Regular", "寒蝉锦书宋:WideRegular", "Songti SC", serif;
+  font-family: var(--font-display-wide);
   font-size: 36px;
   font-feature-settings: "hwid", "fwid", "dlig";
   font-synthesis: none;
@@ -212,7 +316,7 @@
 }
 
 .bd-title-block h1 {
-  font-family: "Home Chill Jinshu Compact", var(--font-display-compact);
+  font-family: var(--font-display-compact);
   font-size: 84px;
   font-weight: 400;
   letter-spacing: 0;
@@ -227,7 +331,7 @@
 }
 
 .bd-subtitle {
-  font-family: "Home Chill Jinshu", var(--font-display);
+  font-family: var(--font-display-text-medium);
   font-size: 40px;
   font-weight: 500;
   line-height: 1;
@@ -273,17 +377,29 @@
 }
 
 .bd-edition-row {
-  align-items: flex-start;
-  display: inline-flex;
-  flex-direction: column;
-  height: 12px;
-  justify-content: flex-start;
-  width: 184px;
+  display: grid;
+  gap: 2px 10px;
+  height: auto;
+  justify-content: center;
+  min-width: 184px;
+  width: max-content;
+}
+
+.bd-edition-row--single {
+  justify-items: center;
+  width: 100%;
+}
+
+.bd-edition-row--grid {
+  grid-template-columns: repeat(2, auto);
+  justify-content: start;
+  justify-items: start;
+  min-width: 0;
 }
 
 .bd-volume-row {
   color: var(--bd-ink);
-  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", sans-serif;
+  font-family: var(--font-heiti);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 12px;
@@ -325,11 +441,6 @@
   width: 83px;
 }
 
-.bd-download-link:hover,
-.bd-download-link:focus-visible {
-  color: var(--bd-accent);
-}
-
 .bd-download-mark {
   display: block;
   height: 44px;
@@ -339,7 +450,7 @@
 
 .bd-download-label {
   color: var(--bd-ink);
-  font-family: "Glow Sans SC:Compressed ExtraBold", "Home Glow Sans SC", sans-serif;
+  font-family: var(--font-heiti-display);
   font-size: 16px;
   font-weight: 800;
   left: 33px;
@@ -350,7 +461,6 @@
   top: 9px;
 }
 
-.bd-download-link,
 .bd-secondary-actions a {
   align-items: center;
   background: #ffffff;
@@ -359,11 +469,6 @@
   justify-content: center;
   line-height: 12px;
   padding: 4px 0;
-}
-
-.bd-download-link {
-  font-family: "Home Chill Jinshu", var(--font-display);
-  font-weight: 500;
 }
 
 .bd-secondary-actions {
@@ -377,7 +482,7 @@
 .bd-secondary-actions a {
   color: var(--bd-ink);
   gap: 12px;
-  font-family: "Home Chill Jinshu", var(--font-display);
+  font-family: var(--font-display-text-medium);
   font-weight: 500;
   min-height: 20px;
 }
@@ -425,7 +530,7 @@
 
 .bd-abstract h2,
 .bd-outline h2 {
-  font-family: "Source Han Sans SC:Medium", "Home Source Han Sans SC", sans-serif;
+  font-family: var(--font-heiti);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 12px;
@@ -437,6 +542,8 @@
 .bd-body {
   font-family: var(--font-zhisong);
   font-size: 12px;
+  font-feature-settings: "fwid" 1;
+  font-variant-east-asian: full-width;
   line-height: 1.5;
   text-align: left;
   width: 100%;
@@ -454,6 +561,8 @@
 .bd-outline-list {
   font-family: var(--font-zhisong);
   font-size: 12px;
+  font-feature-settings: "fwid" 1;
+  font-variant-east-asian: full-width;
   line-height: 1.5;
   list-style: none;
   margin: 0;

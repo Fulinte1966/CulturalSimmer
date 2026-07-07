@@ -4,3 +4,11 @@ dist/
 .cache/
 __pycache__/
 reference/web/
+reference/debug-archive/
+*.log
+*.err.log
+*.tmp
+*.bak
+*.local
+.env
+.env.*

@@ -19,7 +19,7 @@ const { book } = Astro.props;
   {book.parsed.isVolume && (
     <div class="meta-item">
       <span class="field-label">册次</span>
-      <span>{formatVolume(book.parsed.volumeNumber!, book.total_volumes)}</span>
+      <span>{formatVolume(book.parsed.volumeNumber!, book.totalVolumes)}</span>
     </div>
   )}
   <div class="meta-item">

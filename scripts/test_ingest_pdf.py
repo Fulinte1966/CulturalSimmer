@@ -31,9 +31,9 @@ class IngestPdfTests(unittest.TestCase):
                     {
                         "title": "标题",
                         "edition": 2,
-                        "canonical_tag": "F0-9_v2",
-                        "canonical_filename": "F0-9_v2.pdf",
-                        "source_pdf_path": str(source_pdf),
+                        "canonicalTag": "F0-9_v2",
+                        "canonicalFilename": "F0-9_v2.pdf",
+                        "sourcePdfPath": str(source_pdf),
                     },
                     ensure_ascii=False,
                 ),
@@ -56,7 +56,7 @@ class IngestPdfTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             metadata_path = Path(temp_dir) / "metadata.json"
             metadata_path.write_text(
-                json.dumps({"canonical_tag": "F0-9_v2"}), encoding="utf-8"
+                json.dumps({"canonicalTag": "F0-9_v2"}), encoding="utf-8"
             )
             calls: list[tuple[str, ...]] = []
 
@@ -92,11 +92,11 @@ class IngestPdfTests(unittest.TestCase):
                 "tags": ["甲", "乙"],
                 "description": "简介。",
                 "language": "zh-CN",
-                "source_release_id": 10,
-                "source_asset_id": 20,
-                "source_sha256": "abc",
-                "source_pdf_path": str(root / "fixture.pdf"),
-                "canonical_tag": "F0-9_v2",
+                "sourceReleaseId": 10,
+                "sourceAssetId": 20,
+                "sourceSha256": "abc",
+                "sourcePdfPath": str(root / "fixture.pdf"),
+                "canonicalTag": "F0-9_v2",
             }
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False), encoding="utf-8"
@@ -118,8 +118,8 @@ class IngestPdfTests(unittest.TestCase):
             manifest = json.loads(
                 (root / "src/data/manifests/F0-9_v2.json").read_text("utf-8")
             )
-            self.assertEqual(manifest["source_asset_id"], 20)
-            self.assertTrue(manifest["generated_at"])
+            self.assertEqual(manifest["sourceAssetId"], 20)
+            self.assertTrue(manifest["generatedAt"])
 
 
 if __name__ == "__main__":

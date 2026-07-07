@@ -47,11 +47,19 @@ try {
 
 const base = import.meta.env.BASE_URL;
 const callNumber = formatDisplayCallNumber(book.parsed);
+const tallyParams = new URLSearchParams({
+  alignLeft: "1",
+  transparentBackground: "1",
+  dynamicHeight: "1",
+  bookId: book.id,
+  edition: String(book.edition),
+});
+const tallyEmbedUrl = `https://tally.so/embed/XxyDOP?${tallyParams.toString()}`;
 const characterCount =
-  (book.reading?.cjk_character_count ?? 0) +
-  (book.reading?.latin_token_count ?? 0);
-const pageLabel = book.reading?.page_count
-  ? `${book.reading.page_count} 页`
+  (book.reading?.cjkCharacterCount ?? 0) +
+  (book.reading?.latinTokenCount ?? 0);
+const pageLabel = book.reading?.pageCount
+  ? `${book.reading.pageCount} 页`
   : undefined;
 const characterLabel = characterCount > 0
   ? `${(characterCount / 10000).toLocaleString("zh-CN", {
@@ -59,16 +67,17 @@ const characterLabel = characterCount > 0
       minimumFractionDigits: characterCount >= 10000 ? 1 : 0,
     })}${characterCount >= 10000 ? " 万" : ""}字`
   : undefined;
-const fileSizeLabel = book.reading?.file_size_bytes
-  ? `${(book.reading.file_size_bytes / 1024 / 1024).toLocaleString("zh-CN", {
+const fileSizeLabel = book.reading?.fileSizeBytes
+  ? `${(book.reading.fileSizeBytes / 1024 / 1024).toLocaleString("zh-CN", {
       maximumFractionDigits: 2,
       minimumFractionDigits: 2,
     })} 兆字节`
   : undefined;
 const volumeLabel = book.parsed.isVolume
-  ? formatShortVolume(book.parsed.volumeNumber!, book.total_volumes)
+  ? formatShortVolume(book.parsed.volumeNumber!, book.totalVolumes)
   : undefined;
 const editionLabel = formatEditionWithDate(book.date, book.edition);
+const editionLabels = [editionLabel];
 const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，${author}` : ""}。查看书目信息并下载 PDF。`;
 ---
 
@@ -98,17 +107,36 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           <span>{calendar.weekdayLabel}</span>
         </div>
 
-        <div class="bd-proof" aria-label="勘误">
-          <img
-            class="bd-proof-mark"
-            src={joinBasePath(base, "brand/proof-badge.svg")}
-            alt=""
-            width="48"
-            height="67"
-            aria-hidden="true"
-          />
-          <span>勘误</span>
-        </div>
+      <button
+        type="button"
+        class="bd-proof"
+        aria-label="勘误"
+        aria-expanded="false"
+        aria-controls="bd-errata-panel"
+        data-errata-label-open="返回"
+        data-errata-label-closed="勘误"
+        data-errata-toggle
+      >
+        <img
+          class="bd-proof-mark"
+          src={joinBasePath(base, "brand/proof-badge.svg")}
+          alt=""
+          width="48"
+          height="67"
+          aria-hidden="true"
+        />
+        <svg
+          class="bd-proof-text"
+          viewBox="0 0 26 24"
+          width="26"
+          height="24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <text class="bd-proof-text-under" x="13" y="12" text-anchor="middle" dominant-baseline="central" data-errata-toggle-text>勘误</text>
+          <text class="bd-proof-text-front" x="13" y="12" text-anchor="middle" dominant-baseline="central" data-errata-toggle-text>勘误</text>
+        </svg>
+      </button>
       </header>
 
       <section class="bd-main">
@@ -116,7 +144,8 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           <BookCover book={book} mode="model" pagefindMeta />
         </div>
 
-        <section class="bd-text" aria-labelledby="book-title">
+        <section class="bd-text" aria-labelledby="book-title" data-errata-region>
+          <div class="bd-text-content" data-book-detail-content>
           <div class="bd-info">
             <div class="bd-title-block">
               {book.series && <p class="bd-series">{book.series}</p>}
@@ -142,8 +171,14 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                   {characterLabel && <span>{characterLabel}</span>}
                   {fileSizeLabel && <span>{fileSizeLabel}</span>}
                 </div>
-                <div class="bd-edition-row">
-                  <span>{editionLabel}</span>
+                <div
+                  class:list={[
+                    "bd-edition-row",
+                    editionLabels.length === 1 && "bd-edition-row--single",
+                    editionLabels.length > 1 && "bd-edition-row--grid",
+                  ]}
+                >
+                  {editionLabels.map((label) => <span>{label}</span>)}
                 </div>
               </div>
               <div class="bd-call-row">内部书号 {callNumber}</div>
@@ -162,7 +197,6 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               />
               <span class="bd-download-label">传阅</span>
             </div>
-            <a class="bd-download-link" href={book.downloadUrl} target="_blank" rel="noopener noreferrer">下载 PDF</a>
             <div class="bd-secondary-actions">
               <a class="bd-button" href={joinBasePath(base, "books/")}>
                 <span class="bd-button-dot" aria-hidden="true"></span>
@@ -204,6 +238,28 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               }
             </section>
           </div>
+          </div>
+
+          <section
+            id="bd-errata-panel"
+            class="bd-errata-panel"
+            aria-label="读者勘误表"
+            data-errata-panel
+            tabindex="-1"
+            hidden
+          >
+            <iframe
+              data-tally-src={tallyEmbedUrl}
+              loading="lazy"
+              width="100%"
+              height="100"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+              scrolling="no"
+              title="读者勘误表"
+            ></iframe>
+          </section>
         </section>
       </section>
     </article>
@@ -217,14 +273,116 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
 </div>
 
 <script>
-  requestAnimationFrame(() => {
+  const freezeModelTransform = () => {
     requestAnimationFrame(() => {
-      const model = document.querySelector(
-        ".book-cover--model"
-      ) as HTMLElement | null;
-      if (model) {
-        const t = getComputedStyle(model).transform;
-        model.style.transform = t;
+      requestAnimationFrame(() => {
+        const model = document.querySelector(
+          ".book-cover--model"
+        ) as HTMLElement | null;
+        if (model) {
+          const t = getComputedStyle(model).transform;
+          model.style.transform = t;
+        }
+      });
+    });
+  };
+
+  freezeModelTransform();
+
+  const syncCoverStagePosition = () => {
+    const frame = document.querySelector<HTMLElement>(".bd-frame");
+    const coverStage = document.querySelector<HTMLElement>(".bd-cover-stage");
+    if (!frame || !coverStage) return;
+
+    const frameRect = frame.getBoundingClientRect();
+    coverStage.style.left = `${frameRect.left + 72}px`;
+  };
+
+  let coverStageFrame = 0;
+  const scheduleCoverStageSync = () => {
+    if (coverStageFrame) return;
+    coverStageFrame = requestAnimationFrame(() => {
+      coverStageFrame = 0;
+      syncCoverStagePosition();
+    });
+  };
+
+  syncCoverStagePosition();
+  window.addEventListener("resize", scheduleCoverStageSync, { passive: true });
+  window.addEventListener("scroll", scheduleCoverStageSync, { passive: true });
+
+  const loadTallyEmbeds = () => {
+    const source = "https://tally.so/widgets/embed.js";
+    const hydrateFrames = () => {
+      document
+        .querySelectorAll<HTMLIFrameElement>("iframe[data-tally-src]:not([src])")
+        .forEach((iframe) => {
+          iframe.src = iframe.dataset.tallySrc ?? "";
+        });
+    };
+
+    const run = () => {
+      const tallyWindow = window as Window & {
+        Tally?: { loadEmbeds: () => void };
+      };
+
+      if (typeof tallyWindow.Tally !== "undefined") {
+        tallyWindow.Tally.loadEmbeds();
+        return;
+      }
+      hydrateFrames();
+    };
+
+    const tallyWindow = window as Window & {
+      Tally?: { loadEmbeds: () => void };
+    };
+
+    if (typeof tallyWindow.Tally !== "undefined") {
+      run();
+      return;
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${source}"]`);
+
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = source;
+      script.onload = run;
+      script.onerror = hydrateFrames;
+      document.body.appendChild(script);
+    } else {
+      existingScript.addEventListener("load", run, { once: true });
+      existingScript.addEventListener("error", hydrateFrames, { once: true });
+    }
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-errata-toggle]").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const region = document.querySelector<HTMLElement>("[data-errata-region]");
+      const content = document.querySelector<HTMLElement>("[data-book-detail-content]");
+      const panel = document.querySelector<HTMLElement>("[data-errata-panel]");
+
+      if (!region || !content || !panel) return;
+
+      const isOpen = !panel.hidden;
+      panel.hidden = isOpen;
+      content.hidden = !isOpen;
+      region.classList.toggle("bd-text--errata", !isOpen);
+      toggle.setAttribute("aria-expanded", String(!isOpen));
+      const nextLabel = !isOpen
+        ? toggle.dataset.errataLabelOpen ?? "返回"
+        : toggle.dataset.errataLabelClosed ?? "勘误";
+      toggle.setAttribute("aria-label", nextLabel);
+      toggle
+        .querySelectorAll<SVGTextElement>("[data-errata-toggle-text]")
+        .forEach((text) => {
+          text.textContent = nextLabel;
+        });
+
+      if (!isOpen) {
+        loadTallyEmbeds();
+        scheduleCoverStageSync();
+        panel.focus({ preventScroll: true });
       }
     });
   });

@@ -34,64 +34,51 @@ npm run preview
 
 ## 新增书籍
 
-### 首次发布
+当前使用 GitHub Release 触发自动导入。不要手写 Markdown、下载链接、Release tag、PDF 文件名、分类号或册次；这些都由 PDF 元数据和索书号规则自动推导。
 
-1. 确定索书号，例如 `A12-8-2`。
-2. 编译 PDF，命名为 `A12-8-2_v1.pdf`。
-3. 创建 GitHub Release，tag 为 `A12-8-2_v1`，上传 PDF。
-4. 新建 `src/content/books/A12-8-2.md`，填写 frontmatter。
-5. 运行资产提取脚本（生成封面、目录与阅读数据）：
+完整流程见 [电子书上传工作流](docs/ebook-upload-workflow.md)。
 
-   ```bash
-   ./scripts/extract-outline-from-release.sh A12-8-2 1
+### 上传步骤
+
+1. 准备带完整 XMP 元数据的 PDF。
+2. 在 GitHub 创建临时 Release，tag 必须以 `ingest-` 开头，例如：
+
+   ```txt
+   ingest-20260707-F0-1-1-v1
    ```
 
-6. 检查生成的 `src/data/outlines/A12-8-2_v1.json`。
-7. 提交 Markdown 和 JSON，推送到 `main` 分支。
-8. GitHub Actions 自动部署网站。
+3. 在临时 Release 中上传且只上传一个 PDF。
+4. 发布临时 Release。
+5. GitHub Actions 自动校验元数据、生成网页数据和静态资产、创建正式 Release、提交到 `main` 并触发 Pages 部署。
 
-### 更新新版
+正式 Release tag 和 PDF 文件名由系统生成：
 
-1. 将 `edition` 从 1 改为 2。
-2. 新 PDF 命名为 `A12-8-2_v2.pdf`。
-3. 新建 Release，tag 为 `A12-8-2_v2`，上传 PDF。
-4. 重新生成该版 PDF 的静态资产：
-
-   ```bash
-   ./scripts/extract-outline-from-release.sh A12-8-2 2
-   ```
-
-5. 更新 `src/content/books/A12-8-2.md` 的 `edition` 字段。
-6. 提交更新。
-
-### PDF 资产提取脚本
-
-项目 PDF 统一使用 A5 页面尺寸，封面列表和详情书模均按 `148:210` 比例渲染。
-
-需要安装依赖：
-
-```bash
-pip install PyMuPDF
+```txt
+F0-1-1_v1
+F0-1-1_v1.pdf
 ```
 
-需要安装 [GitHub CLI](https://cli.github.com/) 并登录：
+### 新版发布
 
-```bash
-gh auth login
+同一本书发布新版时，保持同一个索书号，只递增 `edition`：
+
+```txt
+F0-1-1_v1
+F0-1-1_v2
 ```
 
-也可以直接从本地 PDF 生成全部资产（无需 Release）：
+网页显示出版式版次，例如 `2026 年 6 月第 1 版`、`2026 年 7 月第 2 版`。下载入口始终指向当前 Markdown 记录的最新版。
 
-```bash
-python scripts/extract-book-assets.py path/to/book.pdf A12-8-2 1
-```
+### 自动生成内容
 
-输出包括：
+以 `F0-1-1` 第 1 版为例，导入后会生成：
 
-- `public/covers/A12-8-2_v1.png`
-- `public/covers/A12-8-2_v1_spine.png`
-- `src/data/outlines/A12-8-2_v1.json`
-- `src/data/reading/A12-8-2_v1.json`
+- `public/covers/F0-1-1_v1.png`
+- `public/covers/F0-1-1_v1_spine.png`
+- `src/data/outlines/F0-1-1_v1.json`
+- `src/data/reading/F0-1-1_v1.json`
+- `src/content/books/F0-1-1.md`
+- `src/data/manifests/F0-1-1_v1.json`
 
 中文、日文、韩文按字符计数，拉丁字母与数字按连续 token
 计数。自动阅读时间的速率配置位于
@@ -127,7 +114,7 @@ A12-8-2_v1.pdf    A12-8-2_v1
 下载链接自动生成为：
 
 ```txt
-https://github.com/poyinte/ebook-library/releases/download/A12-8-2_v1/A12-8-2_v1.pdf
+https://github.com/Fulinte1966/CulturalSimmer/releases/download/A12-8-2_v1/A12-8-2_v1.pdf
 ```
 
 ## 分类表

@@ -17,11 +17,11 @@ export function getDownloadUrl(id: string, edition: number): string {
 }
 
 export interface ReadingMetrics {
-  page_count: number;
-  cjk_character_count?: number;
-  latin_token_count?: number;
-  estimated_minutes?: number;
-  file_size_bytes?: number;
+  pageCount: number;
+  cjkCharacterCount?: number;
+  latinTokenCount?: number;
+  estimatedMinutes?: number;
+  fileSizeBytes?: number;
 }
 
 export type CoverKind = "explicit" | "generated" | "placeholder";
@@ -45,14 +45,20 @@ export interface BookMeta {
   coverUrl?: string;
   spineUrl?: string;
   coverKind: CoverKind;
-  total_volumes?: number;
-  readtime?: number;
+  totalVolumes?: number;
+  readTime?: number;
+  editionHistory?: EditionHistoryItem[];
   reading?: ReadingMetrics;
   readingMinutes?: number;
   readingTimeSource?: ReadingTimeSource;
   parsed: ParsedBookId;
   downloadUrl: string;
   outlinePath: string;
+}
+
+export interface EditionHistoryItem {
+  edition: number;
+  date: Date;
 }
 
 function withBasePath(value: string): string {
@@ -114,7 +120,7 @@ function loadReadingMetrics(
     const value = JSON.parse(
       fs.readFileSync(metricsPath, "utf-8")
     ) as ReadingMetrics;
-    if (!Number.isInteger(value.page_count) || value.page_count < 1) {
+    if (!Number.isInteger(value.pageCount) || value.pageCount < 1) {
       return undefined;
     }
     return value;
@@ -136,23 +142,24 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         date,
         tags,
         cover,
-        total_volumes,
-        readtime,
+        totalVolumes,
+        readTime,
+        editionHistory,
         author,
         language,
         series,
         publisher,
         source,
         rights,
-        license_url,
+        licenseUrl,
       } = entry.data;
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, edition, cover);
       const reading = loadReadingMetrics(id, edition);
-      const readingMinutes = readtime ?? reading?.estimated_minutes;
-      const readingTimeSource: ReadingTimeSource | undefined = readtime
+      const readingMinutes = readTime ?? reading?.estimatedMinutes;
+      const readingTimeSource: ReadingTimeSource | undefined = readTime
         ? "manual"
-        : reading?.estimated_minutes
+        : reading?.estimatedMinutes
           ? "automatic"
           : undefined;
 
@@ -166,14 +173,15 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         publisher,
         source,
         rights,
-        licenseUrl: license_url,
+        licenseUrl,
         edition,
         date,
         tags,
         cover,
         ...resolvedCover,
-        total_volumes,
-        readtime,
+        totalVolumes,
+        readTime,
+        editionHistory,
         reading,
         readingMinutes,
         readingTimeSource,

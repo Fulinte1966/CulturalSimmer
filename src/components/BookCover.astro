@@ -19,9 +19,21 @@ const coverClass = [
   `book-cover--${book.coverKind}`,
 ].join(" ");
 const base = import.meta.env.BASE_URL;
+const minModelThickness = 18;
+const maxModelThickness = 42;
+const fallbackModelThickness = 28;
+const pageCount = book.reading?.pageCount;
+const modelThickness =
+  pageCount && Number.isFinite(pageCount)
+    ? Math.min(
+        maxModelThickness,
+        Math.max(minModelThickness, Math.round(Math.sqrt(pageCount) * 1.9))
+      )
+    : fallbackModelThickness;
 const modelStyle =
   mode === "model"
     ? [
+        `--book-size: ${modelThickness}px`,
         `--pages-texture: url("${joinBasePath(base, "images/pages-texture.svg")}")`,
         book.spineUrl
           ? `--spine-texture: url("${book.spineUrl}")`
@@ -33,6 +45,7 @@ const modelStyle =
 ---
 
 <figure class={coverClass} style={modelStyle}>
+  {mode === "model" && <span class="book-cover-shadow" aria-hidden="true" />}
   <div class="book-cover-volume">
     <div class="book-cover-surface">
       {

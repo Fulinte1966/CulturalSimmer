@@ -1,7 +1,400 @@
 ---
-import Layout from "../../components/Layout.astro";
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import "../../styles/category-index.css";
+import { joinBasePath } from "../../lib/basePath";
+import { getAllBooks } from "../../lib/books";
+import { getCalendarStatus } from "../../lib/uapis";
+import bookMarkUrl from "../../../SVG/资源 8.svg?url";
+
+interface IndexNode {
+  code: string;
+  label: string;
+  children?: IndexNode[];
+}
+
+const [books, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
+const base = import.meta.env.BASE_URL;
+const coverFallback = joinBasePath(base, "brand/homepage-cover.png");
+const coveredBooks = books.filter((book) => book.coverUrl);
+const bookSource = coveredBooks.length > 0 ? coveredBooks : books;
+const displayBooks = Array.from({ length: 20 }, (_, index) =>
+  bookSource[index % Math.max(bookSource.length, 1)]
+).filter(Boolean);
+
+const indexTree: IndexNode = {
+  code: "",
+  label: "书目索引",
+  children: [
+    {
+      code: "A",
+      label: "马克思主义、列宁主义、毛泽东主义",
+      children: [
+        {
+          code: "A1",
+          label: "马克思、恩格斯著作",
+          children: [
+            { code: "A11", label: "选集、文集、选读" },
+            { code: "A12", label: "单行著作" },
+            { code: "A13", label: "书信集、日记、函电" },
+            { code: "A15", label: "手迹" },
+            { code: "A16", label: "专题汇编" },
+            { code: "A18", label: "语录" },
+          ],
+        },
+        { code: "A2", label: "列宁著作" },
+        { code: "A3", label: "斯大林著作" },
+        { code: "A4", label: "毛泽东著作" },
+        { code: "A5", label: "马克思、恩格斯、列宁、斯大林、毛泽东著作汇编" },
+        { code: "A6", label: "马克思、恩格斯、列宁、斯大林、毛泽东的生平和传记" },
+        { code: "A7", label: "马克思主义、列宁主义、毛泽东主义的学习、研究和参考资料" },
+      ],
+    },
+    { code: "B", label: "哲学" },
+    { code: "C", label: "社会科学总论" },
+    { code: "D", label: "政治" },
+    { code: "F", label: "经济" },
+    { code: "I", label: "文学" },
+    { code: "K", label: "历史、地理" },
+  ],
+};
+
+const rootRows = indexTree.children ?? [];
 ---
 
-<Layout title="索引" activeNav="categories">
-  <section class="reserved-page" aria-label="索引页待设计"></section>
-</Layout>
+<NewspaperLayout title="文火索引" description="文火电子书馆书目索引">
+  <main class="figma-homepage" data-pagefind-ignore="all">
+    <div class="fm-frame" aria-label="文火索引">
+      <header class="fm-index-head">
+        <nav class="fm-index-breadcrumb" aria-label="页面位置">
+          <a class="fm-home-link" href={joinBasePath(base, "")}>主页</a>
+          <span aria-hidden="true">・</span>
+          <span>索引</span>
+        </nav>
+        <div class="fm-index-head-right">
+          <img
+            class="fm-index-mini-logo"
+            src={joinBasePath(base, "brand/wordmark.svg")}
+            alt="文火"
+            width="42"
+            height="18"
+          />
+          <div class="fm-index-date">
+            <time>{calendar.dateLabel}</time>
+            <span>{calendar.weekdayLabel}</span>
+          </div>
+        </div>
+        <div class="fm-index-headline" aria-hidden="true"></div>
+      </header>
+
+      <section
+        class="fm-index-system"
+        data-mode="callnumber"
+        data-depth="root"
+        aria-label="书目索引系统"
+      >
+        <button
+          class="fm-index-toggle"
+          type="button"
+          aria-label="切换索引模式"
+          aria-pressed="false"
+        >
+          <span class="fm-book-mark" aria-hidden="true">
+            <img class="fm-book-mark-image" src={bookMarkUrl} alt="" width="103" height="60" />
+            <svg viewBox="0 0 108 62.5862" role="img">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M41.1665 6.95307C41.4087 6.72555 41.7037 6.56107 42.0254 6.47427C43.4854 5.97922 44.9188 5.40945 46.3196 4.76723C49.7132 3.40368 53.0543 1.91522 56.4269 0.478805L63.0045 3.21632C64.9631 4.0282 66.9322 4.79845 68.8698 5.64157C69.9468 5.97022 70.9572 6.48462 71.8549 7.16125C72.0074 7.30472 72.1998 7.3993 72.4072 7.43271C72.6145 7.46612 72.8271 7.43682 73.0175 7.34861C73.1051 7.25128 73.1535 7.12529 73.1535 6.99471C73.1535 6.86413 73.1051 6.73814 73.0175 6.64081C71.5407 6.04751 70.0324 5.46462 68.5347 4.84009C66.0524 3.79921 63.5805 2.75833 61.0878 1.71745C59.37 1.04088 57.7571 0.0624528 55.8823 3.84541e-08C54.1855 0.499622 52.6563 1.36355 51.0224 2.0089C49.3885 2.65424 47.8802 3.31 46.3406 4.00739C44.6019 4.79845 42.7899 5.43339 41.0199 6.17241C40.6323 6.33895 40.0772 6.40141 40.1296 7.08839C40.2959 7.17289 40.4841 7.2052 40.6692 7.18103C40.8544 7.15687 41.0278 7.07737 41.1665 6.95307Z" />
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M107.12 20.9425C105.654 20.3804 104.24 19.7038 102.763 19.173C101.714 18.6807 100.633 18.2599 99.5267 17.9135C99.0374 17.8127 98.5762 17.6066 98.1755 17.3098C97.5986 16.9107 96.9468 16.631 96.2588 16.4875C95.9701 16.4394 95.6886 16.3555 95.4209 16.2377C93.8498 15.3738 92.1321 14.8325 90.5192 14.0727C89.9117 13.7812 89.2937 13.5418 88.6653 13.3024C88.5939 13.2608 88.5141 13.2353 88.4317 13.2277C88.3493 13.2201 88.2662 13.2306 88.1882 13.2584C88.1103 13.2862 88.0395 13.3306 87.9808 13.3886C87.922 13.4466 87.8768 13.5166 87.8483 13.5939C88.665 14.2645 89.6369 14.7224 90.6763 14.9262C91.7236 15.3113 92.771 15.8422 93.7556 16.2794C94.7401 16.7165 95.777 17.06 96.7825 17.4868C97.788 17.9135 98.783 18.2466 99.7361 18.7254C100.689 19.2042 101.831 19.5269 102.878 20.0473C103.859 20.3701 104.8 20.7995 105.685 21.3276C105.675 21.5007 105.613 21.6668 105.506 21.8041C105.4 21.9415 105.254 22.0438 105.088 22.0979C104.449 22.3165 103.915 22.7328 103.308 22.9826C100.794 24.0235 98.4583 25.3246 95.976 26.4071C93.8813 27.3023 91.9541 28.3952 89.9012 29.3216C86.4553 30.8933 83.0618 32.5691 79.6159 34.12C78.3276 34.7029 77.0917 35.4003 75.7929 35.9728C73.1256 37.1386 70.4827 38.3321 67.8642 39.5534C66.0522 40.3861 64.345 41.427 62.4911 42.1972C61.2343 42.7177 59.9565 43.2381 58.731 43.8314C58.1578 44.1726 57.5034 44.3559 56.8353 44.3623C56.2801 44.0916 55.7879 43.8835 55.3899 43.6545C53.536 42.7385 51.5145 42.1868 49.6711 41.2813C47.8277 40.3757 46.4243 39.3661 44.6542 38.627C41.3549 37.2427 38.1604 35.6293 34.903 34.1408C33.091 33.3081 31.2895 32.4442 29.488 31.5907L20.3758 27.271C16.4795 25.4079 12.5937 23.4718 8.60319 21.7856L8.17376 20.9841C8.94036 20.7769 9.66627 20.4426 10.3209 19.9953C13.285 18.6838 16.2281 17.3306 19.2446 16.1649C20.8976 15.3794 22.6017 14.7048 24.3454 14.1455C24.5231 14.1213 24.6915 14.052 24.8346 13.9445C24.9776 13.837 25.0905 13.6947 25.1623 13.5314C25.2671 13.3128 25.1623 13.1359 24.8586 12.9277C23.3242 13.7381 21.7313 14.4339 20.093 15.0095C18.7 15.6548 17.2336 16.1544 15.8406 16.7894C13.5783 17.8303 11.2321 18.6526 8.96977 19.6622C7.14668 20.3774 5.43605 21.3483 3.88996 22.5454C2.05664 24.1593 0.793572 26.3158 0.286953 28.697C-0.095651 30.1894 -0.095651 31.7533 0.286953 33.2457C0.499386 34.4303 0.962068 35.5567 1.6445 36.5507C2.32693 37.5446 3.2136 38.3836 4.24607 39.0122C6.02662 40.053 7.81765 40.9898 9.67152 41.8225C12.9813 43.3006 16.2386 44.9452 19.4541 46.5481C22.6696 48.1511 26.1574 49.8893 29.5195 51.5235C32.8816 53.1577 36.2751 54.9168 39.7105 56.5197C43.6696 58.3725 47.5554 60.371 51.4726 62.3174C51.7246 62.4667 52.0076 62.5565 52.3 62.58C52.5923 62.6035 52.8862 62.5599 53.1589 62.4528C53.6112 62.3025 54.0552 62.1288 54.4891 61.9323C56.8457 60.7041 59.2338 59.5175 61.5904 58.2892C63.3081 57.3837 65.0886 56.5614 66.8273 55.7703C69.7181 54.4796 72.4727 52.9391 75.2797 51.5027C77.5735 50.3265 79.951 49.3585 82.2448 48.1823C83.356 47.5486 84.4992 46.9719 85.6698 46.4544C87.1466 45.8715 88.4349 44.9139 89.964 44.4768C90.1526 44.3519 90.0374 44.05 90.3201 44.0292C95.4628 41.9474 100.218 39.1475 105.256 36.9408C105.423 36.7631 105.551 36.553 105.632 36.3237C105.713 36.0944 105.746 35.8509 105.727 35.6085C105.075 35.0525 104.34 34.5996 103.549 34.2657C102.147 33.5659 100.802 32.7585 99.5267 31.8509C99.2619 31.6833 99.0499 31.4451 98.9147 31.1635C98.7795 30.882 98.7266 30.5683 98.7621 30.2584C98.8247 28.8886 99.2989 27.5689 100.124 26.4696C100.438 26.0428 100.668 25.4287 101.171 25.2934C102.061 25.0227 102.784 24.4294 103.643 24.1068C104.69 23.7008 105.738 23.1908 106.858 22.7224C107.361 22.5038 107.906 22.2956 108 21.6815C107.796 21.3461 107.487 21.0865 107.12 20.9425Z" />
+            </svg>
+          </span>
+          <span class="fm-toggle-text">书目索引</span>
+        </button>
+
+        <div class="fm-index-panel">
+          <div class="fm-printed-rule" aria-hidden="true"></div>
+          <div class="fm-call-tree" aria-live="polite">
+            {rootRows.map((node) => (
+              <div class="fm-call-row" data-level="0">
+                <button class="fm-call-code" type="button" data-code={node.code}>
+                  <span class="fm-code-tail">{node.code}</span>
+                </button>
+                <button class="fm-call-label" type="button" data-code={node.code}>
+                  {node.label}
+                </button>
+              </div>
+            ))}
+          </div>
+          <label class="fm-keyword-line" hidden>
+            <span class="sr-only">关键词</span>
+            <input type="text" value="" placeholder="请输入关键词检索" autocomplete="off" />
+          </label>
+          <div class="fm-printed-rule" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="fm-book-results" hidden aria-label="书籍结果">
+        <ol class="fm-book-grid">
+          {displayBooks.map((book) => (
+            <li>
+              <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
+                <img src={book.coverUrl ?? coverFallback} alt={`《${book.title}》封面`} />
+              </a>
+            </li>
+          ))}
+        </ol>
+        <nav class="fm-pagination" aria-label="分页">
+          <button type="button" data-page-action="first">首　页</button>
+          <button type="button" data-page-action="prev">上一页</button>
+          <span class="fm-page-current">第 1 页</span>
+          <span class="fm-page-total">共 2 页</span>
+          <button type="button" data-page-action="next">下一页</button>
+          <button type="button" data-page-action="last">尾　页</button>
+        </nav>
+      </section>
+    </div>
+  </main>
+</NewspaperLayout>
+
+<script is:inline define:vars={{ indexTree }}>
+  const tree = indexTree;
+  const root = tree;
+  const byCode = new Map();
+  const parentOf = new Map();
+  const state = {
+    mode: "callnumber",
+    browseCode: "",
+    selectedCode: null,
+    keywordQuery: "",
+    page: 1,
+  };
+  const pageSize = 10;
+
+  function walk(node, parent) {
+    byCode.set(node.code, node);
+    if (parent) parentOf.set(node.code, parent);
+    for (const child of node.children ?? []) {
+      walk(child, node);
+    }
+  }
+
+  function pathTo(node) {
+    const path = [];
+    let current = node;
+    while (current && current.code !== "") {
+      path.unshift(current);
+      current = parentOf.get(current.code);
+    }
+    return path;
+  }
+
+  function splitCode(code) {
+    if (code.length <= 1) return ["", code];
+    return [code.slice(0, -1), code.slice(-1)];
+  }
+
+  function levelOf(node) {
+    let level = 0;
+    let current = parentOf.get(node.code);
+    while (current && current.code !== "") {
+      level += 1;
+      current = parentOf.get(current.code);
+    }
+    return level;
+  }
+
+  function rowsForState() {
+    const selected = state.selectedCode ? byCode.get(state.selectedCode) : null;
+    const browsing = byCode.get(state.browseCode) ?? root;
+
+    if (selected) return pathTo(selected);
+    if (browsing.code === "") return root.children ?? [];
+    return [...pathTo(browsing), ...(browsing.children ?? [])];
+  }
+
+  function browse(node) {
+    const selected = state.selectedCode ? byCode.get(state.selectedCode) : null;
+    const browsing = byCode.get(state.browseCode) ?? root;
+    const parent = parentOf.get(node.code) ?? root;
+    const path = browsing.code ? pathTo(browsing) : [];
+    const isAncestor = path.some((item) => item.code === node.code);
+
+    if (selected && node.code === selected.code) {
+      state.selectedCode = null;
+      state.browseCode = parent.code;
+    } else if (!selected && node.code === browsing.code && browsing.code !== "") {
+      state.selectedCode = null;
+      state.browseCode = parent.code;
+    } else if (!selected && isAncestor && node.code !== browsing.code) {
+      state.selectedCode = null;
+      state.browseCode = parent.code;
+    } else {
+      state.selectedCode = null;
+      state.browseCode = node.code;
+    }
+
+    state.page = 1;
+    render();
+  }
+
+  function select(node) {
+    state.selectedCode = node.code;
+    state.browseCode = node.code;
+    state.page = 1;
+    render();
+  }
+
+  function renderCodeButton(node) {
+    const [prefix, tail] = splitCode(node.code);
+    const button = document.createElement("button");
+    button.className = "fm-call-code";
+    button.type = "button";
+    button.dataset.code = node.code;
+    button.setAttribute("aria-label", `浏览 ${node.code}`);
+
+    if (prefix) {
+      const prefixSpan = document.createElement("span");
+      prefixSpan.className = "fm-code-prefix";
+      prefixSpan.textContent = prefix;
+      button.append(prefixSpan);
+    }
+
+    const tailSpan = document.createElement("span");
+    tailSpan.className = "fm-code-tail";
+    tailSpan.textContent = tail;
+    button.append(tailSpan);
+    button.addEventListener("click", () => browse(node));
+    return button;
+  }
+
+  function renderLabelButton(node) {
+    const button = document.createElement("button");
+    button.className = "fm-call-label";
+    button.type = "button";
+    button.dataset.code = node.code;
+    button.textContent = node.label;
+    button.setAttribute("aria-label", `显示 ${node.code} 结果`);
+    button.addEventListener("click", () => select(node));
+    return button;
+  }
+
+  function renderRows() {
+    const treeEl = document.querySelector(".fm-call-tree");
+    if (!treeEl) return;
+
+    treeEl.replaceChildren();
+    for (const node of rowsForState()) {
+      const row = document.createElement("div");
+      row.className = "fm-call-row";
+      row.dataset.level = String(levelOf(node));
+      row.append(renderCodeButton(node), renderLabelButton(node));
+      treeEl.append(row);
+    }
+  }
+
+  function updateMode() {
+    const system = document.querySelector(".fm-index-system");
+    const toggle = document.querySelector(".fm-index-toggle");
+    const toggleText = document.querySelector(".fm-toggle-text");
+    const callTree = document.querySelector(".fm-call-tree");
+    const keywordLine = document.querySelector(".fm-keyword-line");
+    const keywordInput = document.querySelector(".fm-keyword-line input");
+
+    if (!system || !toggle || !toggleText || !callTree || !keywordLine || !keywordInput) return;
+
+    const isKeyword = state.mode === "keyword";
+    system.dataset.mode = state.mode;
+    system.dataset.depth = state.mode === "keyword"
+      ? "keyword"
+      : state.browseCode === "" && !state.selectedCode
+        ? "root"
+        : "branch";
+    toggle.setAttribute("aria-pressed", String(isKeyword));
+    toggleText.textContent = isKeyword ? "关键词" : "书目索引";
+    callTree.hidden = isKeyword;
+    keywordLine.hidden = !isKeyword;
+    keywordInput.value = state.keywordQuery;
+  }
+
+  function updateBooks() {
+    const results = document.querySelector(".fm-book-results");
+    const gridItems = Array.from(document.querySelectorAll(".fm-book-grid li"));
+    const pagination = document.querySelector(".fm-pagination");
+    const currentPage = document.querySelector(".fm-page-current");
+    const totalPage = document.querySelector(".fm-page-total");
+    if (!results || !pagination) return;
+
+    let count = 0;
+    if (state.mode === "keyword") {
+      count = state.keywordQuery.trim() ? 2 : 20;
+    } else if (state.selectedCode || state.browseCode) {
+      count = 20;
+    }
+
+    const pageCount = Math.max(1, Math.ceil(count / pageSize));
+    state.page = Math.min(Math.max(state.page, 1), pageCount);
+    const start = (state.page - 1) * pageSize;
+    const end = start + pageSize;
+
+    results.hidden = count === 0;
+    for (const [index, item] of gridItems.entries()) {
+      item.hidden = index < start || index >= end || index >= count;
+    }
+    pagination.hidden = count === 0 || pageCount <= 1;
+    if (currentPage) currentPage.textContent = `第 ${state.page} 页`;
+    if (totalPage) totalPage.textContent = `共 ${pageCount} 页`;
+
+    pagination.querySelectorAll("button").forEach((button) => {
+      const action = button.dataset.pageAction;
+      button.disabled =
+        (state.page <= 1 && (action === "first" || action === "prev")) ||
+        (state.page >= pageCount && (action === "next" || action === "last"));
+    });
+  }
+
+  function render() {
+    renderRows();
+    updateMode();
+    updateBooks();
+  }
+
+  walk(root, null);
+
+  document.querySelector(".fm-index-toggle")?.addEventListener("click", () => {
+    state.mode = state.mode === "callnumber" ? "keyword" : "callnumber";
+    state.page = 1;
+    render();
+    if (state.mode === "keyword") {
+      document.querySelector(".fm-keyword-line input")?.focus();
+    }
+  });
+
+  document.querySelector(".fm-keyword-line input")?.addEventListener("input", (event) => {
+    state.keywordQuery = event.currentTarget.value;
+    state.page = 1;
+    render();
+  });
+
+  document.querySelectorAll(".fm-pagination button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const totalText = document.querySelector(".fm-page-total")?.textContent ?? "";
+      const total = Number(totalText.match(/\d+/)?.[0] ?? "1");
+
+      if (button.dataset.pageAction === "first") state.page = 1;
+      if (button.dataset.pageAction === "prev") state.page -= 1;
+      if (button.dataset.pageAction === "next") state.page += 1;
+      if (button.dataset.pageAction === "last") state.page = total;
+
+      render();
+    });
+  });
+
+  document.querySelectorAll(".fm-call-code").forEach((button) => {
+    const node = byCode.get(button.dataset.code);
+    if (node) button.addEventListener("click", () => browse(node));
+  });
+
+  document.querySelectorAll(".fm-call-label").forEach((button) => {
+    const node = byCode.get(button.dataset.code);
+    if (node) button.addEventListener("click", () => select(node));
+  });
+
+  render();
+</script>

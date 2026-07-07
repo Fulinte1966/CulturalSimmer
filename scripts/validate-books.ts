@@ -6,12 +6,12 @@
  * 2. edition is a positive integer
  * 3. date exists
  * 4. title exists
- * 5. total_volumes (if present) is positive integer
- * 6. volumeNumber <= total_volumes for multi-volume books
+ * 5. totalVolumes (if present) is positive integer
+ * 6. volumeNumber <= totalVolumes for multi-volume books
  * 7. classification exists in classifications.yml
  * 8. outline JSON exists (warning only)
  * 9. no duplicate ids
- * 10. readtime (if present) is a positive integer
+ * 10. readTime (if present) is a positive integer
  */
 
 import fs from "node:fs";
@@ -47,9 +47,9 @@ interface BookEntry {
   date: string;
   tags: string[];
   cover?: string;
-  total_volumes?: number;
+  totalVolumes?: number;
   author?: string;
-  readtime?: number;
+  readTime?: number;
   filename: string;
 }
 
@@ -115,9 +115,9 @@ function loadBooks(): BookEntry[] {
       date: fm.date as string,
       tags: (fm.tags as string[]) || [],
       cover: fm.cover as string | undefined,
-      total_volumes: fm.total_volumes as number | undefined,
+      totalVolumes: fm.totalVolumes as number | undefined,
       author: fm.author as string | undefined,
-      readtime: fm.readtime as number | undefined,
+      readTime: fm.readTime as number | undefined,
       filename: file,
     };
   });
@@ -181,31 +181,31 @@ function main() {
       errors++;
     }
 
-    // 5. total_volumes
-    if (book.total_volumes !== undefined) {
-      if (!Number.isInteger(book.total_volumes) || book.total_volumes < 1) {
+    // 5. totalVolumes
+    if (book.totalVolumes !== undefined) {
+      if (!Number.isInteger(book.totalVolumes) || book.totalVolumes < 1) {
         console.error(
-          `${prefix} ERROR: total_volumes must be a positive integer, got ${book.total_volumes}`
+          `${prefix} ERROR: totalVolumes must be a positive integer, got ${book.totalVolumes}`
         );
         errors++;
       }
     }
 
     // 10. manual reading-time override
-    if (book.readtime !== undefined) {
-      if (!Number.isInteger(book.readtime) || book.readtime < 1) {
+    if (book.readTime !== undefined) {
+      if (!Number.isInteger(book.readTime) || book.readTime < 1) {
         console.error(
-          `${prefix} ERROR: readtime must be a positive integer, got ${book.readtime}`
+          `${prefix} ERROR: readTime must be a positive integer, got ${book.readTime}`
         );
         errors++;
       }
     }
 
     // 6. volume consistency
-    if (volumeNumber !== null && book.total_volumes !== undefined) {
-      if (volumeNumber > book.total_volumes) {
+    if (volumeNumber !== null && book.totalVolumes !== undefined) {
+      if (volumeNumber > book.totalVolumes) {
         console.error(
-          `${prefix} ERROR: volume ${volumeNumber} > total_volumes ${book.total_volumes}`
+          `${prefix} ERROR: volume ${volumeNumber} > totalVolumes ${book.totalVolumes}`
         );
         errors++;
       }

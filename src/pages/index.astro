@@ -77,26 +77,42 @@ const quoteLines =
     : ["你们要关心国家大事", "要把无产阶级文化大革命", "进行到底！"];
 const quoteLabelChars = Array.from("毛主席语录");
 
+const weatherDayParts = (date?: string) => {
+  if (!date) return { number: "--", unit: "日" };
+  const parsed = new Date(`${date}T00:00:00+08:00`);
+  return Number.isNaN(parsed.getTime())
+    ? { number: "--", unit: "日" }
+    : { number: String(parsed.getDate()), unit: "日" };
+};
+
+const weatherScaleParts = (value?: string | number) => {
+  const text = String(value ?? "暂无");
+  const match = text.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  return match ? { number: match[1], unit: match[2] || "级" } : { number: text, unit: "" };
+};
+
 const currentForecast = weather?.forecast?.[0];
 const futureForecasts =
   weather?.forecast?.slice(1, 4).map((day) => ({
-    day: `${new Date(`${day.date}T00:00:00+08:00`).getDate()}日`,
-    weather: day.weather_day ?? day.weather_night ?? "多云",
+    ...weatherDayParts(day.date),
+    weather: day.weather_day ?? day.weather_night ?? "暂无",
   })) ?? [
-    { day: "25日", weather: "晴转多云" },
-    { day: "26日", weather: "多云转阴" },
-    { day: "27日", weather: "阴有雨" },
+    { number: "--", unit: "日", weather: "暂无" },
+    { number: "--", unit: "日", weather: "暂无" },
+    { number: "--", unit: "日", weather: "暂无" },
   ];
 
-const weatherCity = weather?.city ? `${weather.city}地区` : "北京地区";
-const dayWeather = currentForecast?.weather_day ?? weather?.weather ?? "阴转多云";
-const nightWeather = currentForecast?.weather_night ?? weather?.weather ?? "晴转多云";
-const dayWindDir = currentForecast?.wind_dir_day ?? weather?.wind_direction ?? "北转南";
-const dayWindScale = currentForecast?.wind_scale_day ?? weather?.wind_power ?? "二、三级";
-const nightWindDir = currentForecast?.wind_dir_night ?? weather?.wind_direction ?? "南转北";
-const nightWindScale = currentForecast?.wind_scale_night ?? weather?.wind_power ?? "一、二级";
-const tempMax = currentForecast?.temp_max ?? weather?.temp_max ?? weather?.temperature ?? 24;
-const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.temperature ?? 11;
+const weatherCity = weather?.city ? `${weather.city}地区` : `${siteConfig.weatherCity}地区`;
+const dayWeather = currentForecast?.weather_day ?? weather?.weather ?? "暂无";
+const nightWeather = currentForecast?.weather_night ?? weather?.weather ?? "暂无";
+const dayWindDir = currentForecast?.wind_dir_day ?? weather?.wind_direction ?? "暂无";
+const dayWindScale = currentForecast?.wind_scale_day ?? weather?.wind_power ?? "暂无";
+const nightWindDir = currentForecast?.wind_dir_night ?? weather?.wind_direction ?? "暂无";
+const nightWindScale = currentForecast?.wind_scale_night ?? weather?.wind_power ?? "暂无";
+const dayWindScaleParts = weatherScaleParts(dayWindScale);
+const nightWindScaleParts = weatherScaleParts(nightWindScale);
+const tempMax = currentForecast?.temp_max ?? weather?.temp_max ?? weather?.temperature ?? "—";
+const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.temperature ?? "—";
 ---
 
 <NewspaperLayout title="文火" description="文火电子书馆">
@@ -185,6 +201,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             <i aria-hidden="true">⁝</i>
           </a>
         </div>
+        <div class="fm-book-list-frame">
         <ol class="fm-book-list" aria-label="上架书目">
           {shelfBooks.map((book) => (
             <li>
@@ -194,6 +211,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             </li>
           ))}
         </ol>
+        </div>
       </section>
 
       <div class="fm-bottom-divider" aria-hidden="true"></div>
@@ -206,27 +224,27 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
           <a href="https://www.youtube.com/@Fulinte1966" target="_blank" rel="noreferrer">弗林特放映室</a>
         </div>
         <span class="fm-footer-rule" aria-hidden="true"></span>
-        <div class="fm-weather">
+        <div class="fm-weather" data-weather-city={siteConfig.weatherCity}>
           <div class="fm-weather-labels">
-            <p>{weatherCity}</p>
+            <p><span data-weather-field="city">{weatherCity}</span></p>
             <p>天气预报</p>
           </div>
           <div class="fm-weather-detail">
-            <p>白天 {dayWeather}</p>
-            <p>风向 {dayWindDir}</p>
-            <p>风力 {dayWindScale}</p>
-            <p><strong>最高温度</strong> {tempMax}度</p>
-            <p>夜间 {nightWeather}</p>
-            <p>风向 {nightWindDir}</p>
-            <p>风力 {nightWindScale}</p>
-            <p><strong>最低温度</strong> {tempMin}度</p>
+            <p>白天 <span data-weather-field="dayWeather">{dayWeather}</span></p>
+            <p>风向 <span data-weather-field="dayWindDir">{dayWindDir}</span></p>
+            <p>风力 <span data-weather-field="dayWindScale"><span class="fm-weather-number" data-weather-number>{dayWindScaleParts.number}</span><span data-weather-unit>{dayWindScaleParts.unit}</span></span></p>
+            <p><strong>最高温度</strong> <span class="fm-weather-number" data-weather-field="tempMax">{tempMax}</span>度</p>
+            <p>夜间 <span data-weather-field="nightWeather">{nightWeather}</span></p>
+            <p>风向 <span data-weather-field="nightWindDir">{nightWindDir}</span></p>
+            <p>风力 <span data-weather-field="nightWindScale"><span class="fm-weather-number" data-weather-number>{nightWindScaleParts.number}</span><span data-weather-unit>{nightWindScaleParts.unit}</span></span></p>
+            <p><strong>最低温度</strong> <span class="fm-weather-number" data-weather-field="tempMin">{tempMin}</span>度</p>
           </div>
           <div class="fm-weather-days">
-            {futureForecasts.map((day) => (
+            {futureForecasts.map((day, index) => (
               <p>
-                {day.day}
+                <span data-weather-day={index}><span class="fm-weather-number" data-weather-day-number>{day.number}</span><span data-weather-day-unit>{day.unit}</span></span>
                 <br />
-                {day.weather}
+                <span data-weather-forecast={index}>{day.weather}</span>
               </p>
             ))}
           </div>
@@ -237,37 +255,361 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
 </NewspaperLayout>
 
 <script>
-  for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list")) {
+  for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame")) {
     let isDragging = false;
+    let didDrag = false;
+    let frame = 0;
+    let glideFrame = 0;
+    let lastMoveTime = 0;
+    let lastScrollLeft = 0;
+    let pendingScrollLeft = 0;
+    let reboundTimer = 0;
+    let snapFrame = 0;
+    let snapResumeTimer = 0;
     let startX = 0;
     let startScrollLeft = 0;
+    let velocity = 0;
+    const edgePullLimit = 64;
+    const inertialEdgePullLimit = 24;
+    const snapDuration = 420;
+    const edgeResistance = 0.34;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const getMaxScroll = () => Math.max(shelf.scrollWidth - shelf.clientWidth, 0);
+
+    const clampScroll = (value: number) => Math.min(Math.max(value, 0), getMaxScroll());
+
+    const getEdgePull = (value: number, limit = edgePullLimit) => {
+      const maxScroll = getMaxScroll();
+      if (value < 0) return Math.min(-value * edgeResistance, limit);
+      if (value > maxScroll) return -Math.min((value - maxScroll) * edgeResistance, limit);
+      return 0;
+    };
+
+    const setEdgePull = (value: number) => {
+      shelf.style.setProperty("--fm-edge-pull", `${value.toFixed(2)}px`);
+    };
+
+    const hasEdgePull = () => {
+      const currentPull = getComputedStyle(shelf).getPropertyValue("--fm-edge-pull").trim();
+      return currentPull && currentPull !== "0px" && currentPull !== "0.00px";
+    };
+
+    const clearRebound = () => {
+      if (reboundTimer) {
+        window.clearTimeout(reboundTimer);
+        reboundTimer = 0;
+      }
+      shelf.classList.remove("is-rebounding");
+    };
+
+    const clearSnapAnimation = () => {
+      if (snapFrame) {
+        cancelAnimationFrame(snapFrame);
+        snapFrame = 0;
+      }
+      shelf.classList.remove("is-snapping");
+    };
+
+    const clearSnapResume = () => {
+      if (snapResumeTimer) {
+        window.clearTimeout(snapResumeTimer);
+        snapResumeTimer = 0;
+      }
+    };
+
+    const pauseSnap = () => {
+      clearSnapResume();
+      shelf.classList.add("is-snap-paused");
+    };
+
+    const resumeSnapAfterRebound = () => {
+      clearSnapResume();
+      snapResumeTimer = window.setTimeout(() => {
+        shelf.classList.remove("is-snap-paused");
+        snapResumeTimer = 0;
+      }, 160);
+    };
+
+    const finishMotion = () => {
+      shelf.classList.remove("is-gliding");
+      shelf.classList.remove("is-rebounding");
+      shelf.classList.remove("is-snapping");
+      reboundTimer = 0;
+    };
+
+    const reboundEdge = () => {
+      clearRebound();
+      const currentPull = getComputedStyle(shelf).getPropertyValue("--fm-edge-pull").trim();
+      const shouldRebound = currentPull && currentPull !== "0px" && currentPull !== "0.00px";
+      if (!shouldRebound) {
+        setEdgePull(0);
+        shelf.classList.remove("is-snap-paused");
+        finishMotion();
+        return;
+      }
+      pauseSnap();
+      shelf.classList.add("is-gliding");
+      shelf.classList.add("is-rebounding");
+      requestAnimationFrame(() => setEdgePull(0));
+      reboundTimer = window.setTimeout(() => {
+        finishMotion();
+        resumeSnapAfterRebound();
+      }, 280);
+    };
+
+    const getSnapTarget = () => {
+      const item = shelf.querySelector<HTMLElement>(".fm-book-list li");
+      const itemWidth = item?.getBoundingClientRect().width ?? 180;
+      return clampScroll(Math.round(shelf.scrollLeft / itemWidth) * itemWidth);
+    };
+
+    const snapToNearest = () => {
+      clearSnapAnimation();
+      pauseSnap();
+      setEdgePull(0);
+
+      const startScrollLeft = shelf.scrollLeft;
+      const targetScrollLeft = getSnapTarget();
+      const distance = targetScrollLeft - startScrollLeft;
+
+      if (Math.abs(distance) < 1) {
+        shelf.scrollLeft = targetScrollLeft;
+        finishMotion();
+        resumeSnapAfterRebound();
+        return;
+      }
+
+      shelf.classList.add("is-gliding");
+      shelf.classList.add("is-snapping");
+      const startTime = performance.now();
+
+      const tick = (time: number) => {
+        const progress = Math.min((time - startTime) / snapDuration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        shelf.scrollLeft = startScrollLeft + distance * eased;
+
+        if (progress >= 1) {
+          shelf.scrollLeft = targetScrollLeft;
+          snapFrame = 0;
+          finishMotion();
+          resumeSnapAfterRebound();
+          return;
+        }
+
+        snapFrame = requestAnimationFrame(tick);
+      };
+
+      snapFrame = requestAnimationFrame(tick);
+    };
+
+    const setScrollWithEdgePull = (value: number, edgeLimit = edgePullLimit) => {
+      shelf.scrollLeft = clampScroll(value);
+      setEdgePull(getEdgePull(value, edgeLimit));
+    };
+
+    const applyScroll = () => {
+      setScrollWithEdgePull(pendingScrollLeft);
+      frame = 0;
+    };
+
+    const stopGlide = () => {
+      if (glideFrame) {
+        cancelAnimationFrame(glideFrame);
+        glideFrame = 0;
+      }
+      clearSnapAnimation();
+      clearRebound();
+      shelf.classList.remove("is-gliding");
+      shelf.classList.remove("is-snap-paused");
+      clearSnapResume();
+      setEdgePull(0);
+    };
+
+    const settleWithSnap = () => {
+      glideFrame = 0;
+      if (hasEdgePull()) {
+        reboundEdge();
+      } else {
+        snapToNearest();
+      }
+    };
+
+    const startGlide = () => {
+      if (prefersReducedMotion.matches || Math.abs(velocity) < 0.08) {
+        settleWithSnap();
+        return;
+      }
+
+      shelf.classList.add("is-gliding");
+      let previousTime = performance.now();
+
+      const tick = (time: number) => {
+        const elapsed = Math.min(time - previousTime, 32);
+        previousTime = time;
+
+        const targetScrollLeft = shelf.scrollLeft + velocity * elapsed;
+        const hitEdge = targetScrollLeft !== clampScroll(targetScrollLeft);
+        const edgeLimit = hitEdge ? inertialEdgePullLimit : edgePullLimit;
+        setScrollWithEdgePull(targetScrollLeft, edgeLimit);
+        if (hitEdge) {
+          settleWithSnap();
+          return;
+        }
+        velocity *= Math.pow(0.92, elapsed / 16.67);
+
+        if (Math.abs(velocity) < 0.02) {
+          settleWithSnap();
+          return;
+        }
+
+        glideFrame = requestAnimationFrame(tick);
+      };
+
+      glideFrame = requestAnimationFrame(tick);
+    };
 
     shelf.addEventListener("pointerdown", (event: PointerEvent) => {
       if (event.button !== 0) return;
+      stopGlide();
+      clearRebound();
       isDragging = true;
+      didDrag = false;
+      velocity = 0;
       startX = event.clientX;
       startScrollLeft = shelf.scrollLeft;
+      lastMoveTime = event.timeStamp;
+      lastScrollLeft = shelf.scrollLeft;
       shelf.classList.add("is-dragging");
       shelf.setPointerCapture(event.pointerId);
     });
 
     shelf.addEventListener("pointermove", (event: PointerEvent) => {
       if (!isDragging) return;
-      event.preventDefault();
-      shelf.scrollLeft = startScrollLeft - (event.clientX - startX);
+      const deltaX = event.clientX - startX;
+      if (Math.abs(deltaX) > 3) didDrag = true;
+      if (didDrag) event.preventDefault();
+      pendingScrollLeft = startScrollLeft - deltaX;
+      const elapsed = Math.max(event.timeStamp - lastMoveTime, 1);
+      const nextScrollLeft = clampScroll(pendingScrollLeft);
+      const nextVelocity = (nextScrollLeft - lastScrollLeft) / elapsed;
+      velocity = velocity * 0.65 + nextVelocity * 0.35;
+      lastMoveTime = event.timeStamp;
+      lastScrollLeft = nextScrollLeft;
+      if (!frame) frame = requestAnimationFrame(applyScroll);
     });
 
-    const endDrag = (event: PointerEvent) => {
+    const endDrag = (event: PointerEvent, shouldGlide = false) => {
       if (!isDragging) return;
       isDragging = false;
       shelf.classList.remove("is-dragging");
+      if (frame) {
+        cancelAnimationFrame(frame);
+        applyScroll();
+      }
       if (shelf.hasPointerCapture(event.pointerId)) {
         shelf.releasePointerCapture(event.pointerId);
       }
+      if (shouldGlide && didDrag) {
+        startGlide();
+      } else {
+        settleWithSnap();
+      }
     };
 
-    shelf.addEventListener("pointerup", endDrag);
-    shelf.addEventListener("pointercancel", endDrag);
-    shelf.addEventListener("pointerleave", endDrag);
+    shelf.addEventListener("dragstart", (event) => event.preventDefault());
+    shelf.addEventListener("pointerup", (event) => endDrag(event, true));
+    shelf.addEventListener("pointercancel", (event) => endDrag(event));
+    shelf.addEventListener("pointerleave", (event) => endDrag(event));
+    shelf.addEventListener(
+      "click",
+      (event) => {
+        if (!didDrag) return;
+        event.preventDefault();
+        event.stopPropagation();
+        didDrag = false;
+      },
+      true
+    );
+  }
+
+  const weatherBox = document.querySelector<HTMLElement>(".fm-weather[data-weather-city]");
+  if (weatherBox) {
+    const setField = (field: string, value?: string | number) => {
+      if (value === undefined || value === null || value === "") return;
+      const target = weatherBox.querySelector<HTMLElement>(`[data-weather-field="${field}"]`);
+      if (target) target.textContent = String(value);
+    };
+
+    const setScale = (field: string, value?: string | number) => {
+      if (value === undefined || value === null || value === "") return;
+      const target = weatherBox.querySelector<HTMLElement>(`[data-weather-field="${field}"]`);
+      if (!target) return;
+      const text = String(value);
+      const match = text.match(/^(\d+(?:\.\d+)?)(.*)$/);
+      const numberTarget = target.querySelector<HTMLElement>("[data-weather-number]");
+      const unitTarget = target.querySelector<HTMLElement>("[data-weather-unit]");
+      if (!numberTarget || !unitTarget || !match) {
+        target.textContent = text;
+        return;
+      }
+      numberTarget.textContent = match[1];
+      unitTarget.textContent = match[2] || "级";
+    };
+
+    const setForecast = (index: number, day?: string, weather?: string) => {
+      const dayTarget = weatherBox.querySelector<HTMLElement>(`[data-weather-day="${index}"]`);
+      const weatherTarget = weatherBox.querySelector<HTMLElement>(`[data-weather-forecast="${index}"]`);
+      if (dayTarget && day) {
+        const match = String(day).match(/^(.+?)(日)$/);
+        const numberTarget = dayTarget.querySelector<HTMLElement>("[data-weather-day-number]");
+        const unitTarget = dayTarget.querySelector<HTMLElement>("[data-weather-day-unit]");
+        if (numberTarget && unitTarget && match) {
+          numberTarget.textContent = match[1];
+          unitTarget.textContent = match[2];
+        } else {
+          dayTarget.textContent = day;
+        }
+      }
+      if (weatherTarget && weather) weatherTarget.textContent = weather;
+    };
+
+    const updateWeather = async () => {
+      const city = weatherBox.dataset.weatherCity;
+      if (!city) return;
+
+      const url = new URL("https://uapis.cn/api/v1/misc/weather");
+      url.searchParams.set("city", city);
+      url.searchParams.set("lang", "zh");
+      url.searchParams.set("forecast", "true");
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.city || !data.weather) return;
+
+        const current = Array.isArray(data.forecast) ? data.forecast[0] : undefined;
+        setField("city", `${data.city}地区`);
+        setField("dayWeather", current?.weather_day ?? data.weather);
+        setField("nightWeather", current?.weather_night ?? data.weather);
+        setField("dayWindDir", current?.wind_dir_day ?? data.wind_direction);
+        setScale("dayWindScale", current?.wind_scale_day ?? data.wind_power);
+        setField("nightWindDir", current?.wind_dir_night ?? data.wind_direction);
+        setScale("nightWindScale", current?.wind_scale_night ?? data.wind_power);
+        setField("tempMax", current?.temp_max ?? data.temp_max ?? data.temperature);
+        setField("tempMin", current?.temp_min ?? data.temp_min ?? data.temperature);
+
+        for (const [index, day] of (data.forecast ?? []).slice(1, 4).entries()) {
+          const date = day.date ? new Date(`${day.date}T00:00:00+08:00`) : undefined;
+          const dayLabel = date && !Number.isNaN(date.getTime()) ? `${date.getDate()}日` : undefined;
+          setForecast(index, dayLabel, day.weather_day ?? day.weather_night);
+        }
+      } catch {
+        // Keep the static fallback if the public weather API is rate-limited.
+      }
+    };
+
+    updateWeather();
   }
 </script>

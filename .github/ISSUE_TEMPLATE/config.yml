@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 书籍勘误
+    url: https://github.com/Fulinte1966/CulturalSimmer/issues
+    about: 请点击网站书目详情页右上角的［勘误］，填写《读者勘误表》。填写内容将会自动上传至本站。

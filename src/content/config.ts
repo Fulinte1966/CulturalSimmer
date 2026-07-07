@@ -16,18 +16,26 @@ const books = defineCollection({
     publisher: z.string().optional(),
     source: z.string().optional(),
     rights: z.string().optional(),
-    license_url: z.string().url().optional(),
+    licenseUrl: z.string().url().optional(),
     tags: z.array(z.string()).default([]),
     cover: z.string().optional(),
-    total_volumes: z
+    totalVolumes: z
       .number()
       .int()
-      .positive("total_volumes must be a positive integer")
+      .positive("totalVolumes must be a positive integer")
       .optional(),
-    readtime: z
+    readTime: z
       .number()
       .int()
-      .positive("readtime must be a positive integer")
+      .positive("readTime must be a positive integer")
+      .optional(),
+    editionHistory: z
+      .array(
+        z.object({
+          edition: z.number().int().positive(),
+          date: z.date(),
+        })
+      )
       .optional(),
   }),
 });

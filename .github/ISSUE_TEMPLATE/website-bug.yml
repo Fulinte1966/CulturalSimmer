@@ -1,0 +1,82 @@
+name: 网站捉虫
+description: 指出网站功能上存在的问题或可改进的地方。
+labels:
+  - 网站捉虫
+
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: 问题类型
+      options:
+        - 下载问题
+        - 链接失效
+        - 页面显示异常
+        - 搜索或索引问题
+        - 字体或排版显示问题
+        - 移动端适配问题
+        - 其他问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      placeholder: ［示例］点击某本书的下载按钮后没有反应……
+    validations:
+      required: true
+
+  - type: input
+    id: page_url
+    attributes:
+      label: 出错页面
+      placeholder: https://...
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开……
+        2. 点击……
+        3. 看到……
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际表现
+      placeholder: ［示例］页面空白、按钮无响应、文字重叠……
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期表现
+      placeholder: ［示例］应正常下载 PDF……
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图或录屏
+      placeholder: 请将媒体文件粘贴或拖入此处
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      placeholder: |
+        浏览器：Chrome / Safari / Firefox / Edge / ...
+        系统：Windows / macOS / iOS / Android / ...
+        设备：电脑 / 手机 / 平板 / ...
+    validations:
+      required: false

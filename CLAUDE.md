@@ -48,11 +48,15 @@ Markdown books (src/content/books/*.md)
   → Astro Content Collection (config.ts — Zod schema with optional subtitle)
     → books.ts (getAllBooks, getBookById, getBooksByClassification)
       └─ resolves covers (explicit → generated → placeholder), loads reading metrics
-      → Homepage (NewspaperLayout + src/styles/home.css)
-        → Components (BookCover, EditionStatus)
-      → Catalog/detail/reserved pages (Layout)
-        → Components (BookCard, BookCover, BookMeta, Outline)
+      → Homepage (index.astro + src/styles/home.css)
+        → Components (BookCover)
+      → Catalog/detail pages (Layout or NewspaperLayout)
+        → Components (BookCard, BookCover, BookMeta, Outline, ReadingStats, DownloadButton)
 ```
+
+All derived fields — `downloadUrl`, `release_tag`, `pdf_filename`, `classification`, `volume` — are computed from `id` + `edition` by `bookId.ts` and `books.ts`. Never hand-write them in book markdown frontmatter.
+
+`subtitle` is explicit metadata from frontmatter (or XMP). Never derive it from parentheses in `title`.
 
 ### Call number system (the core abstraction)
 
@@ -67,9 +71,13 @@ Display call numbers (`formatDisplayCallNumber`):
 - `A8-3` → `A8/3`
 - `I210.4-1` → `I210.4/1`
 
-**Never hand-write** `download_url`, `release_tag`, `pdf_filename`, `classification`, or `volume` in book markdown. These are all derived from `id` + `edition` by `bookId.ts` (+ `books.ts` for the GitHub URL using `siteConfig`).
+### Base path
 
-`subtitle` is explicit metadata from frontmatter (or XMP). Never derive it from parentheses in `title`.
+All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves to `/ebook-library/` in production). Use `joinBasePath(base, pathname)` from `src/lib/basePath.ts` — it avoids double slashes.
+
+### Site config
+
+`src/lib/site.ts` is the single source for GitHub owner/repo, weather city, and front-page slogan. The slogan renders on the homepage as the "毛主席语录" quote block.
 
 ### Key files
 
@@ -80,26 +88,36 @@ Display call numbers (`formatDisplayCallNumber`):
 | `src/lib/classification.ts` | Classification tree — reads `classifications.yml`, builds parent-child hierarchy, provides `getClassificationNodes()`, `getClassificationNode()`, `getClassificationAncestors()` |
 | `src/lib/site.ts` | `siteConfig` — `githubOwner`, `githubRepo`, `weatherCity`, `frontPageSlogan` |
 | `src/lib/basePath.ts` | `joinBasePath(base, pathname)` — joins base URL and pathname avoiding double slashes |
-| `src/lib/uapis.ts` | API client for uapis.cn — Chinese calendar (lunar dates, holidays) and weather data |
+| `src/lib/uapis.ts` | API client for uapis.cn — Chinese calendar (lunar dates, holidays) and weather data. Both server-side (Astro frontmatter) and client-side (`<script>` fetch in index.astro) |
 | `src/content/config.ts` | Zod schema — validates id, title, subtitle, edition, date, tags, author, cover, total_volumes, readtime |
-| `src/components/Layout.astro` | Standard catalog layout — branded header + 3-item nav |
-| `src/components/NewspaperLayout.astro` | Full-page wrapper for the Figma-designed homepage — no nav |
-| `src/components/EditionStatus.astro` | Real-time date/weather/lunar calendar bar (uapis API) |
+| `src/components/Layout.astro` | Standard catalog layout — branded header + 3-item nav (新书/索引/总览) |
+| `src/components/NewspaperLayout.astro` | Full-page Figma-designed wrapper — no nav, minimal `<html>` skeleton. Used by homepage and book detail |
+| `src/components/BookCover.astro` | Dual-mode cover component — `flat` (2D card) and `model` (3D CSS pseudo-elements) |
+| `src/components/BookCard.astro` | Catalog list item — BookCover + call number + title |
+| `src/components/EditionStatus.astro` | Reusable date/weather/lunar calendar bar (available but not used by current pages; pages fetch data directly) |
 | `src/data/classifications.yml` | `key: label` map of classification codes to Chinese names (85 entries, A–P) |
 | `src/data/reading-config.json` | Reading speed config (CJK: 300 chars/min, Latin: 265 words/min) |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics via PyMuPDF |
-| `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation (implements `pdf-metadata-contract.md`) |
-| `scripts/test_metadata.py` | Unit tests for XMP extraction and validation (24 tests) |
-| `scripts/test-reading-metrics.py` | Unit tests for `book_assets.py` |
-| `scripts/test_ingest_pdf.py` | Unit tests for `ingest_pdf.py` |
+| `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation |
 | `scripts/ingest_pdf.py` | GitHub Actions orchestration — validates, generates, publishes, and cleans up PDF ingestion |
+| `scripts/validate-books.ts` | Standalone validator (used in CI) — checks call numbers, editions, classifications, outlines |
 | `scripts/requirements.txt` | Python dependencies: PyMuPDF, PyYAML, defusedxml |
-| `scripts/validate-books.ts` | Standalone validator (used in CI) |
-| `.github/workflows/deploy.yml` | CI/CD — `npm ci` → `test:ui` → `validate` → `check` → `build` → deploy to GitHub Pages |
+| `.github/workflows/deploy.yml` | CI/CD — `npm ci` → `test:ui` → `validate` → `check` → `build` → deploy to GitHub Pages. Also runs daily at UTC 16:00 (midnight Beijing time) to refresh weather data |
 | `.github/workflows/ingest-pdf.yml` | PDF ingestion — triggers on `ingest-*` Release, extracts XMP, generates assets, creates canonical Release |
 | `reference/figma-handoff/current-home/` | Active homepage design source of truth — frozen measurements, fonts, assets, QA notes |
-| `reference/figma-handoff/` | Historical handoff notes plus PDF metadata and automation references |
-| `plan.md` | Original implementation plan (22 sections, Chinese) |
+
+### CSS architecture
+
+Four stylesheets with strict separation:
+
+| File | Scope |
+|---|---|
+| `src/styles/global.css` | CSS reset, shared typography, layout basics, `.book-cover--model` 3D geometry, `.book-cover--flat` styles, catalog grid, responsive breakpoints, `.site-header`/`.site-nav`, `.edition-status` |
+| `src/styles/home.css` | Homepage-only — `.figma-homepage` frame, masthead, newsletter, shelf, weather footer. **Must NOT** leak into global.css |
+| `src/styles/book-detail.css` | Book detail page — `.bd-*` grid/text/metadata/actions, 3D cover stage, abstract/outline/intro typography |
+| `src/styles/category-index.css` | Classification index page — `.fm-index-*` tree browser, book grid, pagination |
+
+CSS uses 2-space indentation. Always `Read` before `Edit`.
 
 ### Dual layout system
 
@@ -113,7 +131,18 @@ Two layout components serve different page types:
 | `categories` | 索引 | `/categories/` |
 | `overview` | 总览 | `/books/` |
 
-**`NewspaperLayout.astro`** — Full-page Figma-designed wrapper for the front page (`/`). No nav, no branded header — just a minimal `<html>` wrapper. The homepage-specific CSS lives in `src/styles/home.css`.
+**`NewspaperLayout.astro`** — Full-page Figma-designed wrapper for the front page (`/`), book detail (`/books/[id]/`), and category index (`/categories/`). No nav, no branded header — just a minimal `<html>` wrapper.
+
+### Page status
+
+| Route | Status | Layout |
+|---|---|---|
+| `/` | **Complete** — Figma newspaper design with lead book, shelf, weather | NewspaperLayout |
+| `/books/[id]/` | **Complete** — 3D book model, metadata, outline, download | NewspaperLayout |
+| `/categories/` | **Complete** — classification tree browser with call number/keyword modes, book grid | NewspaperLayout |
+| `/categories/[classification]/` | **Placeholder** — reserved page | Layout |
+| `/books/` | **Placeholder** — reserved page ("总览页待设计") | Layout |
+| `/search/` | **Placeholder** — "搜索功能暂时关闭" | Layout |
 
 ### Cover system
 
@@ -121,9 +150,18 @@ Two layout components serve different page types:
 
 1. **Explicit** (`coverKind: "explicit"`) — book frontmatter has a `cover` field
 2. **Generated** (`coverKind: "generated"`) — `public/covers/{id}_v{edition}.png` exists on disk
-3. **Placeholder** (`coverKind: "placeholder"`) — typographic fallback
+3. **Placeholder** (`coverKind: "placeholder"`) — typographic fallback (author + title rendered in CSS)
 
-Flat covers: 148/210 aspect ratio, 280px desktop target. Real covers show 1px dark-red border + 5px radius. Placeholders show 1px gray border. Model mode is unchanged from the original CSS geometry.
+Flat covers: 148/210 aspect ratio, 280px desktop target. Real covers show 1px dark-red border + 5px radius. Placeholders show 1px gray border.
+
+### Data directories
+
+Two generated-data directories use the pattern `{id}_v{edition}.json`:
+
+- `src/data/outlines/` — PDF bookmarks as `OutlineItem[]` (`{ level, title }`)
+- `src/data/reading/` — `ReadingMetrics` (`{ page_count, cjk_character_count, latin_token_count, estimated_minutes, file_size_bytes }`)
+
+Both are produced by `book_assets.py` and read by `books.ts` at build time. Missing outlines produce a warning in `validate-books`; missing reading metrics silently fall back to `readtime` frontmatter or no reading time display.
 
 ### Homepage handoff
 
@@ -139,6 +177,12 @@ Active homepage values live in `reference/figma-handoff/current-home/`:
 The homepage targets the fixed `1440 x 1024` Figma viewport. Do not add
 responsive rules until a separate mobile/tablet design is supplied.
 
+### Weather/calendar dual-fetch
+
+Both the homepage (`index.astro`) and book detail page (`[id].astro`) fetch calendar and weather data **server-side** in Astro frontmatter via `uapis.ts`. The homepage additionally runs a **client-side** `fetch()` in a `<script>` block to refresh weather after page load (gracefully degrades if rate-limited).
+
+The deploy workflow runs daily at UTC 16:00 (midnight Beijing) to rebuild with fresh data.
+
 ### Responsive breakpoints
 
 - Desktop ≥960px: 3-column gallery
@@ -147,31 +191,28 @@ responsive rules until a separate mobile/tablet design is supplied.
 - Narrow ≤360px: 1-column
 - ≤560px: book detail single-column with flat cover, model pseudo-elements hidden
 
-### 3D book model + debug workbench
+### 3D book model
 
 The `.book-cover--model` element uses CSS pseudo-elements for spine, back cover, page edges, and shadow. All dimensions controlled by CSS custom properties. At ≤560px, pseudo-elements are hidden and a flat cover is shown.
 
-**Spine darkening**: Uses `background-image` gradient overlay (`linear-gradient(rgb(0 0 0 / calc(1 - brightness)), …)`) instead of global.css's `box-shadow: inset`. The debug CSS overrides with `box-shadow: none` to prevent the inset shadow from darkening the spine border.
+Model thickness is computed from page count: `Math.round(Math.sqrt(pageCount) * 1.9)`, clamped to 18–42px.
 
-**Unified border system**: Cover surface, spine `::after`, and back cover `volume::after` all share `border-color: var(--border-color, #555)`. The `--border-color` is computed in JS from the `border-color-depth` slider. Spine gets `border-right: 0` (cover junction); cover gets `border-left: 0` (spine junction). `--model-border` defaults to 3px.
+**Spine darkening**: Uses `background-image` gradient overlay (`linear-gradient(rgb(0 0 0 / calc(1 - brightness)), …)`) instead of global.css's `box-shadow: inset`.
 
-**Shadow system**: Replaced the global.css single blurred pill (`::before` with `blur(12px)` + `skewX(45deg)`) with a `clip-path` trapezoid anchored to the book's 3D bottom contour. Gradient `linear-gradient(to bottom, 30% → 10% → 3% → 0)` simulates contact/penumbra/ambient layers. Left anchor fixed at 163px from element edge. Right anchor Y follows `-var(--book-size)` dynamically.
+**Unified border system**: Cover surface, spine `::after`, and back cover `volume::after` all share `border-color: var(--border-color, #555)`. Spine gets `border-right: 0` (cover junction); cover gets `border-left: 0` (spine junction). `--model-border` defaults to 3px.
 
-**Debug workbench** (`/debug/book-model`):
-- `src/pages/debug/book-model.astro` — interactive geometry tuning page
-- `src/styles/book-model-debug.css` — debug-only overrides (higher specificity than global.css)
-- Live controls for stage, cover image, surface alignment, spine/pages, border color/depth, shadow shape
-- "隐藏封面" toggle for shadow tuning
-- CSS output panel for copying tuned values to production (`book-detail.css`)
-- localStorage persistence with versioned keys (`v4`)
+**Shadow system**: `clip-path` trapezoid anchored to the 3D book's bottom contour. Gradient `linear-gradient(to bottom, 30% → 10% → 3% → 0)` simulates contact/penumbra/ambient layers. Left anchor fixed at 163px from element edge. Right anchor Y follows `-var(--book-size)` dynamically.
+
+### Client-side JS patterns
+
+No JS framework. Key interactive behaviors use vanilla JS with custom state management:
+
+- **Homepage shelf** (`index.astro` `<script>`) — pointer-event-based scroll/drag with inertia glide, edge-pull resistance, snap-to-item, reduced-motion support. ~500 lines of custom physics.
+- **Classification tree** (`categories/index.astro` `<script>`) — state machine for call number/keyword browsing modes, pagination, dynamic DOM rendering. Uses `byCode`/`parentOf` Maps over an in-memory tree.
 
 ### Pagefind
 
 Custom JavaScript API (`search.astro`) — dynamic import of `pagefind/pagefind.js`, custom result renderer using BookCard DOM contract. No body snippets. Query survives navigation via `?q=`.
-
-### Base path
-
-All internal links must use `import.meta.env.BASE_URL` (resolves to `/ebook-library/` in production).
 
 ## Adding a book
 
@@ -197,11 +238,11 @@ All internal links must use `import.meta.env.BASE_URL` (resolves to `/ebook-libr
 
 - **No** database, user accounts, comments, CMS, SSR, online PDF reader
 - **No** EPUB/MOBI/HTML formats — PDF only
-- **No** dark mode, complex UI, client framework, CSS framework
+- **No** dark mode, client framework, CSS framework
 - **No** About page, standalone copyright page
 - **No** outline-to-PDF page linking — outline is display-only
 - **No** GitHub Release existence check at build time (offline-safe)
-- **No** gradient, decorative shadow, Metro blocks, pills, nested cards
 - `subtitle` must come from explicit metadata — never derived from title
 - `public/brand/wordmark.svg` used unchanged — do not redraw, trace, or replace
 - CSS uses 2-space indentation — always `Read` before `Edit`
+- Homepage styles (`home.css`) must not leak into `global.css` — separate files, separate scopes
