@@ -1,4 +1,4 @@
-"""Unit tests for mixed-language reading-time estimation."""
+"""Unit tests for generated PDF reading metrics."""
 
 import json
 import tempfile
@@ -7,7 +7,6 @@ from pathlib import Path
 
 from book_assets import (
     count_text_units,
-    estimate_reading_minutes,
     extract_book_assets,
     normalize_pdf_text,
 )
@@ -37,23 +36,6 @@ class ReadingMetricTests(unittest.TestCase):
         text = "iPhone于2025年发布HTML5标准"
         self.assertEqual(normalize_pdf_text(text), text)
 
-    def test_uses_independent_reading_rates(self) -> None:
-        self.assertEqual(
-            estimate_reading_minutes(600, 265, 300, 265),
-            3,
-        )
-
-    def test_returns_at_least_one_minute(self) -> None:
-        self.assertEqual(
-            estimate_reading_minutes(1, 0, 300, 265),
-            1,
-        )
-
-    def test_empty_text_has_no_estimate(self) -> None:
-        self.assertIsNone(
-            estimate_reading_minutes(0, 0, 300, 265)
-        )
-
     def test_extracts_assets_from_temporary_pdf(self) -> None:
         try:
             import fitz
@@ -62,17 +44,6 @@ class ReadingMetricTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            (root / "src" / "data").mkdir(parents=True)
-            source_config = (
-                Path(__file__).resolve().parents[1]
-                / "src"
-                / "data"
-                / "reading-config.json"
-            )
-            (root / "src" / "data" / "reading-config.json").write_text(
-                source_config.read_text(encoding="utf-8"),
-                encoding="utf-8",
-            )
 
             pdf_path = root / "sample.pdf"
             document = fitz.open()

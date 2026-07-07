@@ -90,9 +90,7 @@ F0-1-1_v2
 - `src/content/books/F0-1-1.md`
 - `src/data/manifests/F0-1-1_v1.json`
 
-中文、日文、韩文按字符计数，拉丁字母与数字按连续 token
-计数。自动阅读时间的速率配置位于
-`src/data/reading-config.json`。
+中文、日文、韩文按字符计数，拉丁字母与数字按连续 token 计数。
 
 ## 索书号规则
 

@@ -30,7 +30,7 @@ PDF (GitHub Release)
       public/covers/{id}_v{edition}.png         — first-page cover image
       public/covers/{id}_v{edition}_spine.png   — 1px-wide spine sample
       src/data/outlines/{id}_v{edition}.json    — PDF bookmarks
-      src/data/reading/{id}_v{edition}.json     — page count, character counts, estimated minutes
+      src/data/reading/{id}_v{edition}.json     — page count, character counts, file size
 
 Markdown books (src/content/books/*.md)
   → Astro Content Collection (config.ts — Zod schema with optional subtitle)

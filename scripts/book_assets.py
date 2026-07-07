@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import math
 import re
 from pathlib import Path
 from typing import Any
@@ -17,6 +16,7 @@ LATIN_TOKEN_PATTERN = re.compile(
     r"[A-Za-z0-9]+(?:[._+#/-][A-Za-z0-9]+)*"
 )
 LEGACY_BYTE_RUN_PATTERN = re.compile(r"[\x00-\xff]+")
+SPARSE_TEXT_UNITS_PER_PAGE = 80
 
 
 def normalize_pdf_text(text: str) -> str:
@@ -49,29 +49,6 @@ def count_text_units(text: str) -> tuple[int, int]:
     )
 
 
-def estimate_reading_minutes(
-    cjk_count: int,
-    latin_count: int,
-    cjk_chars_per_minute: int,
-    latin_words_per_minute: int,
-) -> int | None:
-    """Estimate mixed-language reading time using independent rates."""
-
-    if cjk_count + latin_count == 0:
-        return None
-
-    minutes = (
-        cjk_count / cjk_chars_per_minute
-        + latin_count / latin_words_per_minute
-    )
-    return max(1, math.ceil(minutes))
-
-
-def load_reading_config(root: Path) -> dict[str, int]:
-    config_path = root / "src" / "data" / "reading-config.json"
-    return json.loads(config_path.read_text(encoding="utf-8"))
-
-
 def extract_book_assets(
     pdf_path: Path,
     book_id: str,
@@ -82,7 +59,6 @@ def extract_book_assets(
 
     import fitz
 
-    config = load_reading_config(root)
     tag = f"{book_id}_v{edition}"
     outline_path = root / "src" / "data" / "outlines" / f"{tag}.json"
     reading_path = root / "src" / "data" / "reading" / f"{tag}.json"
@@ -113,15 +89,9 @@ def extract_book_assets(
         "pageCount": document.page_count,
         "fileSizeBytes": pdf_path.stat().st_size,
     }
-    if units_per_page >= config["sparse_text_units_per_page"]:
+    if units_per_page >= SPARSE_TEXT_UNITS_PER_PAGE:
         reading["cjkCharacterCount"] = cjk_count
         reading["latinTokenCount"] = latin_count
-        reading["estimatedMinutes"] = estimate_reading_minutes(
-            cjk_count,
-            latin_count,
-            config["cjk_chars_per_minute"],
-            config["latin_words_per_minute"],
-        )
 
     first_page = document.load_page(0)
     scale = min(3.0, 640 / max(first_page.rect.width, 1))

@@ -26,7 +26,7 @@ Treat `design-tokens.json` and `screens.json` as the Figma source of truth.
 - `subtitle` must come from PDF XMP metadata and generated frontmatter.
 - Preserve the existing CSS book-model geometry, including the spine seam
   repaint workaround and the mobile flat-cover fallback.
-- Preserve the CJK/Latin reading-time algorithm and sparse-page behavior.
+- Preserve CJK/Latin text counting and sparse-page behavior.
 - Preserve `import.meta.env.BASE_URL` for every internal URL and asset.
 - Do not commit, push, deploy, publish, edit, or delete a real GitHub Release.
 - Do not overwrite unrelated user changes.

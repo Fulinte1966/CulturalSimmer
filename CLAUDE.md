@@ -42,7 +42,7 @@ PDF (GitHub Release)
       public/covers/{id}_v{edition}.png         — first-page cover image
       public/covers/{id}_v{edition}_spine.png   — 1px-wide spine sample
       src/data/outlines/{id}_v{edition}.json    — PDF bookmarks
-      src/data/reading/{id}_v{edition}.json     — page count, character counts, estimated minutes
+      src/data/reading/{id}_v{edition}.json     — page count, character counts, file size
 
 Markdown books (src/content/books/*.md)
   → Astro Content Collection (config.ts — Zod schema with optional subtitle)
@@ -96,7 +96,6 @@ All internal links and asset URLs must use `import.meta.env.BASE_URL` (resolves 
 | `src/components/BookCard.astro` | Catalog list item — BookCover + call number + title |
 | `src/components/EditionStatus.astro` | Reusable date/weather/lunar calendar bar (available but not used by current pages; pages fetch data directly) |
 | `src/data/classifications.yml` | `key: label` map of classification codes to Chinese names (85 entries, A–P) |
-| `src/data/reading-config.json` | Reading speed config (CJK: 300 chars/min, Latin: 265 words/min) |
 | `scripts/book_assets.py` | Core module — extracts cover, spine, outline, and reading metrics via PyMuPDF |
 | `scripts/extract_metadata.py` | PDF XMP metadata extraction + validation |
 | `scripts/ebook_upload.py` | Local preflight + temporary ingest Release creation |
@@ -161,7 +160,7 @@ Flat covers: 148/210 aspect ratio, 280px desktop target. Real covers show 1px da
 Two generated-data directories use the pattern `{id}_v{edition}.json`:
 
 - `src/data/outlines/` — PDF bookmarks as `OutlineItem[]` (`{ level, title }`)
-- `src/data/reading/` — `ReadingMetrics` (`{ page_count, cjk_character_count, latin_token_count, estimated_minutes, file_size_bytes }`)
+- `src/data/reading/` — `ReadingMetrics` (`{ page_count, cjk_character_count, latin_token_count, file_size_bytes }`)
 
 Both are produced by `book_assets.py` and read by `books.ts` at build time. Missing outlines produce a warning in `validate-books`; missing reading metrics hide the reading-stats display.
 

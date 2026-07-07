@@ -20,7 +20,6 @@ export interface ReadingMetrics {
   pageCount: number;
   cjkCharacterCount?: number;
   latinTokenCount?: number;
-  estimatedMinutes?: number;
   fileSizeBytes?: number;
 }
 

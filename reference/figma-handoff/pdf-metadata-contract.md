@@ -41,8 +41,8 @@ that XMP field. It must not reinterpret `pdfsubject` as a subtitle.
 |---|---|---|
 | `/EbookTotalVolumes` | positive integer string | Total number of volumes |
 
-This key contains ASCII digits only. It is optional. Automatic reading time is
-always generated from PDF text metrics.
+This key contains ASCII digits only. It is optional. Reading metrics are
+generated from PDF text metrics.
 
 ## LaTeX form
 
@@ -147,7 +147,7 @@ Subtitle is optional. Its absence is not an error.
 - Release date comes from the intake Release publication timestamp.
 - Cover and spine come from the first page.
 - Outline comes from PDF bookmarks.
-- Page count and reading estimate come from PDF content.
+- Page count and text counts come from PDF content.
 - PDF file size comes from the downloaded asset byte length.
 - Canonical tag is `{id}_v{edition}`.
 - Canonical filename is `{id}_v{edition}.pdf`.
@@ -163,7 +163,6 @@ interface ReadingMetrics {
   file_size_bytes?: number;
   cjk_character_count?: number;
   latin_token_count?: number;
-  estimated_minutes?: number;
 }
 ```
 
