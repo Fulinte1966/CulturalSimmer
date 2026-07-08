@@ -1,5 +1,5 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "Homepage Implementation", "reference/figma-make"]
+  "exclude": ["dist"]
 }

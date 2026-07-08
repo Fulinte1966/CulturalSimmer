@@ -48,7 +48,7 @@ jobs:
         id: validate
         env:
           GH_TOKEN: ${{ github.token }}
-          ALLOW_EDITION_SKIP: ${{ contains(github.event.release.body, 'Allow-Edition-Skip: true') }}
+          ALLOW_EDITION_SKIP: "${{ contains(github.event.release.body, 'Allow-Edition-Skip: true') }}"
         run: |
           python scripts/ingest_pdf.py validate \
             --workspace _ingest_workspace \
