@@ -4,7 +4,7 @@ import "../../styles/category-index.css";
 import { joinBasePath } from "../../lib/basePath";
 import { getAllBooks } from "../../lib/books";
 import { getCalendarStatus } from "../../lib/uapis";
-import bookMarkUrl from "../../assets/icons/bookmark.svg?url";
+import bookMarkUrl from "../../assets/icons/icon-index-toggle-book.svg?url";
 
 interface IndexNode {
   code: string;
@@ -72,7 +72,7 @@ const rootRows = indexTree.children ?? [];
         <div class="fm-index-head-right">
           <img
             class="fm-index-mini-logo"
-            src={joinBasePath(base, "brand/wordmark.svg")}
+            src={joinBasePath(base, "assets/brand/culturalsimmer-wordmark.svg")}
             alt="文火"
             width="42"
             height="18"

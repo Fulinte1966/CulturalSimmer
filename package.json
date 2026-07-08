@@ -9,10 +9,10 @@
     "ebook:upload": "python scripts/ebook_upload.py",
     "check": "astro check",
     "validate": "tsx scripts/validate-books.ts",
-    "test:reading": "python scripts/test-reading-metrics.py",
-    "test:metadata": "python scripts/test_metadata.py",
-    "test:ingest": "python scripts/test_ingest_pdf.py",
-    "test:ui": "tsx --test tests/**/*.test.ts"
+    "test:reading": "python tests/python/reading_metrics_test.py",
+    "test:metadata": "python tests/python/metadata_test.py",
+    "test:ingest": "python tests/python/ingest_pdf_test.py",
+    "test:ui": "tsx --test tests/node/**/*.test.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

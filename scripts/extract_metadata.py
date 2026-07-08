@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 """Extract and validate PDF book metadata from XMP.
 
-Implements the contract defined in reference/figma-handoff/pdf-metadata-contract.md.
+Implements the contract defined in docs/pdf/metadata-contract.md.
 """
 
 import re
@@ -22,6 +24,13 @@ NS = {
     "prism": "http://prismstandard.org/namespaces/basic/2.1/",
     "xmp": "http://ns.adobe.com/xap/1.0/",
     "xmpRights": "http://ns.adobe.com/xap/1.0/rights/",
+}
+
+NS_ALIASES = {
+    "prism": (
+        "http://prismstandard.org/namespaces/basic/2.1/",
+        "http://prismstandard.org/namespaces/basic/3.0/",
+    ),
 }
 
 # Regex matching the existing call-number parser in src/lib/bookId.ts
@@ -64,17 +73,24 @@ class PdfBookMetadata:
 # ---------------------------------------------------------------------------
 
 
+def _expanded_names(tag: str) -> list[str]:
+    if ":" not in tag:
+        return [tag]
+    prefix, local = tag.split(":", 1)
+    namespaces = NS_ALIASES.get(prefix, (NS[prefix],))
+    return [f"{{{namespace}}}{local}" for namespace in namespaces]
+
+
 def _xmp_text(desc: ET.Element, tag: str) -> Optional[str]:
     """Read a simple text element, rdf:Alt, or single-value rdf:Seq/Bag."""
     if ":" in tag:
-        prefix, local = tag.split(":", 1)
-        namespace = NS.get(prefix)
-        if namespace:
-            attr_text = _normalize_text(desc.attrib.get(f"{{{namespace}}}{local}"))
+        for expanded_name in _expanded_names(tag):
+            attr_text = _normalize_text(desc.attrib.get(expanded_name))
             if attr_text:
                 return attr_text
 
-    el = desc.find(tag, NS)
+    elements = [desc.find(expanded_name) for expanded_name in _expanded_names(tag)]
+    el = next((candidate for candidate in elements if candidate is not None), None)
     if el is None:
         return None
 
@@ -108,7 +124,8 @@ def _normalize_text(value: Optional[str]) -> str:
 
 def _xmp_seq(desc: ET.Element, tag: str) -> list[str]:
     """Read an rdf:Seq or rdf:Bag list."""
-    el = desc.find(tag, NS)
+    elements = [desc.find(expanded_name) for expanded_name in _expanded_names(tag)]
+    el = next((candidate for candidate in elements if candidate is not None), None)
     if el is None:
         return []
 
