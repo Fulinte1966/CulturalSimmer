@@ -5,6 +5,7 @@ on:
     types: [published]
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -102,6 +103,12 @@ jobs:
             --metadata _ingest_output.json \
             --release-tag "${{ github.ref_name }}" \
             --push-success "${{ job.status == 'success' }}"
+
+      - name: Trigger deploy
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
 
       - name: Summary
         if: always()
