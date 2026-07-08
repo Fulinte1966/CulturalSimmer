@@ -138,6 +138,7 @@ class IngestPdfTests(unittest.TestCase):
             frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
             self.assertEqual(frontmatter["title"], metadata["title"])
             self.assertEqual(frontmatter["editions"][0]["edition"], 2)
+            self.assertIn("editions:\n  - edition: 2", markdown)
             self.assertNotIn("edition", frontmatter)
             self.assertNotIn("date", frontmatter)
             manifest = json.loads(
