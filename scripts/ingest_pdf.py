@@ -30,6 +30,21 @@ from edition_policy import check_expected_edition, format_edition_check_lines
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class _IndentedSafeDumper(yaml.SafeDumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow, False)
+
+
+def _dump_frontmatter(data: dict) -> str:
+    return yaml.dump(
+        data,
+        Dumper=_IndentedSafeDumper,
+        allow_unicode=True,
+        sort_keys=False,
+        default_flow_style=False,
+    )
+
+
 def _run(cmd: list[str], **kwargs):
     return subprocess.run(cmd, check=True, text=True, **kwargs)
 
@@ -298,12 +313,7 @@ def cmd_generate(args: list[str]):
             frontmatter[opt] = meta[opt]
     frontmatter["editions"] = _merge_edition_record(existing_frontmatter, meta)
 
-    yaml_text = yaml.safe_dump(
-        frontmatter,
-        allow_unicode=True,
-        sort_keys=False,
-        default_flow_style=False,
-    )
+    yaml_text = _dump_frontmatter(frontmatter)
     md_content = f"---\n{yaml_text}---\n\n{meta.get('description', '')}\n"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(md_content, encoding="utf-8")
