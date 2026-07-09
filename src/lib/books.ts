@@ -37,6 +37,7 @@ export interface BookMeta {
   source?: string;
   rights?: string;
   licenseUrl?: string;
+  zlibraryUrl?: string;
   edition: number;
   editionDate: string;
   date: Date;
@@ -50,6 +51,7 @@ export interface BookMeta {
   totalVolumes?: number;
   reading?: ReadingMetrics;
   parsed: ParsedBookId;
+  releaseUrl: string;
   downloadUrl: string;
   outlinePath: string;
 }
@@ -59,6 +61,10 @@ export interface EditionRecord {
   editionDate: string;
   releaseTag?: string;
   manifest?: string;
+}
+
+function getReleaseUrl(id: string, edition: number): string {
+  return `https://github.com/${siteConfig.githubOwner}/${siteConfig.githubRepo}/releases/tag/${getReleaseTag(id, edition)}`;
 }
 
 function withBasePath(value: string): string {
@@ -208,6 +214,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         source,
         rights,
         licenseUrl,
+        zlibraryUrl,
       } = entry.data;
       const editions = resolveEditions(rawEditions);
       const latestEdition = getLatestEdition(editions);
@@ -228,6 +235,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         source,
         rights,
         licenseUrl,
+        zlibraryUrl,
         edition: latestEdition.edition,
         editionDate: latestEdition.editionDate,
         date,
@@ -239,6 +247,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         totalVolumes,
         reading,
         parsed,
+        releaseUrl: getReleaseUrl(id, latestEdition.edition),
         downloadUrl: getDownloadUrl(id, latestEdition.edition),
         outlinePath: `src/data/outlines/${id}_v${latestEdition.edition}.json`,
       };

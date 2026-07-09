@@ -31,11 +31,13 @@ Contract version: `1`.
 | Source | `dc:source` | `pdfsource` | `1975年版扫描本` |
 | Rights | `dc:rights/rdf:Alt` | `pdfcopyright` | `版权归原作者所有` |
 | License URL | `xmpRights:WebStatement` | `pdflicenseurl` | `https://example.com/license` |
+| Z-Library URL | `prism:url` | `pdfurl` | `https://z-library.sk/book/...` |
 
 Hyperxmp 5.13 emits `pdfsubtitle` as `prism:subtitle`; the extractor must read
 that XMP field. It must not reinterpret `pdfsubject` as a subtitle. The
 extractor accepts PRISM basic metadata namespaces 2.1 and 3.0 for the
-`prism:*` fields in this contract.
+`prism:*` fields in this contract. For manually authored non-LaTeX metadata,
+the extractor also accepts `dc:relation` as a fallback related-resource URL.
 
 ## Optional custom PDF Info fields
 
@@ -70,7 +72,8 @@ Load `hyperref` before `hyperxmp`:
   pdfpublisher    = {},
   pdfsource       = {},
   pdfcopyright    = {版权归原作者所有},
-  pdflicenseurl   = {}
+  pdflicenseurl   = {},
+  pdfurl          = {https://z-library.sk/book/...}
 }
 
 % Optional xdvipdfmx document-info values. Omit empty values.
@@ -93,7 +96,8 @@ The desired future template-facing form is:
   description    = 系统介绍资本主义政治经济学的基础知识。,
   keywords       = {政治经济学,资本主义,青年自学丛书},
   language       = zh-CN,
-  series         = 青年自学丛书
+  series         = 青年自学丛书,
+  zlibrary-url   = https://z-library.sk/book/...
 }
 ```
 
@@ -120,6 +124,7 @@ class PdfBookMetadata:
     source: str | None
     rights: str | None
     license_url: str | None
+    zlibrary_url: str | None
 ```
 
 Use `document.get_xml_metadata()` and a safe XML parser. Handle simple
@@ -180,6 +185,7 @@ title: 政治经济学基础知识
 subtitle: 资本主义部分
 author: 《政治经济学基础知识》编写组
 language: zh-CN
+zlibraryUrl: https://z-library.sk/book/...
 totalVolumes: 2
 editions:
   - edition: 1

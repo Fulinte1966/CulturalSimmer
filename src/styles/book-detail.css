@@ -43,9 +43,12 @@
   background: #ffffff;
   height: 36px;
   isolation: isolate;
-  position: sticky;
+  left: 50%;
+  position: fixed;
   top: 25px;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: var(--bd-frame);
   z-index: 5;
 }
 
@@ -183,6 +186,7 @@
   display: flex;
   gap: 48px;
   justify-content: center;
+  margin-top: 120px;
   overflow: visible;
   position: relative;
 }
@@ -461,7 +465,8 @@
   top: 9px;
 }
 
-.bd-secondary-actions a {
+.bd-secondary-actions a,
+.bd-secondary-actions .bd-button--disabled {
   align-items: center;
   background: #ffffff;
   display: inline-flex;
@@ -479,12 +484,18 @@
   width: auto;
 }
 
-.bd-secondary-actions a {
+.bd-secondary-actions a,
+.bd-secondary-actions .bd-button--disabled {
   color: var(--bd-ink);
   gap: 12px;
   font-family: var(--font-display-text-medium);
   font-weight: 500;
   min-height: 20px;
+}
+
+.bd-secondary-actions .bd-button--disabled {
+  color: rgb(0 0 0 / 28%);
+  cursor: default;
 }
 
 .bd-button-dot {

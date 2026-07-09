@@ -632,9 +632,19 @@ figure {
   width: 1152px;
 }
 
+.site-shell {
+  padding-top: 82px;
+}
+
 .site-header {
+  background: #ffffff;
   border-bottom: 1px solid var(--rule);
+  left: 0;
   padding: 24px 0 10px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 20;
 }
 
 .site-header-inner {

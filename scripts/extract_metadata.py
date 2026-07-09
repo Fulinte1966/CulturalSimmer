@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse
 
 from defusedxml import ElementTree as ET
 
@@ -66,6 +67,7 @@ class PdfBookMetadata:
     source: Optional[str] = None
     rights: Optional[str] = None
     license_url: Optional[str] = None
+    zlibrary_url: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +165,21 @@ def _edition_date_from_create_date(raw_create_date: str) -> str:
         raise MetadataError(f"xmp:CreateDate is not a valid ISO date: {raw_create_date}") from exc
 
     return f"{parsed.year:04d}-{parsed.month:02d}"
+
+
+def _is_http_url(value: str) -> bool:
+    parsed = urlparse(value)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _xmp_external_url(desc: ET.Element) -> Optional[str]:
+    for tag in ("prism:url", "dc:relation"):
+        value = _xmp_text(desc, tag)
+        if value:
+            if not _is_http_url(value):
+                raise MetadataError(f"{tag} must be an HTTP(S) URL: {value}")
+            return value
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -311,6 +328,7 @@ def _extract_from_document(
     source = _xmp_text(desc, "dc:source")
     rights = _xmp_text(desc, "dc:rights")
     license_url = _xmp_text(desc, "xmpRights:WebStatement")
+    zlibrary_url = _xmp_external_url(desc)
 
     # --- Custom PDF Info fields --------------------------------------------
     info = _read_custom_pdf_info(document)
@@ -359,6 +377,7 @@ def _extract_from_document(
         source=source,
         rights=rights,
         license_url=license_url,
+        zlibrary_url=zlibrary_url,
     )
 
 
