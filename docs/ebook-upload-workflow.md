@@ -7,7 +7,7 @@
 - PDF 不进入 Git 历史，只托管在 GitHub Releases。
 - PDF XMP 是书目元数据来源；不根据文件名、Release 标题或正文内容猜测书目信息。
 - 不手写 `downloadUrl`、`releaseTag`、`pdfFilename`、`classification`、`volume` 等派生字段。
-- 正式发布键为 `{bookId}_v{edition}`，例如 `F0-1-1_v1`。
+- 正式发布键为 `{bookId}_v{edition}`，例如 `F0-1-1_v1`；正式 Release 的 tag 和标题均使用该唯一发行号。
 - `prism:bookEdition` 必须由 PDF 声明；脚本只校验，不替 PDF 决定版次。
 
 ## 本地上传入口
