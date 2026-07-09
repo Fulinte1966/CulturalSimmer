@@ -571,9 +571,12 @@
   z-index: 1;
 }
 
+.fm-book-list .book-cover,
 .fm-book-list img {
   -webkit-user-drag: none;
+  height: 238px;
   user-select: none;
+  width: 168px;
 }
 
 .fm-contact {

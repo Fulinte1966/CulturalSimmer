@@ -383,6 +383,7 @@ html {
 
 .fm-book-grid li,
 .fm-book-grid a,
+.fm-book-grid .book-cover,
 .fm-book-grid img {
   height: 238px;
   width: 168px;

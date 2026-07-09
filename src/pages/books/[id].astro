@@ -24,7 +24,7 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { id, title, subtitle, author } = entry.data;
+const { id } = entry.data;
 const { Content } = await entry.render();
 const [book, calendar] = await Promise.all([
   getBookById(id),
@@ -34,6 +34,8 @@ const [book, calendar] = await Promise.all([
 if (!book) {
   throw new Error(`Book metadata not found for ${id}`);
 }
+
+const { title, subtitle, author } = book;
 
 let outline: OutlineItem[] = [];
 try {
