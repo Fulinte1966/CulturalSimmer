@@ -17,14 +17,6 @@ npm run build
 ```
 
 The generator reads text from `src/`, `public/assets/`, and `dist/` when it
-exists. It also adds a conservative Chinese punctuation/UI safelist and writes
-one WOFF2 subset per source font. Keep CSS `@font-face` rules pointed at
-`public/fonts/subset/*.woff2` and use `font-display: swap` for web delivery.
-
-The weather safelist follows the UAPI `/misc/weather` documentation's listed
-common Chinese `weather` values. That field is documented as free-form text
-rather than a fixed enum, so build-time `dist/` extraction handles the rendered
-static value and unexpected client-side refresh text must still be allowed to
-fall through to the CSS fallback stack. Calendar safelist characters cover the
-`/misc/lunartime` fields currently rendered by the site: weekday, sexagenary
-year, lunar month, and lunar day.
+exists and writes one WOFF2 subset per source font. Keep CSS `@font-face` rules
+pointed at `public/fonts/subset/*.woff2` and use `font-display: swap` for web
+delivery.

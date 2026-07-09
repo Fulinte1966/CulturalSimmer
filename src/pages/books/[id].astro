@@ -6,7 +6,6 @@ import NewspaperLayout from "../../components/NewspaperLayout.astro";
 import BookCover from "../../components/BookCover.astro";
 import type { OutlineItem } from "../../lib/outline";
 import {
-  formatDisplayCallNumber,
   formatEditionDateString,
   formatShortVolume,
 } from "../../lib/bookId";
@@ -52,7 +51,7 @@ try {
 }
 
 const base = import.meta.env.BASE_URL;
-const callNumber = formatDisplayCallNumber(book.parsed);
+const callNumber = id;
 const characterCount =
   (book.reading?.cjkCharacterCount ?? 0) +
   (book.reading?.latinTokenCount ?? 0);
