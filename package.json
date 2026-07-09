@@ -7,6 +7,8 @@
     "build": "astro build && node scripts/build-pagefind.mjs",
     "preview": "astro preview",
     "ebook:upload": "python3 scripts/ebook_upload.py",
+    "fonts:subset": "python3 scripts/subset_fonts.py",
+    "fonts:refresh": "npm run build && npm run fonts:subset && npm run build",
     "check": "astro check",
     "validate": "tsx scripts/validate-books.ts",
     "test:reading": "python3 tests/python/reading_metrics_test.py",
