@@ -26,11 +26,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: npm ci
+      - run: pip install -r scripts/requirements.txt
       - run: npm run test:ui
       - run: npm run validate
       - run: npm run check
-      - run: npm run build
+      - run: npm run fonts:refresh
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

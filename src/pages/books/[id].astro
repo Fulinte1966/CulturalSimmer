@@ -53,14 +53,6 @@ try {
 
 const base = import.meta.env.BASE_URL;
 const callNumber = formatDisplayCallNumber(book.parsed);
-const tallyParams = new URLSearchParams({
-  alignLeft: "1",
-  transparentBackground: "1",
-  dynamicHeight: "1",
-  bookId: book.id,
-  edition: String(book.edition),
-});
-const tallyEmbedUrl = `https://tally.so/embed/XxyDOP?${tallyParams.toString()}`;
 const characterCount =
   (book.reading?.cjkCharacterCount ?? 0) +
   (book.reading?.latinTokenCount ?? 0);
@@ -196,7 +188,13 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           </div>
 
           <div class="bd-actions" aria-label="书籍操作">
-            <div class="bd-download" aria-label="传阅">
+            <a
+              class="bd-download"
+              href={book.downloadUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="下载 PDF"
+            >
               <img
                 class="bd-download-mark"
                 src={joinBasePath(base, "assets/badges/badge-download.svg")}
@@ -206,7 +204,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                 aria-hidden="true"
               />
               <span class="bd-download-label">传阅</span>
-            </div>
+            </a>
             <div class="bd-secondary-actions">
               <a class="bd-button" href={book.releaseUrl} target="_blank" rel="noreferrer">
                 <span class="bd-button-dot" aria-hidden="true"></span>
@@ -263,22 +261,22 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           <section
             id="bd-errata-panel"
             class="bd-errata-panel"
-            aria-label="读者勘误表"
+            aria-label="读者勘误提示"
             data-errata-panel
             tabindex="-1"
             hidden
           >
-            <iframe
-              data-tally-src={tallyEmbedUrl}
-              loading="lazy"
-              width="100%"
-              height="100"
-              frameborder="0"
-              marginheight="0"
-              marginwidth="0"
-              scrolling="no"
-              title="读者勘误表"
-            ></iframe>
+            <img
+              class="bd-errata-qr"
+              src={joinBasePath(base, "assets/errata/book-model-with-qr.svg")}
+              alt=""
+              width="160"
+              height="222"
+              aria-hidden="true"
+            />
+            <p class="bd-errata-copy">
+              请扫描或点击书末“书籍勘误”二维码<br />提交《读者勘误表》
+            </p>
           </section>
         </section>
       </section>
