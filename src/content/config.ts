@@ -16,6 +16,7 @@ const books = defineCollection({
     source: z.string().optional(),
     rights: z.string().optional(),
     licenseUrl: z.string().url().optional(),
+    zlibraryUrl: z.string().url().optional(),
     tags: z.array(z.string()).default([]),
     cover: z.string().optional(),
     totalVolumes: z

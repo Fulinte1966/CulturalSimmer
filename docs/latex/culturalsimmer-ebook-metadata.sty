@@ -27,6 +27,7 @@
 \tl_new:N \l__csmeta_source_tl
 \tl_new:N \l__csmeta_rights_tl
 \tl_new:N \l__csmeta_license_url_tl
+\tl_new:N \l__csmeta_zlibrary_url_tl
 
 \keys_define:nn { culturalsimmer / ebook-metadata }
   {
@@ -45,6 +46,7 @@
     source        .tl_set:N = \l__csmeta_source_tl,
     rights        .tl_set:N = \l__csmeta_rights_tl,
     license-url   .tl_set:N = \l__csmeta_license_url_tl,
+    zlibrary-url  .tl_set:N = \l__csmeta_zlibrary_url_tl,
     language      .initial:n = zh-CN,
   }
 
@@ -65,6 +67,7 @@
     \tl_clear:N \l__csmeta_source_tl
     \tl_clear:N \l__csmeta_rights_tl
     \tl_clear:N \l__csmeta_license_url_tl
+    \tl_clear:N \l__csmeta_zlibrary_url_tl
   }
 
 \cs_new_protected:Npn \__csmeta_required:nN #1#2
@@ -97,6 +100,7 @@
         pdfsource      = { \exp_not:V \l__csmeta_source_tl },
         pdfcopyright   = { \exp_not:V \l__csmeta_rights_tl },
         pdflicenseurl  = { \exp_not:V \l__csmeta_license_url_tl },
+        pdfurl         = { \exp_not:V \l__csmeta_zlibrary_url_tl },
       }
     \tl_if_blank:NF \l__csmeta_total_volumes_tl
       {

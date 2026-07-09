@@ -64,6 +64,7 @@ npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
 | 来源 | `dc:source` |
 | 权利说明 | `dc:rights` |
 | 权利说明 URL | `xmpRights:WebStatement` |
+| Z-Library 页面 URL | `prism:url`（LaTeX helper 中为 `zlibrary-url`，最终写入 `pdfurl`） |
 | 总册数 | `/EbookTotalVolumes` |
 
 LaTeX 源码可以使用项目自己的宏名，但最终写入 PDF XMP 时必须映射到标准字段，例如 `dc:identifier`、`dc:title`、`prism:bookEdition`、`dc:description`。
@@ -90,7 +91,8 @@ docs/latex/culturalsimmer-ebook-metadata.sty
   description = 系统介绍资本主义政治经济学的基础知识。,
   keywords = {政治经济学,资本主义},
   language = zh-CN,
-  series = 青年自学丛书
+  series = 青年自学丛书,
+  zlibrary-url = https://z-library.sk/book/...
 }
 ```
 
@@ -153,6 +155,7 @@ subtitle: 资本主义部分
 description: 系统介绍……
 author: 《政治经济学基础知识》编写组
 language: zh-CN
+zlibraryUrl: https://z-library.sk/book/...
 editions:
   - edition: 1
     editionDate: "2026-06"

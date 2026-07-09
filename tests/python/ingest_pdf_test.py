@@ -96,6 +96,7 @@ class IngestPdfTests(unittest.TestCase):
                 "tags": ["甲", "乙"],
                 "description": "简介。",
                 "language": "zh-CN",
+                "zlibraryUrl": "https://z-library.sk/book/fixture",
                 "sourceReleaseId": 10,
                 "sourceAssetId": 20,
                 "sourceSha256": "abc",
@@ -137,6 +138,7 @@ class IngestPdfTests(unittest.TestCase):
             markdown = (root / "src/content/books/F0-9.md").read_text("utf-8")
             frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
             self.assertEqual(frontmatter["title"], metadata["title"])
+            self.assertEqual(frontmatter["zlibraryUrl"], metadata["zlibraryUrl"])
             self.assertEqual(frontmatter["editions"][0]["edition"], 2)
             self.assertIn("editions:\n  - edition: 2", markdown)
             self.assertNotIn("edition", frontmatter)
@@ -148,6 +150,9 @@ class IngestPdfTests(unittest.TestCase):
             self.assertEqual(manifest["pageCount"], 12)
             self.assertEqual(manifest["wordCount"], 102)
             self.assertEqual(manifest["sourceAssetId"], 20)
+            self.assertEqual(
+                manifest["metadata"]["zlibraryUrl"], metadata["zlibraryUrl"]
+            )
             self.assertTrue(manifest["generatedAt"])
 
     def test_expected_edition_from_existing_editions(self) -> None:

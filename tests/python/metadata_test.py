@@ -286,6 +286,7 @@ class ExtractMetadataTests(unittest.TestCase):
                 "dc:source": _alt("1975年版扫描本"),
                 "dc:rights": _alt("版权归原作者所有"),
                 "xmpRights:WebStatement": "https://example.com/license",
+                "prism:url": "https://z-library.sk/book/fixture",
             }
         )
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -300,6 +301,40 @@ class ExtractMetadataTests(unittest.TestCase):
             self.assertEqual(meta.source, "1975年版扫描本")
             self.assertEqual(meta.rights, "版权归原作者所有")
             self.assertEqual(meta.license_url, "https://example.com/license")
+            self.assertEqual(meta.zlibrary_url, "https://z-library.sk/book/fixture")
+
+    def test_extracts_external_url_from_dc_relation_fallback(self) -> None:
+        xmp = _make_xmp(
+            **{
+                "dc:identifier": "F0-1-1",
+                "dc:title": _alt("政治经济学基础知识"),
+                "prism:bookEdition": "1",
+                "dc:description": _alt("系统介绍资本主义政治经济学。"),
+                "dc:relation": "https://z-library.sk/book/fallback",
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            pdf = _make_test_pdf(root, "test.pdf", xmp=xmp)
+            meta = extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertEqual(meta.zlibrary_url, "https://z-library.sk/book/fallback")
+
+    def test_rejects_invalid_external_url(self) -> None:
+        xmp = _make_xmp(
+            **{
+                "dc:identifier": "F0-1-1",
+                "dc:title": _alt("政治经济学基础知识"),
+                "prism:bookEdition": "1",
+                "dc:description": _alt("系统介绍资本主义政治经济学。"),
+                "prism:url": "not-a-url",
+            }
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            pdf = _make_test_pdf(root, "test.pdf", xmp=xmp)
+            with self.assertRaises(MetadataError) as ctx:
+                extract(pdf, SAMPLE_CLASSIFICATIONS)
+            self.assertIn("must be an HTTP(S) URL", str(ctx.exception))
 
     def test_missing_subtitle_is_not_an_error(self) -> None:
         xmp = _make_xmp(

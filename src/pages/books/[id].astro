@@ -208,16 +208,26 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               <span class="bd-download-label">传阅</span>
             </div>
             <div class="bd-secondary-actions">
-              <a class="bd-button" href={joinBasePath(base, "books/")}>
+              <a class="bd-button" href={book.releaseUrl} target="_blank" rel="noreferrer">
                 <span class="bd-button-dot" aria-hidden="true"></span>
                 <span class="bd-button-text">基核技术站</span>
                 <span class="bd-button-dot" aria-hidden="true"></span>
               </a>
-              <a href={joinBasePath(base, `categories/${book.parsed.classification}/`)}>
-                <span class="bd-button-dot" aria-hidden="true"></span>
-                <span class="bd-button-text">择览资料站</span>
-                <span class="bd-button-dot" aria-hidden="true"></span>
-              </a>
+              {
+                book.zlibraryUrl ? (
+                  <a href={book.zlibraryUrl} target="_blank" rel="noreferrer">
+                    <span class="bd-button-dot" aria-hidden="true"></span>
+                    <span class="bd-button-text">择览资料站</span>
+                    <span class="bd-button-dot" aria-hidden="true"></span>
+                  </a>
+                ) : (
+                  <span class="bd-button bd-button--disabled" aria-disabled="true">
+                    <span class="bd-button-dot" aria-hidden="true"></span>
+                    <span class="bd-button-text">择览资料站</span>
+                    <span class="bd-button-dot" aria-hidden="true"></span>
+                  </span>
+                )
+              }
             </div>
           </div>
 

@@ -241,6 +241,7 @@ def cmd_validate(args: list[str]):
         "source": meta.source,
         "rights": meta.rights,
         "licenseUrl": meta.license_url,
+        "zlibraryUrl": meta.zlibrary_url,
         "canonicalTag": tag,
         "canonicalFilename": filename,
         "sourceReleaseId": int(opts.release_id),
@@ -307,6 +308,7 @@ def cmd_generate(args: list[str]):
         "source",
         "rights",
         "licenseUrl",
+        "zlibraryUrl",
         "language",
     ):
         if meta.get(opt) is not None:
@@ -361,6 +363,7 @@ def cmd_generate(args: list[str]):
                 "source",
                 "rights",
                 "licenseUrl",
+                "zlibraryUrl",
             )
             if meta.get(key) is not None
         },
