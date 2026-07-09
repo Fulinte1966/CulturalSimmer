@@ -318,11 +318,11 @@
 .bd-errata-copy {
   color: var(--bd-ink);
   font-family: var(--font-zhisong);
-  font-size: 16px;
+  font-size: 12px;
   font-feature-settings: "fwid" 1;
   font-variant-east-asian: full-width;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 150%;
   overflow-wrap: normal;
   white-space: nowrap;
 }
