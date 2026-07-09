@@ -1,5 +1,6 @@
 ---
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import BookCover from "../../components/BookCover.astro";
 import "../../styles/category-index.css";
 import { joinBasePath } from "../../lib/basePath";
 import { getAllBooks } from "../../lib/books";
@@ -14,11 +15,9 @@ interface IndexNode {
 
 const [books, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
 const base = import.meta.env.BASE_URL;
-const coveredBooks = books.filter((book) => book.coverUrl);
-const displayBooks =
-  coveredBooks.length > 0
-    ? Array.from({ length: 20 }, (_, index) => coveredBooks[index % coveredBooks.length])
-    : [];
+const pageSize = 10;
+const displayBooks = books;
+const initialPageCount = Math.max(1, Math.ceil(displayBooks.length / pageSize));
 
 const indexTree: IndexNode = {
   code: "",
@@ -132,9 +131,19 @@ const rootRows = indexTree.children ?? [];
       <section class="fm-book-results" hidden aria-label="书籍结果">
         <ol class="fm-book-grid">
           {displayBooks.map((book) => (
-            <li>
+            <li
+              data-book-classification={book.parsed.classification}
+              data-book-search={[
+                book.id,
+                book.title,
+                book.subtitle,
+                book.author,
+                book.series,
+                ...book.tags,
+              ].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN")}
+            >
               <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                {book.coverUrl && <img src={book.coverUrl} alt={`《${book.title}》封面`} />}
+                <BookCover book={book} mode="flat" />
               </a>
             </li>
           ))}
@@ -143,7 +152,7 @@ const rootRows = indexTree.children ?? [];
           <button type="button" data-page-action="first">首　页</button>
           <button type="button" data-page-action="prev">上一页</button>
           <span class="fm-page-current">第 1 页</span>
-          <span class="fm-page-total">共 2 页</span>
+          <span class="fm-page-total">共 {initialPageCount} 页</span>
           <button type="button" data-page-action="next">下一页</button>
           <button type="button" data-page-action="last">尾　页</button>
         </nav>
@@ -320,21 +329,30 @@ const rootRows = indexTree.children ?? [];
     const totalPage = document.querySelector(".fm-page-total");
     if (!results || !pagination) return;
 
-    let count = 0;
+    let matches = [];
     if (state.mode === "keyword") {
-      count = state.keywordQuery.trim() ? 2 : 20;
+      const query = state.keywordQuery.trim().toLocaleLowerCase("zh-CN");
+      matches = query
+        ? gridItems.filter((item) => item.dataset.bookSearch?.includes(query))
+        : gridItems;
     } else if (state.selectedCode || state.browseCode) {
-      count = 20;
+      const code = state.selectedCode || state.browseCode;
+      matches = gridItems.filter((item) =>
+        item.dataset.bookClassification?.startsWith(code)
+      );
     }
 
+    const count = matches.length;
+    const visibleItems = new Set(matches);
     const pageCount = Math.max(1, Math.ceil(count / pageSize));
     state.page = Math.min(Math.max(state.page, 1), pageCount);
     const start = (state.page - 1) * pageSize;
     const end = start + pageSize;
+    const pageItems = new Set(matches.slice(start, end));
 
     results.hidden = count === 0;
-    for (const [index, item] of gridItems.entries()) {
-      item.hidden = index < start || index >= end || index >= count;
+    for (const item of gridItems) {
+      item.hidden = !visibleItems.has(item) || !pageItems.has(item);
     }
     pagination.hidden = count === 0 || pageCount <= 1;
     if (currentPage) currentPage.textContent = `第 ${state.page} 页`;

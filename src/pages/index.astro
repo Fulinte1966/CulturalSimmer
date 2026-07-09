@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getCollection } from "astro:content";
+import BookCover from "../components/BookCover.astro";
 import NewspaperLayout from "../components/NewspaperLayout.astro";
 import type { OutlineItem } from "../lib/outline";
 import "../styles/home.css";
@@ -42,12 +43,7 @@ if (leadBook) {
 const bookHref = leadBook
   ? joinBasePath(base, `books/${leadBook.id}/`)
   : undefined;
-const coveredBooks = books.filter((book) => book.coverUrl);
-const shelfSource = coveredBooks.length > 0 ? coveredBooks : books;
-const shelfBooks =
-  shelfSource.length > 0
-    ? Array.from({ length: 10 }, (_, index) => shelfSource[index % shelfSource.length])
-    : [];
+const shelfBooks = books.slice(0, 10);
 
 const rawSummary =
   leadBook?.description ||
@@ -204,7 +200,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
           {shelfBooks.map((book) => (
             <li>
               <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                {book.coverUrl && <img src={book.coverUrl} alt={`《${book.title}》封面`} />}
+                <BookCover book={book} mode="flat" />
               </a>
             </li>
           ))}

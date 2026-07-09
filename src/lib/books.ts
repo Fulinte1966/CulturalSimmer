@@ -40,6 +40,7 @@ export interface BookMeta {
   edition: number;
   editionDate: string;
   date: Date;
+  listedAt: Date;
   editions: EditionRecord[];
   tags: string[];
   cover?: string;
@@ -128,8 +129,44 @@ function loadReadingMetrics(
   }
 }
 
+function loadManifestGeneratedAt(id: string, edition: number): Date | undefined {
+  const manifestPath = path.join(
+    rootDir,
+    "src",
+    "data",
+    "manifests",
+    `${id}_v${edition}.json`
+  );
+
+  if (!fs.existsSync(manifestPath)) {
+    return undefined;
+  }
+
+  try {
+    const value = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as {
+      generatedAt?: string;
+    };
+    if (!value.generatedAt) {
+      return undefined;
+    }
+    const date = new Date(value.generatedAt);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  } catch {
+    return undefined;
+  }
+}
+
 function dateFromEditionDate(value: string): Date {
   return new Date(`${value}-01T00:00:00+08:00`);
+}
+
+function normalizeSubtitle(value?: string): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return trimmed.replace(/^[（(]\s*(.*?)\s*[）)]$/u, "$1");
 }
 
 function resolveEditions(
@@ -177,12 +214,13 @@ export async function getAllBooks(): Promise<BookMeta[]> {
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, latestEdition.edition, cover);
       const reading = loadReadingMetrics(id, latestEdition.edition);
+      const date = dateFromEditionDate(latestEdition.editionDate);
 
       return {
         id,
         title,
         description,
-        subtitle,
+        subtitle: normalizeSubtitle(subtitle),
         author,
         language,
         series,
@@ -192,7 +230,8 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         licenseUrl,
         edition: latestEdition.edition,
         editionDate: latestEdition.editionDate,
-        date: dateFromEditionDate(latestEdition.editionDate),
+        date,
+        listedAt: loadManifestGeneratedAt(id, latestEdition.edition) ?? date,
         editions,
         tags,
         cover,
@@ -204,7 +243,12 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         outlinePath: `src/data/outlines/${id}_v${latestEdition.edition}.json`,
       };
     })
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
+    .sort(
+      (a, b) =>
+        b.listedAt.getTime() - a.listedAt.getTime() ||
+        b.date.getTime() - a.date.getTime() ||
+        a.id.localeCompare(b.id)
+    );
 }
 
 export async function getBooksByClassification(

@@ -1,5 +1,7 @@
 """Unit tests for PDF metadata extraction and validation."""
 
+from __future__ import annotations
+
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET

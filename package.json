@@ -6,12 +6,12 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/build-pagefind.mjs",
     "preview": "astro preview",
-    "ebook:upload": "python scripts/ebook_upload.py",
+    "ebook:upload": "python3 scripts/ebook_upload.py",
     "check": "astro check",
     "validate": "tsx scripts/validate-books.ts",
-    "test:reading": "python tests/python/reading_metrics_test.py",
-    "test:metadata": "python tests/python/metadata_test.py",
-    "test:ingest": "python tests/python/ingest_pdf_test.py",
+    "test:reading": "python3 tests/python/reading_metrics_test.py",
+    "test:metadata": "python3 tests/python/metadata_test.py",
+    "test:ingest": "python3 tests/python/ingest_pdf_test.py",
     "test:ui": "tsx --test tests/node/**/*.test.ts"
   },
   "dependencies": {
