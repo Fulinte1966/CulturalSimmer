@@ -298,7 +298,8 @@
   flex-direction: column;
   gap: 32px;
   justify-content: center;
-  min-height: 420px;
+  min-height: 568px;
+  padding: 133px 0;
   text-align: center;
   width: 100%;
 }
@@ -318,9 +319,12 @@
   color: var(--bd-ink);
   font-family: var(--font-zhisong);
   font-size: 16px;
+  font-feature-settings: "fwid" 1;
+  font-variant-east-asian: full-width;
   font-weight: 400;
   line-height: 24px;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .bd-title-block {
