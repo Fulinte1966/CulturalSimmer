@@ -9,6 +9,7 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
   let reboundTimer = 0;
   let snapFrame = 0;
   let snapResumeTimer = 0;
+  let pressedLink: HTMLAnchorElement | null = null;
   let startX = 0;
   let startScrollLeft = 0;
   let velocity = 0;
@@ -218,6 +219,9 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
     clearRebound();
     isDragging = true;
     didDrag = false;
+    pressedLink = event.target instanceof Element
+      ? event.target.closest<HTMLAnchorElement>("a[href]")
+      : null;
     velocity = 0;
     startX = event.clientX;
     startScrollLeft = shelf.scrollLeft;
@@ -257,7 +261,11 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
       startGlide();
     } else {
       settleWithSnap();
+      if (shouldGlide && pressedLink) {
+        window.location.href = pressedLink.href;
+      }
     }
+    pressedLink = null;
   };
 
   shelf.addEventListener("dragstart", (event) => event.preventDefault());

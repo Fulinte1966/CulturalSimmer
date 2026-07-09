@@ -406,7 +406,7 @@ def cmd_publish(args: list[str]):
     _gh(
         "release", "create", meta["canonicalTag"],
         normalized_pdf.resolve().as_posix(),
-        "--title", f"{meta['title']} (v{meta['edition']})",
+        "--title", meta["canonicalTag"],
         "--notes", f"Automated intake of {meta['canonicalFilename']}",
     )
     digest = None
