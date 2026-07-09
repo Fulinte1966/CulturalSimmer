@@ -36,51 +36,6 @@ syncCoverStagePosition();
 window.addEventListener("resize", scheduleCoverStageSync, { passive: true });
 window.addEventListener("scroll", scheduleCoverStageSync, { passive: true });
 
-const loadTallyEmbeds = () => {
-  const source = "https://tally.so/widgets/embed.js";
-  const hydrateFrames = () => {
-    document
-      .querySelectorAll<HTMLIFrameElement>("iframe[data-tally-src]:not([src])")
-      .forEach((iframe) => {
-        iframe.src = iframe.dataset.tallySrc ?? "";
-      });
-  };
-
-  const run = () => {
-    const tallyWindow = window as Window & {
-      Tally?: { loadEmbeds: () => void };
-    };
-
-    if (typeof tallyWindow.Tally !== "undefined") {
-      tallyWindow.Tally.loadEmbeds();
-      return;
-    }
-    hydrateFrames();
-  };
-
-  const tallyWindow = window as Window & {
-    Tally?: { loadEmbeds: () => void };
-  };
-
-  if (typeof tallyWindow.Tally !== "undefined") {
-    run();
-    return;
-  }
-
-  const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${source}"]`);
-
-  if (!existingScript) {
-    const script = document.createElement("script");
-    script.src = source;
-    script.onload = run;
-    script.onerror = hydrateFrames;
-    document.body.appendChild(script);
-  } else {
-    existingScript.addEventListener("load", run, { once: true });
-    existingScript.addEventListener("error", hydrateFrames, { once: true });
-  }
-};
-
 document.querySelectorAll<HTMLElement>("[data-errata-toggle]").forEach((toggle) => {
   toggle.addEventListener("click", () => {
     const region = document.querySelector<HTMLElement>("[data-errata-region]");
@@ -105,7 +60,6 @@ document.querySelectorAll<HTMLElement>("[data-errata-toggle]").forEach((toggle) 
       });
 
     if (!isOpen) {
-      loadTallyEmbeds();
       scheduleCoverStageSync();
       panel.focus({ preventScroll: true });
     }

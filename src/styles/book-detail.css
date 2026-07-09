@@ -95,6 +95,10 @@
 
 .bd-breadcrumb a:hover,
 .bd-breadcrumb a:focus-visible,
+.bd-proof:hover,
+.bd-proof:focus-visible,
+.bd-download:hover,
+.bd-download:focus-visible,
 .bd-secondary-actions a:hover,
 .bd-secondary-actions a:focus-visible {
   color: var(--bd-accent);
@@ -178,7 +182,12 @@
 }
 
 .bd-proof-text-front {
-  fill: #000000;
+  fill: currentColor;
+}
+
+.bd-proof:hover .bd-proof-text-front,
+.bd-proof:focus-visible .bd-proof-text-front {
+  fill: var(--bd-accent);
 }
 
 .bd-main {
@@ -280,24 +289,38 @@
 
 .bd-text--errata {
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .bd-errata-panel {
-  text-align: left;
-  width: 540px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+  min-height: 420px;
+  text-align: center;
+  width: 100%;
 }
 
 .bd-errata-panel[hidden] {
   display: none;
 }
 
-.bd-errata-panel iframe {
-  border: 0;
+.bd-errata-qr {
   display: block;
-  height: auto;
-  overflow: hidden;
-  width: 100%;
+  height: 222px;
+  object-fit: contain;
+  width: 160px;
+}
+
+.bd-errata-copy {
+  color: var(--bd-ink);
+  font-family: var(--font-zhisong);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  overflow-wrap: anywhere;
 }
 
 .bd-title-block {
@@ -442,6 +465,7 @@
   height: 44px;
   justify-content: center;
   position: relative;
+  text-decoration: none;
   width: 83px;
 }
 
@@ -453,7 +477,7 @@
 }
 
 .bd-download-label {
-  color: var(--bd-ink);
+  color: currentColor;
   font-family: var(--font-heiti-display);
   font-size: 16px;
   font-weight: 800;
@@ -463,6 +487,11 @@
   position: absolute;
   text-align: center;
   top: 9px;
+}
+
+.bd-download:hover .bd-download-label,
+.bd-download:focus-visible .bd-download-label {
+  color: var(--bd-accent);
 }
 
 .bd-secondary-actions a,
