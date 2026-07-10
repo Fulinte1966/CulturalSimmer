@@ -174,6 +174,24 @@ Release 创建时先上传 PDF、快照和 changelog，并将生成的 Markdown 
 
 该 workflow 使用 GitHub 官方的 `workflow_dispatch` 手动触发机制；只有默认分支上的 workflow 可以从 Actions 页面运行。Release 正文通过 `gh release edit --notes-file` 更新，JSON 资产在本地校验完成后通过 `gh release upload --clobber` 替换。同步失败不会改写 PDF，也不会触发电子书导入流程。
 
+## 单书总更新日志
+
+`npm run build` 会先执行 `scripts/build_book_changelogs.py`，按最新版至最早版把同一书目的 Release Markdown 合并为：
+
+```text
+src/data/changelogs/{bookId}.md
+```
+
+聚合文件是构建产物，不是新的事实来源。脚本逐版读取 `{releaseTag}.changelog.json`，渲染时重新计算统计；第 1 版历史日志缺失时可根据书目版次生成“初次发布”，第 2 版及以后缺失结构化日志则构建失败。电子书检查更新页面链接到 GitHub 默认分支中的该文件。
+
+检查更新 URL 契约为：
+
+```text
+https://fulinte1966.github.io/CulturalSimmer/check/?bookId=F0-1-1&edition=1
+```
+
+`bookId` 必须与书目内部书号完全一致，`edition` 必须为正整数。页面只把参数作为查询键，不接受 URL 覆盖书名、封面、下载地址或最新版信息。
+
 ## 本地生成
 
 比较两个版次：

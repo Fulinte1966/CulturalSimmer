@@ -1,0 +1,163 @@
+---
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import { joinBasePath } from "../../lib/basePath";
+import { getAllBooks } from "../../lib/books";
+import { siteConfig } from "../../lib/site";
+import { getCalendarStatus } from "../../lib/uapis";
+import "../../styles/book-detail.css";
+import "../../styles/update-check.css";
+
+const [allBooks, calendar] = await Promise.all([
+  getAllBooks(),
+  getCalendarStatus(),
+]);
+const base = import.meta.env.BASE_URL;
+const pagesTexture = joinBasePath(base, "assets/textures/pages.svg");
+const books = allBooks.map((book) => ({
+  id: book.id,
+  title: book.title,
+  subtitle: book.subtitle,
+  author: book.author
+    ? book.author.endsWith("编")
+      ? book.author
+      : `${book.author}编`
+    : undefined,
+  series: book.series,
+  edition: book.edition,
+  coverUrl: book.coverUrl,
+  spineUrl: book.spineUrl,
+  coverKind: book.coverKind,
+  modelThickness: book.reading?.pageCount
+    ? Math.min(42, Math.max(18, Math.round(Math.sqrt(book.reading.pageCount) * 1.9)))
+    : 28,
+  detailUrl: joinBasePath(base, `books/${book.id}/`),
+  changelogUrl:
+    `https://github.com/${siteConfig.githubOwner}/${siteConfig.githubRepo}` +
+    `/blob/main/src/data/changelogs/${book.id}.md`,
+}));
+const serializedBooks = JSON.stringify(books).replace(/</g, "\\u003c");
+---
+
+<NewspaperLayout
+  title="检查更新"
+  description="检查 CulturalSimmer 电子书是否已有新版。"
+>
+  <main class="book-detail-page check-page" data-check-page aria-busy="true">
+    <div class="bd-grid" aria-hidden="true"></div>
+
+    <article class="bd-frame">
+      <header class="bd-head">
+        <div class="bd-head-texture" aria-hidden="true"></div>
+        <nav class="bd-breadcrumb" aria-label="面包屑">
+          <a href={joinBasePath(base, "")}>主页</a>
+          <span>・</span>
+          <span>检查更新</span>
+        </nav>
+
+        <div class="bd-date-line">
+          <img
+            class="bd-cr"
+            src={joinBasePath(base, "assets/brand/culturalsimmer-wordmark.svg")}
+            alt=""
+            width="35"
+            height="18"
+            aria-hidden="true"
+          />
+          <time>{calendar.dateLabel}</time>
+          <span>{calendar.weekdayLabel}</span>
+        </div>
+      </header>
+
+      <section class="bd-main check-main">
+        <div class="bd-cover-stage">
+          <figure
+            class="book-cover book-cover--model book-cover--generated"
+            style={`--book-size: 28px; --pages-texture: url("${pagesTexture}")`}
+            data-check-cover
+            hidden
+          >
+            <span class="book-cover-shadow" aria-hidden="true"></span>
+            <div class="book-cover-volume">
+              <div class="book-cover-surface">
+                <img data-check-cover-image alt="" hidden />
+                <div
+                  class="book-cover-placeholder"
+                  data-check-cover-placeholder
+                  role="img"
+                  aria-label="书籍排版封面"
+                  hidden
+                >
+                  <span class="placeholder-author" data-check-placeholder-author></span>
+                  <strong class="placeholder-title" data-check-placeholder-title></strong>
+                  <span class="placeholder-subtitle" data-check-placeholder-subtitle></span>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+
+        <section class="bd-text check-panel" aria-labelledby="check-book-title">
+          <div class="check-content-frame">
+            <div class="check-book-info">
+              <div class="bd-title-block">
+                <p class="bd-series" data-check-series></p>
+                <h1 id="check-book-title" data-check-title>检查更新</h1>
+                <p class="bd-subtitle" data-check-subtitle></p>
+              </div>
+              <p class="bd-author" data-check-author>正在读取书目信息</p>
+            </div>
+
+            <div class="check-actions">
+              <a
+                class="check-status"
+                data-check-status-link
+                data-status="invalid-request"
+                href={joinBasePath(base, "books/")}
+                aria-describedby="check-live-status"
+              >
+                <span class="check-status-segments" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span>
+                </span>
+                <span class="check-status-characters" aria-hidden="true">
+                  <span data-check-status-character>正</span>
+                  <span data-check-status-character>在</span>
+                  <span data-check-status-character>检</span>
+                  <span data-check-status-character>查</span>
+                </span>
+                <span
+                  id="check-live-status"
+                  class="sr-only"
+                  data-check-live-status
+                  aria-live="polite"
+                >正在检查</span>
+              </a>
+
+              <a
+                class="check-changelog"
+                data-check-changelog
+                href={joinBasePath(base, "books/")}
+                target="_blank"
+                rel="noreferrer"
+                hidden
+              >
+                <span class="bd-button-dot" aria-hidden="true"></span>
+                <span>更新日志</span>
+                <span class="bd-button-dot" aria-hidden="true"></span>
+              </a>
+            </div>
+          </div>
+        </section>
+      </section>
+    </article>
+  </main>
+</NewspaperLayout>
+
+<script
+  id="check-book-data"
+  type="application/json"
+  is:inline
+  set:html={serializedBooks}
+></script>
+<script>
+  import "../../scripts/update-check";
+</script>

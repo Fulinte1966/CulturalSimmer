@@ -89,6 +89,10 @@ F0-1-1_v2
 
 正式 Release 会保存规范化正文快照和结构化 changelog，并使用自动生成的 Markdown 作为正文。复杂公式、表格和图形默认不参与文字差异；需要补录时编辑仓库中的 changelog，再手动运行 **Sync Release Changelog** 重新计算统计并更新 Release。详细规则见 [电子书版本更新日志规范](docs/release-changelog-conventions.md)。
 
+书末“检查更新”二维码使用 `/check/?bookId={内部书号}&edition={版次}`。页面只以 URL 中的书号和版次进行匹配，书名、封面、最新版本和下载入口均以仓库数据为准。每次生产构建还会把同一书目的各版日志合并为 `src/data/changelogs/{内部书号}.md`，供检查更新页面跳转查看。
+
+书末“书籍勘误”二维码使用 `/errata/?bookId={内部书号}&edition={版次}`。最新版会转入详情页并一次性打开嵌入的 Tally 表单；旧版会转到检查更新页面。详情页刷新后始终恢复默认二维码提示。
+
 ### 自动生成内容
 
 以 `F0-1-1` 第 1 版为例，导入后会生成：

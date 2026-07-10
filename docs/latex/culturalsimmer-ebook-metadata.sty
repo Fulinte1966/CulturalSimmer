@@ -1,8 +1,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesExplPackage
   {culturalsimmer-ebook-metadata}
-  {2026/07/07}
-  {0.1.0}
+  {2026/07/11}
+  {0.2.0}
   {CulturalSimmer ebook PDF/XMP metadata helper}
 
 \RequirePackage{expl3}
@@ -120,6 +120,12 @@
     \keys_set:nn { culturalsimmer / ebook-metadata } { #1 }
     \__csmeta_apply:
   }
+
+% Public read-only accessors for display text and generated links.
+\NewExpandableDocumentCommand \EbookId { }
+  { \tl_use:N \l__csmeta_id_tl }
+\NewExpandableDocumentCommand \EbookEdition { }
+  { \tl_use:N \l__csmeta_edition_tl }
 
 \ExplSyntaxOff
 
