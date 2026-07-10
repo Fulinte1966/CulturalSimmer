@@ -53,7 +53,7 @@ npm run preview
    npm run ebook:upload path/to/book.pdf
    ```
 
-4. GitHub Actions 自动校验元数据、生成网页数据和静态资产、创建正式 Release、提交到 `main` 并触发 Pages 部署。
+4. GitHub Actions 自动校验元数据、比较相邻 PDF 版次、生成网页数据和静态资产、创建正式 Release、提交到 `main` 并触发 Pages 部署。
 
 临时 Release tag 由脚本生成，格式类似：
 
@@ -78,6 +78,8 @@ F0-1-1_v2
 ```
 
 网页显示出版式版次，例如 `2026 年 6 月第 1 版`、`2026 年 7 月第 2 版`。下载入口始终指向当前 Markdown 记录的最新版。
+
+正式 Release 会保存规范化正文快照和结构化 changelog，并使用自动生成的 Markdown 作为正文。详细规则见 [电子书版本更新日志规范](docs/release-changelog-conventions.md)。
 
 ### 自动生成内容
 
