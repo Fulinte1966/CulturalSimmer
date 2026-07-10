@@ -20,7 +20,9 @@ def snapshot(text: str, edition: int, page: int = 1) -> dict:
         "editionDate": f"2026-0{edition}",
         "pageCount": page,
         "tokens": tokens,
-        "pageRuns": [{"start": 0, "end": len(tokens), "page": page}],
+        "pageRuns": [
+            {"start": 0, "end": len(tokens), "page": page, "label": str(page)}
+        ],
     }
 
 
@@ -40,6 +42,8 @@ class ContentDiffTests(unittest.TestCase):
         self.assertEqual(change["new"]["changedText"], "作")
         self.assertEqual(change["old"]["pages"], [1])
         self.assertEqual(change["new"]["pages"], [2])
+        self.assertEqual(change["old"]["pageLabels"], ["1"])
+        self.assertEqual(change["new"]["pageLabels"], ["2"])
 
     def test_insertion_deletion_punctuation_and_number_changes(self) -> None:
         insertion = compare_content_snapshots(
@@ -64,11 +68,17 @@ class ContentDiffTests(unittest.TestCase):
         old = snapshot("甲乙丙丁", 1)
         new = snapshot("甲新增乙丙丁", 2)
         new["pageRuns"] = [
-            {"start": 0, "end": 2, "page": 12},
-            {"start": 2, "end": len(new["tokens"]), "page": 13},
+            {"start": 0, "end": 2, "page": 12, "label": "ii"},
+            {
+                "start": 2,
+                "end": len(new["tokens"]),
+                "page": 13,
+                "label": "iii",
+            },
         ]
         change = compare_content_snapshots(old, new)["changes"][0]
         self.assertEqual(change["new"]["pages"], [12, 13])
+        self.assertEqual(change["new"]["pageLabels"], ["ii", "iii"])
 
     def test_size_limit_fails_clearly(self) -> None:
         old = snapshot("甲乙丙", 1)
@@ -84,11 +94,34 @@ class ContentDiffTests(unittest.TestCase):
         new = snapshot("乙", 2)
         old["tokens"] = old_tokens
         new["tokens"] = new_tokens
-        old["pageRuns"] = [{"start": 0, "end": len(old_tokens), "page": 1}]
-        new["pageRuns"] = [{"start": 0, "end": len(new_tokens), "page": 2}]
+        old["pageRuns"] = [
+            {"start": 0, "end": len(old_tokens), "page": 1, "label": "i"}
+        ]
+        new["pageRuns"] = [
+            {"start": 0, "end": len(new_tokens), "page": 2, "label": "1"}
+        ]
 
         changelog = compare_content_snapshots(old, new, timeout_seconds=5)
         self.assertEqual(changelog["summary"]["changed"], 1)
+
+    def test_identical_text_relocated_to_adjacent_page_is_not_a_content_change(self) -> None:
+        old = snapshot("正文甲需要换页的相同内容。脚注正文乙", 1, page=10)
+        new = snapshot("正文甲脚注。需要换页的相同内容正文乙", 2, page=10)
+        old["pageRuns"] = [
+            {"start": 0, "end": len(old["tokens"]), "page": 10, "label": "1"}
+        ]
+        new["pageRuns"] = [
+            {"start": 0, "end": 5, "page": 10, "label": "1"},
+            {
+                "start": 5,
+                "end": len(new["tokens"]),
+                "page": 11,
+                "label": "2",
+            },
+        ]
+
+        changelog = compare_content_snapshots(old, new)
+        self.assertEqual(changelog["summary"]["total"], 0)
 
     def test_long_change_is_truncated_to_release_display_limit(self) -> None:
         old = snapshot("甲。", 1)

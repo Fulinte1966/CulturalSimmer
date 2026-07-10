@@ -17,11 +17,16 @@ from book_assets import normalize_pdf_text
 
 
 SCHEMA_VERSION = 1
-NORMALIZATION_PROFILE = "culturalsimmer-content-v1"
+NORMALIZATION_PROFILE = "culturalsimmer-content-v3"
 UPDATE_PAGE_MARKER = "CULTURALSIMMER_UPDATE_PAGE"
 MARGIN_RATIO = 0.10
 REPEATED_MARGIN_MIN_PAGES = 3
 REPEATED_MARGIN_MIN_RATIO = 0.25
+COMPLEX_REGION_PADDING = 12.0
+COMPLEX_MATH_RATIO = 0.65
+COMPLEX_CENTERED_MATH_RATIO = 0.35
+COMPLEX_DRAWING_WIDTH_RATIO = 0.35
+COMPLEX_DRAWING_HEIGHT_RATIO = 0.08
 
 TOKEN_PATTERN = re.compile(
     r"[A-Za-z0-9]+(?:[._+#:/-][A-Za-z0-9]+)*"
@@ -48,6 +53,7 @@ class PageBlock:
     y1: float
     page_height: float
     text: str
+    complex: bool = False
 
     @property
     def margin(self) -> str | None:
@@ -64,6 +70,8 @@ def normalize_extracted_text(text: str) -> str:
     normalized = normalize_pdf_text(text)
     normalized = unicodedata.normalize("NFC", normalized)
     normalized = normalized.replace("\u00ad", "")
+    normalized = normalized.replace("\x00", "")
+    normalized = re.sub(r"[；;]{2,}", lambda match: match.group(0)[0], normalized)
     normalized = normalized.replace("\r\n", "\n").replace("\r", "\n")
     normalized = re.sub(r"(?<=[A-Za-z])-[ \t]*\n[ \t]*(?=[A-Za-z])", "", normalized)
     normalized = re.sub(r"[ \t\f\v]+", " ", normalized)
@@ -136,34 +144,138 @@ def _filter_structural_lines(text: str, *, toc: bool, colophon: bool) -> str:
     return "\n".join(kept)
 
 
-def _collect_blocks(document: Any) -> tuple[dict[int, list[PageBlock]], set[int]]:
+def _rects_intersect(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> bool:
+    return not (
+        first[2] <= second[0]
+        or second[2] <= first[0]
+        or first[3] <= second[1]
+        or second[3] <= first[1]
+    )
+
+
+def _expanded_rect(
+    rect: tuple[float, float, float, float], padding: float
+) -> tuple[float, float, float, float]:
+    return (
+        rect[0] - padding,
+        rect[1] - padding,
+        rect[2] + padding,
+        rect[3] + padding,
+    )
+
+
+def _dict_block_text(block: dict[str, Any]) -> str:
+    return "\n".join(
+        "".join(str(span.get("text", "")) for span in line.get("spans", []))
+        for line in block.get("lines", [])
+    )
+
+
+def _math_character_ratio(block: dict[str, Any]) -> tuple[int, float]:
+    total = 0
+    math_characters = 0
+    for line in block.get("lines", []):
+        for span in line.get("spans", []):
+            text = "".join(
+                character
+                for character in str(span.get("text", ""))
+                if not character.isspace()
+            )
+            total += len(text)
+            if "math" in str(span.get("font", "")).lower():
+                math_characters += len(text)
+    return total, (math_characters / total if total else 0.0)
+
+
+def _complex_block_indexes(page: Any, blocks: list[dict[str, Any]]) -> set[int]:
+    if page.rotation % 180:
+        return set(range(len(blocks)))
+
+    page_width = float(page.rect.width)
+    page_height = float(page.rect.height)
+    boxes = [tuple(float(value) for value in block["bbox"]) for block in blocks]
+    complex_indexes: set[int] = set()
+
+    for index, block in enumerate(blocks):
+        character_count, math_ratio = _math_character_ratio(block)
+        x0, _, x1, _ = boxes[index]
+        centered = x0 > page_width * 0.18 and x1 < page_width * 0.82
+        if character_count >= 2 and (
+            math_ratio >= COMPLEX_MATH_RATIO
+            or (centered and math_ratio >= COMPLEX_CENTERED_MATH_RATIO)
+        ):
+            complex_indexes.add(index)
+
+    for drawing in page.cluster_drawings():
+        drawing_box = tuple(float(value) for value in drawing)
+        drawing_width = drawing_box[2] - drawing_box[0]
+        drawing_height = drawing_box[3] - drawing_box[1]
+        if (
+            drawing_width < page_width * COMPLEX_DRAWING_WIDTH_RATIO
+            or drawing_height < page_height * COMPLEX_DRAWING_HEIGHT_RATIO
+        ):
+            continue
+        for index, box in enumerate(boxes):
+            if _rects_intersect(box, drawing_box):
+                complex_indexes.add(index)
+
+    changed = True
+    while changed:
+        changed = False
+        expanded = [
+            _expanded_rect(boxes[index], COMPLEX_REGION_PADDING)
+            for index in complex_indexes
+        ]
+        for index, box in enumerate(boxes):
+            if index in complex_indexes:
+                continue
+            if any(_rects_intersect(box, region) for region in expanded):
+                complex_indexes.add(index)
+                changed = True
+    return complex_indexes
+
+
+def _collect_blocks(
+    document: Any,
+) -> tuple[dict[int, list[PageBlock]], set[int], dict[int, str | None]]:
     pages: dict[int, list[PageBlock]] = {}
     marker_pages: set[int] = set()
+    page_labels: dict[int, str | None] = {}
     for page_index in range(document.page_count):
         page = document.load_page(page_index)
         page_number = page_index + 1
+        page_labels[page_number] = str(page.get_label()).strip() or None
+        raw_blocks = [
+            block
+            for block in page.get_text("dict", sort=True).get("blocks", [])
+            if int(block.get("type", -1)) == 0
+        ]
+        complex_indexes = _complex_block_indexes(page, raw_blocks)
         page_blocks: list[PageBlock] = []
-        for raw in page.get_text("blocks", sort=True):
-            if len(raw) < 7 or int(raw[6]) != 0:
-                continue
-            text = normalize_extracted_text(str(raw[4]))
+        for block_index, raw in enumerate(raw_blocks):
+            text = normalize_extracted_text(_dict_block_text(raw))
             if not text:
                 continue
+            bbox = raw["bbox"]
             page_blocks.append(
                 PageBlock(
                     page=page_number,
-                    x0=float(raw[0]),
-                    y0=float(raw[1]),
-                    x1=float(raw[2]),
-                    y1=float(raw[3]),
+                    x0=float(bbox[0]),
+                    y0=float(bbox[1]),
+                    x1=float(bbox[2]),
+                    y1=float(bbox[3]),
                     page_height=float(page.rect.height),
                     text=text,
+                    complex=block_index in complex_indexes,
                 )
             )
         pages[page_number] = page_blocks
         if UPDATE_PAGE_MARKER in "\n".join(block.text for block in page_blocks):
             marker_pages.add(page_number)
-    return pages, marker_pages
+    return pages, marker_pages, page_labels
 
 
 def _repeated_margin_keys(
@@ -204,7 +316,7 @@ def extract_content_snapshot(
     try:
         if document.page_count < 1:
             raise ValueError("PDF must contain at least one page")
-        pages, marker_pages = _collect_blocks(document)
+        pages, marker_pages, page_labels = _collect_blocks(document)
         excluded = {int(page) for page in excluded_pages}
         if exclude_cover:
             excluded.add(1)
@@ -215,7 +327,7 @@ def extract_content_snapshot(
 
         repeated_margin = _repeated_margin_keys(pages, excluded)
         tokens: list[str] = []
-        page_runs: list[dict[str, int]] = []
+        page_runs: list[dict[str, int | str | None]] = []
         removed_counts: Counter[str] = Counter()
 
         for page_number, blocks in pages.items():
@@ -223,8 +335,14 @@ def extract_content_snapshot(
                 continue
             toc = _looks_like_toc(blocks)
             colophon = _looks_like_colophon(blocks)
+            if colophon:
+                removed_counts["colophonPages"] += 1
+                continue
             page_tokens: list[str] = []
             for block in blocks:
+                if block.complex:
+                    removed_counts["complexRegions"] += 1
+                    continue
                 if _is_margin_page_number(block):
                     removed_counts["pageNumbers"] += 1
                     continue
@@ -244,7 +362,14 @@ def extract_content_snapshot(
             if page_tokens:
                 start = len(tokens)
                 tokens.extend(page_tokens)
-                page_runs.append({"start": start, "end": len(tokens), "page": page_number})
+                page_runs.append(
+                    {
+                        "start": start,
+                        "end": len(tokens),
+                        "page": page_number,
+                        "label": page_labels[page_number],
+                    }
+                )
 
         if not tokens:
             raise ValueError(

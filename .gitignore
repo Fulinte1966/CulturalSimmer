@@ -12,3 +12,6 @@ reference/debug-archive/
 *.local
 .env
 .env.*
+mise.local.toml
+output/
+tmp/

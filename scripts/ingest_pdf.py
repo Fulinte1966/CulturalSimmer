@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from changelog_model import normalize_changelog
 from compare_content_snapshots import compare_content_snapshots
 from edition_policy import (
     check_expected_edition,
@@ -262,6 +263,7 @@ def cmd_validate(args: list[str]):
         ROOT / "public" / "covers" / f"{tag}_spine.png",
         ROOT / "src" / "data" / "outlines" / f"{tag}.json",
         ROOT / "src" / "data" / "reading" / f"{tag}.json",
+        ROOT / "src" / "data" / "changelogs" / f"{tag}.changelog.json",
     )
     existing_paths = [
         str(path.relative_to(ROOT)) for path in duplicate_paths if path.exists()
@@ -406,11 +408,13 @@ def cmd_changelog(args: list[str]):
                 edition_date=str(previous_date),
             )
 
-    changelog = compare_content_snapshots(
-        previous_snapshot,
-        current_snapshot,
-        max_tokens=opts.max_tokens,
-        timeout_seconds=opts.timeout_seconds,
+    changelog = normalize_changelog(
+        compare_content_snapshots(
+            previous_snapshot,
+            current_snapshot,
+            max_tokens=opts.max_tokens,
+            timeout_seconds=opts.timeout_seconds,
+        )
     )
     changelog_path = workspace / f"{tag}.changelog.json"
     changelog_path.write_text(
@@ -469,6 +473,17 @@ def cmd_generate(args: list[str]):
         reading.get("latinTokenCount") or 0
     )
 
+    changelog = normalize_changelog(
+        json.loads(Path(meta["changelogPath"]).read_text(encoding="utf-8"))
+    )
+    changelog_dir = ROOT / "src" / "data" / "changelogs"
+    changelog_dir.mkdir(parents=True, exist_ok=True)
+    repository_changelog_path = changelog_dir / f"{tag}.changelog.json"
+    repository_changelog_path.write_text(
+        json.dumps(changelog, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
     # Markdown entry
     tags = meta.get("tags") or []
 
@@ -509,7 +524,7 @@ def cmd_generate(args: list[str]):
     manifest_dir = ROOT / "src" / "data" / "manifests"
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "schemaVersion": 3,
+        "schemaVersion": 4,
         "bookId": id_,
         "title": meta["title"],
         "edition": edition,
@@ -537,7 +552,8 @@ def cmd_generate(args: list[str]):
         "previousEdition": meta.get("previousEdition"),
         "contentSnapshotFilename": f"{tag}.content.json.gz",
         "changelogFilename": f"{tag}.changelog.json",
-        "changelogSummary": meta.get("changelogSummary"),
+        "changelogPath": f"src/data/changelogs/{tag}.changelog.json",
+        "changelogSummary": changelog["summary"],
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metadata": {
             key: meta.get(key)

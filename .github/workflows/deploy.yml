@@ -24,11 +24,11 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: ".node-version"
           cache: npm
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version-file: ".python-version"
       - run: npm ci
       - run: pip install -r scripts/requirements.txt
       - run: npm run test:ui

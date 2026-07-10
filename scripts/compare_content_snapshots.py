@@ -9,7 +9,8 @@ import time
 from contextlib import contextmanager
 from typing import Any, Iterator
 
-from extract_content_snapshot import NORMALIZATION_PROFILE
+from changelog_model import calculate_changelog_summary
+from extract_content_snapshot import NORMALIZATION_PROFILE, tokenize_text
 
 
 SCHEMA_VERSION = 1
@@ -70,6 +71,11 @@ def _validate_snapshot(snapshot: dict[str, Any]) -> None:
             or run["start"] >= run["end"]
             or run["end"] > token_count
             or run["page"] < 1
+            or "label" not in run
+            or (
+                run["label"] is not None
+                and (not isinstance(run["label"], str) or not run["label"])
+            )
         ):
             raise ValueError("Snapshot contains an invalid page run")
 
@@ -156,6 +162,19 @@ def _pages_for_range(
     return sorted(pages)
 
 
+def _page_labels_for_range(
+    snapshot: dict[str, Any], start: int, end: int
+) -> list[str]:
+    labels: list[str] = []
+    for run in snapshot["pageRuns"]:
+        if int(run["start"]) >= end or int(run["end"]) <= start:
+            continue
+        label = run["label"]
+        if isinstance(label, str) and label not in labels:
+            labels.append(label)
+    return labels
+
+
 def _is_word_token(token: str) -> bool:
     return bool(token) and all(
         character.isascii() and character.isalnum()
@@ -226,6 +245,7 @@ def _context_side(
 
     return {
         "pages": _pages_for_range(snapshot, start, end),
+        "pageLabels": _page_labels_for_range(snapshot, start, end),
         "prefix": prefix,
         "changedText": changed,
         "suffix": suffix,
@@ -234,6 +254,59 @@ def _context_side(
         "prefixTruncated": prefix_truncated,
         "suffixTruncated": suffix_truncated,
     }
+
+
+RELOCATION_IGNORED_PUNCTUATION = frozenset("，。；;：:、")
+
+
+def _relocation_key(side: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(
+        token
+        for token in tokenize_text(str(side.get("changedText", "")))
+        if token not in RELOCATION_IGNORED_PUNCTUATION
+    )
+
+
+def _pages_are_adjacent(first: dict[str, Any], second: dict[str, Any]) -> bool:
+    first_pages = [int(page) for page in first.get("pages", [])]
+    second_pages = [int(page) for page in second.get("pages", [])]
+    return bool(
+        first_pages
+        and second_pages
+        and min(abs(left - right) for left in first_pages for right in second_pages)
+        <= 1
+    )
+
+
+def _drop_adjacent_page_relocations(
+    changes: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Ignore identical text moved across an adjacent page by repagination."""
+
+    removed_indexes: set[int] = set()
+    for delete_index, deletion in enumerate(changes):
+        if deletion.get("type") != "delete" or delete_index in removed_indexes:
+            continue
+        old_side = deletion["old"]
+        key = _relocation_key(old_side)
+        if not key:
+            continue
+        for insert_index, insertion in enumerate(changes):
+            if insertion.get("type") != "insert" or insert_index in removed_indexes:
+                continue
+            new_side = insertion["new"]
+            if key == _relocation_key(new_side) and _pages_are_adjacent(
+                old_side, new_side
+            ):
+                removed_indexes.update((delete_index, insert_index))
+                break
+
+    filtered = [
+        change for index, change in enumerate(changes) if index not in removed_indexes
+    ]
+    for index, change in enumerate(filtered, start=1):
+        change["index"] = index
+    return filtered
 
 
 def compare_content_snapshots(
@@ -282,7 +355,6 @@ def compare_content_snapshots(
     elapsed = time.monotonic() - started
 
     changes: list[dict[str, Any]] = []
-    counts = {"insert": 0, "delete": 0, "replace": 0}
     for index, (tag, old_start, old_end, new_start, new_end) in enumerate(
         merged_opcodes, start=1
     ):
@@ -292,7 +364,9 @@ def compare_content_snapshots(
         if tag in {"insert", "replace"}:
             change["new"] = _context_side(new_snapshot, new_start, new_end)
         changes.append(change)
-        counts[tag] += 1
+
+    changes = _drop_adjacent_page_relocations(changes)
+    summary = calculate_changelog_summary({"changes": changes})
 
     return {
         "schemaVersion": SCHEMA_VERSION,
@@ -306,12 +380,7 @@ def compare_content_snapshots(
             "edition": new_snapshot["edition"],
             "editionDate": new_snapshot["editionDate"],
         },
-        "summary": {
-            "total": len(changes),
-            "added": counts["insert"],
-            "removed": counts["delete"],
-            "changed": counts["replace"],
-        },
+        "summary": summary,
         "comparison": {
             "algorithm": "SequenceMatcher coarse-refine bounded",
             "elapsedSeconds": round(elapsed, 3),

@@ -120,6 +120,27 @@ class IngestPdfTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             metadata_path = root / "metadata.json"
+            changelog_path = root / "workspace/F0-9_v2.changelog.json"
+            changelog_path.parent.mkdir(parents=True)
+            changelog_path.write_text(
+                json.dumps(
+                    {
+                        "schemaVersion": 1,
+                        "bookId": "F0-9",
+                        "fromEdition": None,
+                        "toEdition": {"edition": 2, "editionDate": "2026-06"},
+                        "summary": {
+                            "total": 99,
+                            "added": 99,
+                            "removed": 0,
+                            "changed": 0,
+                        },
+                        "changes": [],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
             metadata = {
                 "id": "F0-9",
                 "title": "标题: [测试] # 一",
@@ -140,6 +161,7 @@ class IngestPdfTests(unittest.TestCase):
                 "sourcePdfPath": str(root / "fixture.pdf"),
                 "canonicalTag": "F0-9_v2",
                 "canonicalFilename": "F0-9_v2.pdf",
+                "changelogPath": str(changelog_path),
             }
             (root / "fixture.pdf").write_bytes(b"fixture")
             metadata_path.write_text(
@@ -184,12 +206,23 @@ class IngestPdfTests(unittest.TestCase):
                 (root / "src/data/manifests/F0-9_v2.json").read_text("utf-8")
             )
             self.assertEqual(manifest["editionDate"], "2026-06")
-            self.assertEqual(manifest["schemaVersion"], 3)
+            self.assertEqual(manifest["schemaVersion"], 4)
             self.assertEqual(manifest["pageCount"], 12)
             self.assertEqual(manifest["wordCount"], 102)
             self.assertEqual(manifest["sourceAssetId"], 20)
             self.assertEqual(
                 manifest["metadata"]["zlibraryUrl"], metadata["zlibraryUrl"]
+            )
+            self.assertEqual(
+                manifest["changelogPath"],
+                "src/data/changelogs/F0-9_v2.changelog.json",
+            )
+            repository_changelog = json.loads(
+                (root / manifest["changelogPath"]).read_text("utf-8")
+            )
+            self.assertEqual(
+                repository_changelog["summary"],
+                {"total": 0, "added": 0, "removed": 0, "changed": 0},
             )
             self.assertTrue(manifest["generatedAt"])
 
@@ -263,7 +296,14 @@ class IngestPdfTests(unittest.TestCase):
                     "editionDate": date,
                     "pageCount": 1,
                     "tokens": tokens,
-                    "pageRuns": [{"start": 0, "end": len(tokens), "page": 1}],
+                    "pageRuns": [
+                        {
+                            "start": 0,
+                            "end": len(tokens),
+                            "page": 1,
+                            "label": "i",
+                        }
+                    ],
                 }
 
             previous_snapshot_path = workspace / "F0-9_v1.content.json.gz"

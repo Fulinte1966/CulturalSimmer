@@ -44,6 +44,7 @@ def _local_path_conflicts(tag: str) -> list[str]:
         ROOT / "src" / "data" / "manifests" / f"{tag}.json",
         ROOT / "src" / "data" / "outlines" / f"{tag}.json",
         ROOT / "src" / "data" / "reading" / f"{tag}.json",
+        ROOT / "src" / "data" / "changelogs" / f"{tag}.changelog.json",
         ROOT / "public" / "covers" / f"{tag}.png",
         ROOT / "public" / "covers" / f"{tag}_spine.png",
     )

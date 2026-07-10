@@ -8,7 +8,13 @@ CulturalSimmer is an Astro static PDF ebook library. GitHub Pages hosts the site
 
 ## Commands
 
+The project runtime is declared once in `.node-version` and `.python-version`. Both `mise.toml` and GitHub Actions consume those files. Run commands through `mise`; do not rely on the macOS system Python.
+
 ```bash
+mise install           # install the declared runtimes
+mise run setup         # install Node and Python dependencies
+mise run test          # run every Node and Python test suite
+mise run check         # tests, validation, Astro checks, and production build
 npm run dev           # Astro dev server; Pagefind search is not indexed here
 npm run check         # astro check
 npm run validate      # validate generated/content book data
@@ -32,6 +38,7 @@ temporary ingest-* GitHub Release
   -> scripts/extract_metadata.py validates PDF XMP
   -> scripts/extract_content_snapshot.py normalizes final PDF content
   -> scripts/compare_content_snapshots.py compares adjacent editions
+  -> scripts/changelog_model.py validates entries and derives statistics
   -> scripts/ingest_pdf.py orchestrates generation and publishing
   -> scripts/book_assets.py generates covers, spine samples, outlines, and reading metrics
   -> src/content/books/, src/data/, and public/covers/ update the static site
@@ -45,12 +52,13 @@ Runtime site code lives in `src/`:
 - `src/scripts/`: browser-side TypeScript modules.
 - `src/styles/`: page and global CSS.
 - `src/content/books/`: generated Markdown book records.
-- `src/data/`: classifications plus generated manifests, outlines, and reading metrics.
+- `src/data/`: classifications plus generated changelogs, manifests, outlines, and reading metrics.
 
 Automation and tooling:
 
 - `.github/workflows/deploy.yml`: tests, validates, builds, and deploys GitHub Pages.
 - `.github/workflows/ingest-pdf.yml`: release-triggered PDF ingestion.
+- `.github/workflows/sync-release-changelog.yml`: manual validation, statistics recalculation, and Release changelog synchronization.
 - `scripts/ebook_upload.py`: local preflight and temporary release creation.
 - `scripts/validate-books.ts`: standalone content/data validator.
 - `scripts/requirements.txt`: Python dependencies for ingestion and PDF asset extraction.
@@ -66,6 +74,8 @@ The book call number `id` is the core identifier, parsed by `src/lib/bookId.ts`.
 - The LaTeX helper for XMP metadata is in `docs/latex/culturalsimmer-ebook-metadata.sty`.
 - Never use Git tag diffs, commit history, LaTeX source diffs, or PDF binary diffs as an electronic-book content changelog.
 - Release changelogs must come from normalized final-PDF snapshots; see `docs/release-changelog-conventions.md`.
+- Complex formulas, tables, and graphics are intentionally omitted from automatic text diff. Add required entries to `src/data/changelogs/` and run the manual synchronization workflow.
+- Treat changelog `changes` as source data. `index`, `summary`, manifest statistics, Release notes, and future webpage statistics are derived values.
 
 ## Asset Rules
 
