@@ -1,0 +1,34 @@
+---
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import { joinBasePath } from "../../lib/basePath";
+import { getAllBooks } from "../../lib/books";
+
+const allBooks = await getAllBooks();
+const base = import.meta.env.BASE_URL;
+const books = allBooks.map((book) => ({
+  id: book.id,
+  edition: book.edition,
+  detailUrl: joinBasePath(base, `books/${book.id}/`),
+}));
+const routeData = JSON.stringify({
+  books,
+  checkUrl: joinBasePath(base, "check/"),
+}).replace(/</g, "\\u003c");
+---
+
+<NewspaperLayout
+  title="书籍勘误"
+  description="检查电子书版本并打开对应的读者勘误表。"
+>
+  <main class="sr-only" aria-live="polite">正在检查书籍版本</main>
+</NewspaperLayout>
+
+<script
+  id="errata-route-data"
+  type="application/json"
+  is:inline
+  set:html={routeData}
+></script>
+<script>
+  import "../../scripts/errata-gateway";
+</script>

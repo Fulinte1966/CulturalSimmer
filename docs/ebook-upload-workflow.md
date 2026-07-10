@@ -139,6 +139,7 @@ PDF 声明版次：2
   -> 查找同一书目中小于当前版次的最大历史版次
   -> 下载旧版快照或 PDF，生成当前快照和结构化 changelog
   -> 生成 Markdown、manifest、封面、书脊、目录和阅读数据
+  -> 合并该书各版更新日志并生成单书总更新日志
   -> 运行检查、测试和生产构建
   -> 创建正式 Release 并上传 PDF、快照、changelog
   -> 读取 GitHub Release asset digest 写入 manifest
@@ -151,6 +152,10 @@ PDF 声明版次：2
 `Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
 
 更新日志只比较最终 PDF 的规范化可见内容，不比较 Git、LaTeX 源码或 PDF 二进制。完整规则、JSON schema、Release Markdown 和本地重建命令见 [电子书版本更新日志规范](release-changelog-conventions.md)。差异生成失败时 workflow 会中止，不会发布看似正常的空日志。
+
+生产构建会生成 `src/data/changelogs/{bookId}.md`。书末检查更新二维码应指向 `/check/?bookId={bookId}&edition={edition}`；页面用仓库中的书目数据判断是否存在新版，并链接到最新版详情页和该书总更新日志。
+
+书籍勘误二维码应指向 `/errata/?bookId={bookId}&edition={edition}`，不得直接链接外部表单。网站仅对最新版打开详情页中的 Tally 表单，旧版统一转到检查更新页面。详情页用一次性 `errata=1` 查询参数打开表单，并在渲染时立即从地址栏删除；因此整页刷新不会重复打开表单。
 
 ## Markdown 书目记录
 

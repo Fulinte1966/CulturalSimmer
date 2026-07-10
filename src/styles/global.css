@@ -635,6 +635,8 @@ html {
   font-family: var(--font-song);
   letter-spacing: 0;
   line-height: 1.5;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -665,6 +667,12 @@ img {
   display: block;
   height: auto;
   max-width: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+a {
+  -webkit-user-drag: none;
 }
 
 h1,

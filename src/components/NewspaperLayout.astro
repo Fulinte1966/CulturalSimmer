@@ -21,5 +21,8 @@ const { title, description, searchable = false } = Astro.props;
   </head>
   <body>
     <slot />
+    <script>
+      import "../scripts/prevent-drag";
+    </script>
   </body>
 </html>

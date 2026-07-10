@@ -300,17 +300,47 @@ html {
 .bd-errata-panel {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 32px;
   justify-content: center;
-  min-height: 568px;
-  padding: 133px 0;
+  min-height: calc(100vh - 170px);
   text-align: center;
   width: 100%;
 }
 
 .bd-errata-panel[hidden] {
   display: none;
+}
+
+.bd-errata-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+  transform: translateY(-60px);
+  width: 100%;
+}
+
+.bd-errata-content[hidden],
+.bd-errata-form[hidden] {
+  display: none;
+}
+
+.bd-errata-panel--form {
+  justify-content: flex-start;
+}
+
+.bd-errata-form {
+  min-height: 568px;
+  text-align: left;
+  width: 540px;
+}
+
+.bd-errata-form iframe {
+  border: 0;
+  display: block;
+  min-height: 568px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .bd-errata-qr {

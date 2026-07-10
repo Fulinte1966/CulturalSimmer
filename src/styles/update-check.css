@@ -1,0 +1,238 @@
+.check-page {
+  min-height: 100vh;
+}
+
+.check-page .bd-cover-stage[hidden] {
+  display: none;
+}
+
+.check-main {
+  margin-top: 0;
+  min-height: calc(100vh - 50px);
+}
+
+.check-panel {
+  align-self: stretch;
+  justify-content: center;
+  min-height: calc(100vh - 50px);
+}
+
+.check-content-frame {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  justify-content: center;
+  width: 660px;
+}
+
+.check-book-info {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.check-panel [data-check-series]:empty,
+.check-panel [data-check-subtitle]:empty {
+  display: none;
+}
+
+.check-actions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.check-changelog {
+  align-items: center;
+  background: #ffffff;
+  display: inline-flex;
+  font-family: var(--font-display-text-medium);
+  font-size: 16px;
+  font-weight: 500;
+  gap: 12px;
+  justify-content: center;
+  letter-spacing: 4px;
+  line-height: 16px;
+  padding: 4px 0 4px 4px;
+}
+
+.check-changelog:hover,
+.check-changelog:focus-visible {
+  color: var(--bd-accent);
+}
+
+.check-status {
+  background: #ffffff;
+  color: #000000;
+  display: block;
+  height: 48px;
+  overflow: hidden;
+  position: relative;
+  width: 249px;
+}
+
+.check-status::before,
+.check-status::after {
+  border: 1px solid currentColor;
+  border-radius: 100px;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+}
+
+.check-status::before {
+  inset: 0 0 0 1px;
+}
+
+.check-status::after {
+  inset: 2px 2px 2px 3px;
+}
+
+.check-status-segments,
+.check-status-characters {
+  display: grid;
+  gap: 15.81px;
+  grid-template-columns: repeat(4, 38.14px);
+  height: 24px;
+  left: 25px;
+  position: absolute;
+  top: 12px;
+  width: 200px;
+}
+
+.check-status-segments span {
+  background: currentColor;
+  border-radius: 1px;
+  display: block;
+}
+
+.check-status-characters {
+  top: 11px;
+}
+
+.check-status-characters span {
+  align-items: center;
+  color: #ffffff;
+  display: flex;
+  font-family: var(--font-display-wide);
+  font-size: 24px;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 24px;
+}
+
+.check-status:hover,
+.check-status:focus-visible {
+  color: var(--bd-accent);
+}
+
+.check-status[data-status="invalid-edition"],
+.check-status[data-status="unknown-book"],
+.check-status[data-status="invalid-request"] {
+  color: #4f4f4f;
+}
+
+.check-status[data-status="invalid-edition"]:hover,
+.check-status[data-status="unknown-book"]:hover,
+.check-status[data-status="invalid-request"]:hover,
+.check-status[data-status="invalid-edition"]:focus-visible,
+.check-status[data-status="unknown-book"]:focus-visible,
+.check-status[data-status="invalid-request"]:focus-visible {
+  color: var(--bd-accent);
+}
+
+@media (max-width: 900px) {
+  .check-page {
+    padding: 18px 20px 40px;
+    width: 100%;
+  }
+
+  .check-page .bd-grid,
+  .check-page .bd-frame,
+  .check-main,
+  .check-panel {
+    width: 100%;
+  }
+
+  .check-page .bd-head {
+    max-width: none;
+    top: 18px;
+    width: calc(100% - 40px);
+  }
+
+  .check-page .bd-head::before {
+    inset: -18px -20px 0;
+  }
+
+  .check-page .bd-breadcrumb {
+    max-width: calc(100% - 150px);
+    width: auto;
+  }
+
+  .check-page .bd-date-line {
+    width: auto;
+  }
+
+  .check-page .bd-date-line time,
+  .check-page .bd-date-line span {
+    display: none;
+  }
+
+  .check-main {
+    align-items: center;
+    flex-direction: column;
+    gap: 56px;
+    margin-top: 76px;
+    min-height: 0;
+  }
+
+  .check-main::before {
+    display: none;
+  }
+
+  .check-page .bd-cover-stage {
+    height: 390px;
+    left: auto;
+    position: relative;
+    top: auto;
+    width: 100%;
+  }
+
+  .check-page .bd-cover-stage .book-cover--model {
+    --model-scale: 0.72;
+  }
+
+  .check-panel {
+    min-height: 440px;
+  }
+
+  .check-content-frame {
+    gap: 40px;
+    width: 100%;
+  }
+
+  .check-panel .bd-series {
+    font-size: 28px;
+  }
+
+  .check-panel .bd-title-block h1,
+  .check-panel .bd-title-block h1.bd-title--long {
+    font-size: 48px;
+    line-height: 1.08;
+    max-width: 100%;
+  }
+
+  .check-panel .bd-subtitle {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .check-panel .bd-author {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+}
