@@ -106,6 +106,10 @@ def _looks_like_colophon(blocks: list[PageBlock]) -> bool:
         "责任编辑",
         "电子书制作",
         "检查更新",
+        "内部书号",
+        "书籍勘误",
+        "排版",
+        "排印",
     )
     return sum(indicator in text for indicator in indicators) >= 2
 

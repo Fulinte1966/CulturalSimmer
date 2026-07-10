@@ -14,6 +14,76 @@ from extract_content_snapshot import (
     normalize_extracted_text,
     tokenize_text,
 )
+from compare_content_snapshots import compare_content_snapshots
+from render_release_changelog import render_release_changelog
+
+
+CHANGE_TYPES = (
+    "replace",
+    "delete",
+    "insert",
+    "replace",
+    "delete",
+    "insert",
+    "replace",
+    "delete",
+    "insert",
+    "replace",
+    "insert",
+)
+
+
+def _write_chapter_fixture(pdf_path: Path, *, revised: bool) -> None:
+    import fitz
+
+    document = fitz.open()
+    cover = document.new_page(width=420, height=595)
+    cover.insert_text((72, 120), "COVER")
+
+    for chapter, change_type in enumerate(CHANGE_TYPES, start=1):
+        page = document.new_page(width=420, height=595)
+        page.insert_text((72, 25), "Repeated header")
+        old_tokens = [
+            f"chapter{chapter:02d}",
+            f"before{chapter:02d}",
+            f"context{chapter:02d}",
+            f"stable{chapter:02d}",
+            f"target{chapter:02d}",
+            f"after{chapter:02d}",
+            f"detail{chapter:02d}",
+            f"ending{chapter:02d}",
+        ]
+        new_tokens = list(old_tokens)
+        if change_type == "replace":
+            new_tokens[4] = f"revised{chapter:02d}"
+        elif change_type == "delete":
+            del new_tokens[4]
+        else:
+            new_tokens.insert(5, f"added{chapter:02d}")
+        tokens = new_tokens if revised else old_tokens
+        page.insert_text((72, 120), " ".join(tokens[:4]))
+        page.insert_text((72, 145), " ".join(tokens[4:]) + ".")
+        page.insert_text((200, 575), str(chapter))
+
+    colophon = document.new_page(width=420, height=595)
+    font_path = (
+        Path(__file__).resolve().parents[2]
+        / "tools/font-sources/LXGWNeoZhiSongScreen.ttf"
+    )
+    colophon.insert_text(
+        (72, 120),
+        "排版\n排印\n内部书号 F0-9",
+        fontname="FixtureSong",
+        fontfile=str(font_path),
+    )
+    colophon.insert_text(
+        (72, 170),
+        "2026年7月第" + ("2" if revised else "1") + "版",
+        fontname="FixtureSong",
+        fontfile=str(font_path),
+    )
+    document.save(pdf_path)
+    document.close()
 
 
 class ContentSnapshotTests(unittest.TestCase):
@@ -99,6 +169,48 @@ class ContentSnapshotTests(unittest.TestCase):
                     edition_date="2026-07",
                     exclude_cover=False,
                 )
+
+    def test_full_pdf_comparison_reports_one_change_per_chapter(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            old_pdf = Path(temp_dir) / "old.pdf"
+            new_pdf = Path(temp_dir) / "new.pdf"
+            _write_chapter_fixture(old_pdf, revised=False)
+            _write_chapter_fixture(new_pdf, revised=True)
+
+            old_snapshot = extract_content_snapshot(
+                old_pdf,
+                book_id="F0-9",
+                edition=1,
+                edition_date="2026-06",
+            )
+            new_snapshot = extract_content_snapshot(
+                new_pdf,
+                book_id="F0-9",
+                edition=2,
+                edition_date="2026-07",
+            )
+            changelog = compare_content_snapshots(old_snapshot, new_snapshot)
+
+            self.assertEqual(
+                changelog["summary"],
+                {"total": 11, "added": 4, "removed": 3, "changed": 4},
+            )
+            self.assertEqual(
+                [change["type"] for change in changelog["changes"]],
+                list(CHANGE_TYPES),
+            )
+            self.assertEqual(
+                [
+                    (change.get("new") or change.get("old"))["pages"]
+                    for change in changelog["changes"]
+                ],
+                [[page] for page in range(2, 13)],
+            )
+            markdown = render_release_changelog(changelog)
+            self.assertIn("共有 **11** 处不同", markdown)
+            self.assertIn("<kbd>+ 新增</kbd> **4** 处", markdown)
+            self.assertIn("<kbd>− 删减</kbd> **3** 处", markdown)
+            self.assertIn("<kbd>± 修改</kbd> **4** 处", markdown)
 
 
 if __name__ == "__main__":
