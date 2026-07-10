@@ -81,6 +81,25 @@ class ContentSnapshotTests(unittest.TestCase):
             self.assertIn("Bodysection1", joined)
             self.assertEqual(snapshot["exclusions"]["markerPages"], [6])
 
+    def test_pdf_without_comparable_text_fails_instead_of_reporting_no_changes(self) -> None:
+        import fitz
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "empty.pdf"
+            document = fitz.open()
+            document.new_page(width=420, height=595)
+            document.save(pdf_path)
+            document.close()
+
+            with self.assertRaisesRegex(ValueError, "no comparable text"):
+                extract_content_snapshot(
+                    pdf_path,
+                    book_id="F0-9",
+                    edition=1,
+                    edition_date="2026-07",
+                    exclude_cover=False,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

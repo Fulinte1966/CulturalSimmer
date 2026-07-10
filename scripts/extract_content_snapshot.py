@@ -242,6 +242,12 @@ def extract_content_snapshot(
                 tokens.extend(page_tokens)
                 page_runs.append({"start": start, "end": len(tokens), "page": page_number})
 
+        if not tokens:
+            raise ValueError(
+                "PDF has no comparable text after structural-page exclusions; "
+                "OCR or manual review is required"
+            )
+
         version = getattr(fitz, "VersionBind", None)
         if not version and getattr(fitz, "version", None):
             version = fitz.version[0]
