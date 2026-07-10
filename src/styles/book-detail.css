@@ -1,3 +1,8 @@
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 .book-detail-page {
   --bd-accent: #e22626;
   --bd-ink: #000000;
