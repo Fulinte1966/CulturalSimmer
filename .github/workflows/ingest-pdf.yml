@@ -57,6 +57,14 @@ jobs:
             --release-tag "${{ github.ref_name }}" \
             --output _ingest_output.json
 
+      - name: Generate release changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/ingest_pdf.py changelog \
+            --metadata _ingest_output.json \
+            --workspace _ingest_workspace
+
       - name: Generate assets
         run: |
           python scripts/ingest_pdf.py generate \
@@ -69,6 +77,7 @@ jobs:
           npm run validate
           npm run test:metadata
           npm run test:ingest
+          npm run test:changelog
           npm run test:reading
           npm run test:ui
           npm run build

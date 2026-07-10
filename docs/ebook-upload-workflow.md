@@ -136,16 +136,21 @@ PDF 声明版次：2
   -> GitHub Actions 下载 Release 中唯一 PDF
   -> 读取并校验 PDF XMP 元数据
   -> 校验 PDF 版次是否等于仓库预期版次
+  -> 查找同一书目中小于当前版次的最大历史版次
+  -> 下载旧版快照或 PDF，生成当前快照和结构化 changelog
   -> 生成 Markdown、manifest、封面、书脊、目录和阅读数据
   -> 运行检查、测试和生产构建
-  -> 创建正式 Release 并上传规范化 PDF
+  -> 创建正式 Release 并上传 PDF、快照、changelog
   -> 读取 GitHub Release asset digest 写入 manifest
+  -> 上传最终 manifest
   -> 提交生成文件到 main
   -> 删除临时 Release 和临时 tag
   -> main push 触发 GitHub Pages 部署
 ```
 
 `Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
+
+更新日志只比较最终 PDF 的规范化可见内容，不比较 Git、LaTeX 源码或 PDF 二进制。完整规则、JSON schema、Release Markdown 和本地重建命令见 [电子书版本更新日志规范](release-changelog-conventions.md)。差异生成失败时 workflow 会中止，不会发布看似正常的空日志。
 
 ## Markdown 书目记录
 
@@ -183,7 +188,7 @@ src/data/manifests/F0-1-1_v1.json
 src/data/manifests/F0-1-1_v2.json
 ```
 
-manifest 是版本文件事实记录，包含 `bookId`、`title`、`edition`、`editionDate`、`pdfCreateDate`、`description`、`creator`、`language`、`releaseTag`、`pdfFilename`、`downloadUrl`、`githubAssetDigest`、`bytes`、`pageCount`、`wordCount` 等字段。
+manifest 是版本文件事实记录，包含 `bookId`、`title`、`edition`、`editionDate`、`pdfCreateDate`、`description`、`creator`、`language`、`releaseTag`、`pdfFilename`、`downloadUrl`、`githubAssetDigest`、`bytes`、`pageCount`、`wordCount`、`contentSnapshotFilename`、`changelogFilename` 和 `changelogSummary` 等字段。
 
 GitHub Release asset digest 由 GitHub 提供，系统读取并记录；不要求人工计算 SHA，也不在前台展示。
 

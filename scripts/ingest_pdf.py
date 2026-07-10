@@ -3,6 +3,7 @@
 Called by ``.github/workflows/ingest-pdf.yml``.  Subcommands:
 
     validate   — download + extract + validate → JSON metadata
+    changelog  — compare the previous PDF edition and prepare Release assets
     generate   — produce Markdown / covers / spine / outline / reading
     publish    — create canonical GitHub Release
     cleanup    — remove temporary Release and tag
@@ -21,7 +22,19 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from edition_policy import check_expected_edition, format_edition_check_lines
+from compare_content_snapshots import compare_content_snapshots
+from edition_policy import (
+    check_expected_edition,
+    find_previous_edition_record,
+    format_edition_check_lines,
+)
+from extract_content_snapshot import (
+    NORMALIZATION_PROFILE,
+    extract_content_snapshot,
+    read_snapshot,
+    write_snapshot,
+)
+from render_release_changelog import render_release_changelog
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -55,6 +68,44 @@ def _gh(*args: str):
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _download_release_asset(
+    release_tag: str,
+    asset_name: str,
+    destination: Path,
+    *,
+    required: bool,
+) -> Optional[Path]:
+    """Download one exact Release asset, optionally returning None if absent."""
+
+    destination.mkdir(parents=True, exist_ok=True)
+    asset_path = destination / asset_name
+    if asset_path.exists():
+        asset_path.unlink()
+    result = subprocess.run(
+        [
+            "gh",
+            "release",
+            "download",
+            release_tag,
+            "--pattern",
+            asset_name,
+            "--dir",
+            str(destination),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode == 0 and asset_path.exists():
+        return asset_path
+    if required:
+        detail = result.stderr.strip() or result.stdout.strip() or "asset not found"
+        raise SystemExit(
+            f"Unable to download {asset_name} from Release {release_tag}: {detail}"
+        )
+    return None
 
 
 def _load_classifications() -> dict[str, str]:
@@ -258,6 +309,139 @@ def cmd_validate(args: list[str]):
 
 
 # ---------------------------------------------------------------------------
+# changelog
+# ---------------------------------------------------------------------------
+
+
+def cmd_changelog(args: list[str]):
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--metadata", required=True)
+    ap.add_argument("--workspace", required=True)
+    ap.add_argument("--max-changes", type=int, default=200)
+    ap.add_argument("--max-tokens", type=int, default=400_000)
+    ap.add_argument("--timeout-seconds", type=int, default=30)
+    opts = ap.parse_args(args)
+
+    metadata_path = Path(opts.metadata)
+    meta = json.loads(metadata_path.read_text("utf-8"))
+    workspace = Path(opts.workspace)
+    workspace.mkdir(parents=True, exist_ok=True)
+    tag = meta["canonicalTag"]
+
+    current_snapshot = extract_content_snapshot(
+        Path(meta["sourcePdfPath"]),
+        book_id=meta["id"],
+        edition=int(meta["edition"]),
+        edition_date=meta["editionDate"],
+    )
+    snapshot_path = workspace / f"{tag}.content.json.gz"
+    write_snapshot(snapshot_path, current_snapshot, force=True)
+
+    previous = find_previous_edition_record(ROOT, meta["id"], int(meta["edition"]))
+    previous_snapshot = None
+    previous_tag = None
+    if previous is not None:
+        previous_tag = previous.get("releaseTag")
+        previous_date = previous.get("editionDate")
+        if not previous_tag or not previous_date:
+            raise SystemExit("Previous edition record lacks releaseTag or editionDate")
+
+        old_snapshot_name = f"{previous_tag}.content.json.gz"
+        old_snapshot_path = _download_release_asset(
+            previous_tag,
+            old_snapshot_name,
+            workspace,
+            required=False,
+        )
+        if old_snapshot_path is not None:
+            try:
+                candidate = read_snapshot(old_snapshot_path)
+                compatible = (
+                    candidate.get("normalizationProfile") == NORMALIZATION_PROFILE
+                    and candidate.get("bookId") == meta["id"]
+                    and int(candidate.get("edition", -1)) == int(previous["edition"])
+                    and candidate.get("editionDate") == previous_date
+                )
+            except (OSError, ValueError, TypeError):
+                compatible = False
+                candidate = None
+            if compatible:
+                previous_snapshot = candidate
+            else:
+                old_snapshot_path.unlink(missing_ok=True)
+                print(
+                    "Previous snapshot is incompatible; re-extracting the previous PDF"
+                )
+
+        if previous_snapshot is None:
+            previous_pdf_name = f"{previous_tag}.pdf"
+            previous_pdf = _download_release_asset(
+                previous_tag,
+                previous_pdf_name,
+                workspace,
+                required=True,
+            )
+            from extract_metadata import MetadataError, extract
+
+            try:
+                previous_meta = extract(previous_pdf, _load_classifications())
+            except (ValueError, MetadataError) as exc:
+                raise SystemExit(f"Previous PDF metadata validation failed: {exc}")
+            if previous_meta.id != meta["id"]:
+                raise SystemExit("Previous PDF belongs to a different book")
+            if previous_meta.edition != int(previous["edition"]):
+                raise SystemExit(
+                    "Previous PDF edition does not match the repository edition record"
+                )
+            if previous_meta.edition_date != previous_date:
+                raise SystemExit(
+                    "Previous PDF date does not match the repository edition record"
+                )
+            previous_snapshot = extract_content_snapshot(
+                previous_pdf,
+                book_id=meta["id"],
+                edition=int(previous["edition"]),
+                edition_date=str(previous_date),
+            )
+
+    changelog = compare_content_snapshots(
+        previous_snapshot,
+        current_snapshot,
+        max_tokens=opts.max_tokens,
+        timeout_seconds=opts.timeout_seconds,
+    )
+    changelog_path = workspace / f"{tag}.changelog.json"
+    changelog_path.write_text(
+        json.dumps(changelog, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    notes_path = workspace / f"{tag}.release-notes.md"
+    notes_path.write_text(
+        render_release_changelog(changelog, max_changes=opts.max_changes),
+        encoding="utf-8",
+    )
+
+    meta.update(
+        {
+            "previousEdition": previous["edition"] if previous else None,
+            "previousReleaseTag": previous_tag,
+            "contentSnapshotPath": str(snapshot_path),
+            "changelogPath": str(changelog_path),
+            "releaseNotesPath": str(notes_path),
+            "changelogSummary": changelog["summary"],
+        }
+    )
+    metadata_path.write_text(
+        json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(
+        f"Changelog prepared: {changelog['summary']['total']} content differences"
+    )
+
+
+# ---------------------------------------------------------------------------
 # generate
 # ---------------------------------------------------------------------------
 
@@ -325,7 +509,7 @@ def cmd_generate(args: list[str]):
     manifest_dir = ROOT / "src" / "data" / "manifests"
     manifest_dir.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "bookId": id_,
         "title": meta["title"],
         "edition": edition,
@@ -350,6 +534,10 @@ def cmd_generate(args: list[str]):
         "sourceAssetId": meta["sourceAssetId"],
         "sourceSha256": meta["sourceSha256"],
         "canonicalTag": meta["canonicalTag"],
+        "previousEdition": meta.get("previousEdition"),
+        "contentSnapshotFilename": f"{tag}.content.json.gz",
+        "changelogFilename": f"{tag}.changelog.json",
+        "changelogSummary": meta.get("changelogSummary"),
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metadata": {
             key: meta.get(key)
@@ -381,6 +569,7 @@ def cmd_generate(args: list[str]):
         f"- SHA-256: `{meta['sourceSha256']}`",
         f"- Canonical tag: `{meta['canonicalTag']}`",
         f"- Entry: `{md_path.relative_to(ROOT)}`",
+        f"- Content differences: `{(meta.get('changelogSummary') or {}).get('total', 0)}`",
     ]
     (ROOT / "_ingest_summary.md").write_text("\n".join(summary_lines))
 
@@ -402,12 +591,21 @@ def cmd_publish(args: list[str]):
     if pdf_path.resolve() != normalized_pdf.resolve():
         shutil.copyfile(pdf_path, normalized_pdf)
 
-    # Create canonical Release
+    snapshot_path = Path(meta["contentSnapshotPath"])
+    changelog_path = Path(meta["changelogPath"])
+    notes_path = Path(meta["releaseNotesPath"])
+    for asset_path in (snapshot_path, changelog_path, notes_path):
+        if not asset_path.exists():
+            raise SystemExit(f"Required Release artifact is missing: {asset_path}")
+
+    # Create canonical Release with all content-derived assets.
     _gh(
         "release", "create", meta["canonicalTag"],
         normalized_pdf.resolve().as_posix(),
+        snapshot_path.resolve().as_posix(),
+        changelog_path.resolve().as_posix(),
         "--title", meta["canonicalTag"],
-        "--notes", f"Automated intake of {meta['canonicalFilename']}",
+        "--notes-file", notes_path.resolve().as_posix(),
     )
     digest = None
     release_json = _gh("api", f"repos/:owner/:repo/releases/tags/{meta['canonicalTag']}")
@@ -417,6 +615,10 @@ def cmd_publish(args: list[str]):
             if asset.get("name") == meta["canonicalFilename"]:
                 digest = asset.get("digest")
                 break
+    if not digest:
+        raise SystemExit(
+            f"GitHub did not return a digest for {meta['canonicalFilename']}"
+        )
 
     manifest_path = ROOT / "src" / "data" / "manifests" / f"{meta['canonicalTag']}.json"
     if manifest_path.exists():
@@ -425,6 +627,14 @@ def cmd_publish(args: list[str]):
         manifest_path.write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
+        )
+        release_manifest = Path(opts.workspace) / f"{meta['canonicalTag']}.manifest.json"
+        shutil.copyfile(manifest_path, release_manifest)
+        _gh(
+            "release",
+            "upload",
+            meta["canonicalTag"],
+            release_manifest.resolve().as_posix(),
         )
     print(f"Canonical Release {meta['canonicalTag']} created")
 
@@ -487,6 +697,7 @@ def cmd_commit_message(args: list[str]):
 
 COMMANDS = {
     "validate": cmd_validate,
+    "changelog": cmd_changelog,
     "generate": cmd_generate,
     "publish": cmd_publish,
     "cleanup": cmd_cleanup,

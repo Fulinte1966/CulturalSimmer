@@ -16,6 +16,7 @@ npm run test:ui       # Node tests under tests/node/
 npm run test:reading  # Python reading metric tests under tests/python/
 npm run test:metadata # Python XMP metadata tests under tests/python/
 npm run test:ingest   # Python ingest orchestration tests under tests/python/
+npm run test:changelog # PDF snapshot, content diff, and Release Markdown tests
 npm run build         # Astro build plus Pagefind index
 npm run preview       # serve dist/ locally
 ```
@@ -29,6 +30,8 @@ PDF intake flow:
 ```text
 temporary ingest-* GitHub Release
   -> scripts/extract_metadata.py validates PDF XMP
+  -> scripts/extract_content_snapshot.py normalizes final PDF content
+  -> scripts/compare_content_snapshots.py compares adjacent editions
   -> scripts/ingest_pdf.py orchestrates generation and publishing
   -> scripts/book_assets.py generates covers, spine samples, outlines, and reading metrics
   -> src/content/books/, src/data/, and public/covers/ update the static site
@@ -61,6 +64,8 @@ The book call number `id` is the core identifier, parsed by `src/lib/bookId.ts`.
 - Current display and download edition are derived from the largest `editions[].edition`.
 - PDF metadata requirements are documented in `docs/pdf/metadata-contract.md`.
 - The LaTeX helper for XMP metadata is in `docs/latex/culturalsimmer-ebook-metadata.sty`.
+- Never use Git tag diffs, commit history, LaTeX source diffs, or PDF binary diffs as an electronic-book content changelog.
+- Release changelogs must come from normalized final-PDF snapshots; see `docs/release-changelog-conventions.md`.
 
 ## Asset Rules
 
