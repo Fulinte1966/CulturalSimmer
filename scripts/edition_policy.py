@@ -53,6 +53,27 @@ def get_existing_editions(root: Path, book_id: str) -> list[int]:
     return sorted(editions)
 
 
+def find_previous_edition_record(
+    root: Path, book_id: str, current_edition: int
+) -> dict[str, Any] | None:
+    """Return the highest recorded edition below *current_edition*."""
+
+    data = load_book_frontmatter(root, book_id)
+    if data is None:
+        return None
+    raw_editions = data.get("editions")
+    if not isinstance(raw_editions, list):
+        return None
+    candidates = [
+        dict(item)
+        for item in raw_editions
+        if isinstance(item, dict)
+        and isinstance(item.get("edition"), int)
+        and item["edition"] < current_edition
+    ]
+    return max(candidates, key=lambda item: item["edition"], default=None)
+
+
 def check_expected_edition(
     root: Path,
     book_id: str,

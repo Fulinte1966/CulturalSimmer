@@ -12,7 +12,8 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 import ingest_pdf
-from edition_policy import check_expected_edition
+from edition_policy import check_expected_edition, find_previous_edition_record
+from extract_content_snapshot import NORMALIZATION_PROFILE, write_snapshot
 
 
 class IngestPdfTests(unittest.TestCase):
@@ -27,6 +28,12 @@ class IngestPdfTests(unittest.TestCase):
             source_pdf = root / "uploaded-name.pdf"
             source_pdf.write_bytes(b"fixture")
             metadata_path = root / "metadata.json"
+            snapshot_path = root / "F0-9_v2.content.json.gz"
+            changelog_path = root / "F0-9_v2.changelog.json"
+            notes_path = root / "F0-9_v2.release-notes.md"
+            snapshot_path.write_bytes(b"snapshot")
+            changelog_path.write_text("{}\n", encoding="utf-8")
+            notes_path.write_text("notes\n", encoding="utf-8")
             metadata_path.write_text(
                 json.dumps(
                     {
@@ -35,6 +42,9 @@ class IngestPdfTests(unittest.TestCase):
                         "canonicalTag": "F0-9_v2",
                         "canonicalFilename": "F0-9_v2.pdf",
                         "sourcePdfPath": str(source_pdf),
+                        "contentSnapshotPath": str(snapshot_path),
+                        "changelogPath": str(changelog_path),
+                        "releaseNotesPath": str(notes_path),
                     },
                     ensure_ascii=False,
                 ),
@@ -42,8 +52,29 @@ class IngestPdfTests(unittest.TestCase):
             )
             calls: list[tuple[str, ...]] = []
 
-            with patch.object(
-                ingest_pdf, "_gh", side_effect=lambda *args: calls.append(args) or ""
+            manifest_path = root / "src/data/manifests/F0-9_v2.json"
+            manifest_path.parent.mkdir(parents=True)
+            manifest_path.write_text(
+                json.dumps({"githubAssetDigest": None}), encoding="utf-8"
+            )
+
+            def fake_gh(*args):
+                calls.append(args)
+                if args[:2] == ("api", "repos/:owner/:repo/releases/tags/F0-9_v2"):
+                    return json.dumps(
+                        {
+                            "assets": [
+                                {
+                                    "name": "F0-9_v2.pdf",
+                                    "digest": "sha256:fixture",
+                                }
+                            ]
+                        }
+                    )
+                return ""
+
+            with patch.object(ingest_pdf, "ROOT", root), patch.object(
+                ingest_pdf, "_gh", side_effect=fake_gh
             ):
                 ingest_pdf.cmd_publish(
                     ["--metadata", str(metadata_path), "--workspace", str(root)]
@@ -52,6 +83,12 @@ class IngestPdfTests(unittest.TestCase):
             normalized = root / "F0-9_v2.pdf"
             self.assertEqual(normalized.read_bytes(), b"fixture")
             self.assertIn(normalized.resolve().as_posix(), calls[0])
+            self.assertIn(snapshot_path.resolve().as_posix(), calls[0])
+            self.assertIn(changelog_path.resolve().as_posix(), calls[0])
+            self.assertIn("--notes-file", calls[0])
+            self.assertEqual(calls[-1][:3], ("release", "upload", "F0-9_v2"))
+            manifest = json.loads(manifest_path.read_text("utf-8"))
+            self.assertEqual(manifest["githubAssetDigest"], "sha256:fixture")
 
     def test_failed_push_rolls_back_only_canonical_release(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -147,6 +184,7 @@ class IngestPdfTests(unittest.TestCase):
                 (root / "src/data/manifests/F0-9_v2.json").read_text("utf-8")
             )
             self.assertEqual(manifest["editionDate"], "2026-06")
+            self.assertEqual(manifest["schemaVersion"], 3)
             self.assertEqual(manifest["pageCount"], 12)
             self.assertEqual(manifest["wordCount"], 102)
             self.assertEqual(manifest["sourceAssetId"], 20)
@@ -168,6 +206,95 @@ class IngestPdfTests(unittest.TestCase):
             check = check_expected_edition(root, "F0-9", 2)
             self.assertTrue(check.ok)
             self.assertEqual(check.expected_edition, 2)
+
+    def test_previous_edition_uses_highest_lower_record_not_minus_one(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            books_dir = root / "src/content/books"
+            books_dir.mkdir(parents=True)
+            (books_dir / "F0-9.md").write_text(
+                "---\nid: F0-9\neditions:\n"
+                "  - edition: 1\n    editionDate: '2026-01'\n    releaseTag: F0-9_v1\n"
+                "  - edition: 3\n    editionDate: '2026-03'\n    releaseTag: F0-9_v3\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            previous = find_previous_edition_record(root, "F0-9", 5)
+            self.assertIsNotNone(previous)
+            self.assertEqual(previous["edition"], 3)
+
+    def test_changelog_reuses_compatible_previous_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            books_dir = root / "src/content/books"
+            books_dir.mkdir(parents=True)
+            (books_dir / "F0-9.md").write_text(
+                "---\nid: F0-9\neditions:\n"
+                "  - edition: 1\n    editionDate: '2026-06'\n    releaseTag: F0-9_v1\n"
+                "---\n",
+                encoding="utf-8",
+            )
+            current_pdf = workspace / "current.pdf"
+            current_pdf.write_bytes(b"fixture")
+            metadata_path = root / "metadata.json"
+            metadata_path.write_text(
+                json.dumps(
+                    {
+                        "id": "F0-9",
+                        "edition": 2,
+                        "editionDate": "2026-07",
+                        "canonicalTag": "F0-9_v2",
+                        "sourcePdfPath": str(current_pdf),
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            def make_snapshot(text: str, edition: int, date: str) -> dict:
+                tokens = list(text)
+                return {
+                    "schemaVersion": 1,
+                    "normalizationProfile": NORMALIZATION_PROFILE,
+                    "bookId": "F0-9",
+                    "edition": edition,
+                    "editionDate": date,
+                    "pageCount": 1,
+                    "tokens": tokens,
+                    "pageRuns": [{"start": 0, "end": len(tokens), "page": 1}],
+                }
+
+            previous_snapshot_path = workspace / "F0-9_v1.content.json.gz"
+            write_snapshot(
+                previous_snapshot_path,
+                make_snapshot("甲乙", 1, "2026-06"),
+            )
+
+            with patch.object(ingest_pdf, "ROOT", root), patch.object(
+                ingest_pdf,
+                "extract_content_snapshot",
+                return_value=make_snapshot("甲丙", 2, "2026-07"),
+            ), patch.object(
+                ingest_pdf,
+                "_download_release_asset",
+                return_value=previous_snapshot_path,
+            ):
+                ingest_pdf.cmd_changelog(
+                    [
+                        "--metadata",
+                        str(metadata_path),
+                        "--workspace",
+                        str(workspace),
+                    ]
+                )
+
+            metadata = json.loads(metadata_path.read_text("utf-8"))
+            self.assertEqual(metadata["previousEdition"], 1)
+            self.assertEqual(metadata["changelogSummary"]["changed"], 1)
+            self.assertTrue(Path(metadata["contentSnapshotPath"]).exists())
+            self.assertTrue(Path(metadata["releaseNotesPath"]).exists())
 
     def test_repeated_edition_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

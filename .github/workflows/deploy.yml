@@ -32,6 +32,7 @@ jobs:
       - run: npm ci
       - run: pip install -r scripts/requirements.txt
       - run: npm run test:ui
+      - run: npm run test:changelog
       - run: npm run validate
       - run: npm run check
       - run: npm run fonts:refresh
