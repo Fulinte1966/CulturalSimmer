@@ -147,6 +147,11 @@ Reject the import when:
 - any page differs from the A5 aspect ratio by more than one percent.
 
 Subtitle is optional. Its absence is not an error.
+After Unicode normalization and surrounding-whitespace cleanup during XMP
+extraction, the subtitle is preserved verbatim through generated data and UI
+rendering. The pipeline must not add, remove, or normalize parentheses or any
+other punctuation. Authors who want parentheses must include them in
+`pdfsubtitle`.
 
 ## Derived values
 

@@ -166,7 +166,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             <div class="fm-intro-head">
               {leadBook.series && <p class="fm-series">{leadBook.series}</p>}
               <h1 id="fm-lead-title">{leadBook.title}</h1>
-              {leadBook.subtitle && <p class="fm-subtitle">（{leadBook.subtitle}）</p>}
+              {leadBook.subtitle && <p class="fm-subtitle">{leadBook.subtitle}</p>}
             </div>
             <div class="fm-intro-body">
               {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}

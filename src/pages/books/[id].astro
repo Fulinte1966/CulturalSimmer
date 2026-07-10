@@ -92,7 +92,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
         <nav class="bd-breadcrumb" aria-label="面包屑">
           <a href={joinBasePath(base, "")}>主页</a>
           <span>・</span>
-          <span>《{title}》{subtitle && `（${subtitle}）`}</span>
+          <span>《{title}》{subtitle}</span>
         </nav>
 
         <div class="bd-date-line">
@@ -155,7 +155,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               </h1>
               {subtitle && (
                 <p class="bd-subtitle" data-pagefind-meta="book_subtitle">
-                  （{subtitle}）
+                  {subtitle}
                 </p>
               )}
             </div>

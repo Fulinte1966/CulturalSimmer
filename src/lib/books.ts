@@ -166,15 +166,6 @@ function dateFromEditionDate(value: string): Date {
   return new Date(`${value}-01T00:00:00+08:00`);
 }
 
-function normalizeSubtitle(value?: string): string | undefined {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  return trimmed.replace(/^[（(]\s*(.*?)\s*[）)]$/u, "$1");
-}
-
 function resolveEditions(
   editionsInput?: EditionRecord[]
 ): EditionRecord[] {
@@ -227,7 +218,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         id,
         title,
         description,
-        subtitle: normalizeSubtitle(subtitle),
+        subtitle,
         author,
         language,
         series,

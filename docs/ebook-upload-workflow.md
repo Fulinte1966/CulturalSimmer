@@ -69,6 +69,10 @@ npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
 
 LaTeX 源码可以使用项目自己的宏名，但最终写入 PDF XMP 时必须映射到标准字段，例如 `dc:identifier`、`dc:title`、`prism:bookEdition`、`dc:description`。
 
+副标题在完成 Unicode NFC 规范化和首尾空白清理后原样进入生成数据及网页。
+导入流程和前端不得自动添加、删除或替换括号等标点；需要括号时，应直接在
+PDF 的 `prism:subtitle` 中填写完整括号。
+
 项目提供了一个可直接放入 LaTeX 工程的元数据模块：
 
 ```txt
