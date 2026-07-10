@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from extract_content_snapshot import (
     UPDATE_PAGE_MARKER,
+    _complex_block_indexes,
     _filter_structural_lines,
     extract_content_snapshot,
     normalize_extracted_text,
@@ -82,6 +83,12 @@ def _write_chapter_fixture(pdf_path: Path, *, revised: bool) -> None:
         fontname="FixtureSong",
         fontfile=str(font_path),
     )
+    document.set_page_labels(
+        [
+            {"startpage": 0, "prefix": "", "style": "r", "firstpagenum": 1},
+            {"startpage": 1, "prefix": "", "style": "D", "firstpagenum": 1},
+        ]
+    )
     document.save(pdf_path)
     document.close()
 
@@ -98,6 +105,9 @@ class ContentSnapshotTests(unittest.TestCase):
             normalize_extracted_text("pub\u00adlish\npub-\nlish"),
             "publish\npublish",
         )
+
+    def test_pdf_extraction_nulls_and_duplicate_semicolons_are_removed(self) -> None:
+        self.assertEqual(normalize_extracted_text("公式\x00；；正文"), "公式；正文")
 
     def test_toc_page_numbers_are_removed_but_titles_remain(self) -> None:
         text = "第一章　绪论 …… 1\n第二章　生产 … 23\n附录 .... 108"
@@ -150,6 +160,7 @@ class ContentSnapshotTests(unittest.TestCase):
             self.assertNotIn("101", joined)
             self.assertIn("Bodysection1", joined)
             self.assertEqual(snapshot["exclusions"]["markerPages"], [6])
+            self.assertIsNone(snapshot["pageRuns"][0]["label"])
 
     def test_pdf_without_comparable_text_fails_instead_of_reporting_no_changes(self) -> None:
         import fitz
@@ -170,6 +181,74 @@ class ContentSnapshotTests(unittest.TestCase):
                     exclude_cover=False,
                 )
 
+    def test_complex_graphics_and_rotated_pages_are_skipped(self) -> None:
+        import fitz
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            pdf_path = Path(temp_dir) / "complex.pdf"
+            document = fitz.open()
+            page = document.new_page(width=420, height=595)
+            page.insert_text((72, 40), "Ordinary body before diagram")
+            page.draw_rect(fitz.Rect(60, 80, 360, 220))
+            page.insert_text((100, 140), "Diagram labels must be skipped")
+            page.insert_text((72, 280), "Ordinary body after diagram")
+
+            rotated = document.new_page(width=420, height=595)
+            rotated.insert_text((72, 120), "Rotated table must be skipped")
+            rotated.set_rotation(90)
+            document.save(pdf_path)
+            document.close()
+
+            snapshot = extract_content_snapshot(
+                pdf_path,
+                book_id="F0-9",
+                edition=1,
+                edition_date="2026-07",
+                exclude_cover=False,
+            )
+
+            joined = "".join(snapshot["tokens"])
+            self.assertIn("Ordinarybodybeforediagram", joined)
+            self.assertIn("Ordinarybodyafterdiagram", joined)
+            self.assertNotIn("Diagramlabelsmustbeskipped", joined)
+            self.assertNotIn("Rotatedtablemustbeskipped", joined)
+            self.assertGreaterEqual(
+                snapshot["exclusions"]["removedBlocks"]["complexRegions"], 2
+            )
+
+    def test_math_dominant_text_block_is_classified_as_complex(self) -> None:
+        class FakePage:
+            rotation = 0
+            rect = type("Rect", (), {"width": 420.0, "height": 595.0})()
+
+            @staticmethod
+            def cluster_drawings():
+                return []
+
+        blocks = [
+            {
+                "bbox": (100.0, 100.0, 300.0, 130.0),
+                "lines": [
+                    {
+                        "spans": [
+                            {
+                                "text": "G-W-G'",
+                                "font": "TeXGyreTermesMath-Regular",
+                            }
+                        ]
+                    }
+                ],
+            },
+            {
+                "bbox": (60.0, 200.0, 360.0, 230.0),
+                "lines": [
+                    {"spans": [{"text": "ordinary body", "font": "Song"}]}
+                ],
+            },
+        ]
+
+        self.assertEqual(_complex_block_indexes(FakePage(), blocks), {0})
+
     def test_full_pdf_comparison_reports_one_change_per_chapter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             old_pdf = Path(temp_dir) / "old.pdf"
@@ -189,6 +268,9 @@ class ContentSnapshotTests(unittest.TestCase):
                 edition=2,
                 edition_date="2026-07",
             )
+            self.assertEqual(old_snapshot["pageRuns"][0]["page"], 2)
+            self.assertEqual(old_snapshot["pageRuns"][0]["label"], "1")
+            self.assertNotIn("内部书号", "".join(old_snapshot["tokens"]))
             changelog = compare_content_snapshots(old_snapshot, new_snapshot)
 
             self.assertEqual(
@@ -205,6 +287,13 @@ class ContentSnapshotTests(unittest.TestCase):
                     for change in changelog["changes"]
                 ],
                 [[page] for page in range(2, 13)],
+            )
+            self.assertEqual(
+                [
+                    (change.get("new") or change.get("old"))["pageLabels"]
+                    for change in changelog["changes"]
+                ],
+                [[str(label)] for label in range(1, 12)],
             )
             markdown = render_release_changelog(changelog)
             self.assertIn("共有 **11** 处不同", markdown)

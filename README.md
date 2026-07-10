@@ -13,23 +13,31 @@
 ## 本地开发
 
 ```bash
-# 安装依赖
-npm install
+# 首次克隆后信任项目配置
+mise trust
+
+# 安装并启用与 GitHub Actions 一致的 Node 和 Python
+mise install
+
+# 安装项目依赖
+mise run setup
 
 # 启动开发服务器
-npm run dev
+mise exec -- npm run dev
 
-# 类型检查
-npm run check
+# 运行全部测试、数据校验、类型检查和生产构建
+mise run check
+```
 
-# 校验书目数据
-npm run validate
+进入项目目录后，`mise` 会读取 `.node-version` 和 `.python-version`，让 `node`、`npm`、`python` 和 `python3` 使用与 GitHub Actions 相同的版本。不要直接依赖 macOS 的 `/usr/bin/python3`。
 
-# 构建生产版本（含 Pagefind 索引）
-npm run build
+常用的单项命令仍可在项目环境中运行：
 
-# 预览构建结果
-npm run preview
+```bash
+mise exec -- npm run check
+mise exec -- npm run validate
+mise exec -- npm run build
+mise exec -- npm run preview
 ```
 
 ## 新增书籍
@@ -79,7 +87,7 @@ F0-1-1_v2
 
 网页显示出版式版次，例如 `2026 年 6 月第 1 版`、`2026 年 7 月第 2 版`。下载入口始终指向当前 Markdown 记录的最新版。
 
-正式 Release 会保存规范化正文快照和结构化 changelog，并使用自动生成的 Markdown 作为正文。详细规则见 [电子书版本更新日志规范](docs/release-changelog-conventions.md)。
+正式 Release 会保存规范化正文快照和结构化 changelog，并使用自动生成的 Markdown 作为正文。复杂公式、表格和图形默认不参与文字差异；需要补录时编辑仓库中的 changelog，再手动运行 **Sync Release Changelog** 重新计算统计并更新 Release。详细规则见 [电子书版本更新日志规范](docs/release-changelog-conventions.md)。
 
 ### 自动生成内容
 
@@ -89,6 +97,7 @@ F0-1-1_v2
 - `public/covers/F0-1-1_v1_spine.png`
 - `src/data/outlines/F0-1-1_v1.json`
 - `src/data/reading/F0-1-1_v1.json`
+- `src/data/changelogs/F0-1-1_v1.changelog.json`
 - `src/content/books/F0-1-1.md`
 - `src/data/manifests/F0-1-1_v1.json`
 

@@ -1,0 +1,84 @@
+name: Sync Release Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Canonical release tag, for example F0-1-1_v2
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: changelog-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+          cache: npm
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Verify canonical Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh release view "$RELEASE_TAG"
+
+      - name: Normalize changelog and render Release notes
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          python scripts/sync_release_changelog.py \
+            "$RELEASE_TAG" \
+            --notes-output _release-notes.md
+
+      - name: Validate repository
+        run: |
+          npm run test:ui
+          npm run test:changelog
+          npm run test:ingest
+          npm run validate
+          npm run check
+          npm run build
+
+      - name: Commit derived statistics
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/changelogs/ src/data/manifests/
+          if ! git diff --cached --quiet; then
+            git commit -m "content: sync $RELEASE_TAG changelog"
+            git pull --rebase origin main
+            git push origin main
+          fi
+
+      - name: Update canonical Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release edit "$RELEASE_TAG" \
+            --notes-file _release-notes.md
+          gh release upload "$RELEASE_TAG" \
+            "src/data/changelogs/$RELEASE_TAG.changelog.json" \
+            --clobber

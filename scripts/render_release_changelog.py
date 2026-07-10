@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from changelog_model import calculate_changelog_summary
+
 
 def escape_markdown_text(value: str) -> str:
     escaped = value.replace("\\", "\\\\")
@@ -17,11 +19,15 @@ def _edition_label(edition: dict[str, Any]) -> str:
     return f"{int(year)} 年 {int(month)} 月第 {int(edition['edition'])} 版"
 
 
-def _page_label(pages: list[int]) -> str:
+def _page_label(page_labels: list[str], pages: list[int]) -> str:
+    labels = [label for label in page_labels if label]
+    if labels:
+        first, last = labels[0], labels[-1]
+        return f"第 {first} 页" if first == last else f"第 {first}—{last} 页"
     if not pages:
         return "页码未知"
     first, last = min(pages), max(pages)
-    return f"第 {first} 页" if first == last else f"第 {first}—{last} 页"
+    return f"PDF 第 {first} 页" if first == last else f"PDF 第 {first}—{last} 页"
 
 
 def _render_side(side: dict[str, Any], marker: str) -> str:
@@ -35,12 +41,25 @@ def _render_side(side: dict[str, Any], marker: str) -> str:
     else:
         changed = f"**{changed}**"
 
-    leading = "… " if side.get("prefixTruncated") else ""
-    trailing = " …" if side.get("suffixTruncated") else ""
-    return (
-        f"`{_page_label([int(page) for page in side.get('pages', [])])}` "
-        f"{leading}{prefix}{changed}{suffix}{trailing}"
-    ).rstrip()
+    fragments: list[str] = []
+    if side.get("prefixTruncated"):
+        fragments.append("…")
+    if prefix:
+        fragments.append(prefix)
+    fragments.append(changed)
+    if suffix:
+        fragments.append(suffix)
+    if side.get("suffixTruncated"):
+        fragments.append("…")
+    page_reference = _page_label(
+        [str(label) for label in side.get("pageLabels", [])],
+        [int(page) for page in side.get("pages", [])],
+    )
+    return f"`{page_reference}` " + " ".join(fragments)
+
+
+def _review_marker(change: dict[str, Any]) -> str:
+    return "<sub>?</sub> " if change.get("needsReview") is True else ""
 
 
 def render_release_changelog(
@@ -53,7 +72,9 @@ def render_release_changelog(
         lines.append("初次发布。")
         return "\n".join(lines) + "\n"
 
-    summary = changelog["summary"]
+    summary = calculate_changelog_summary(changelog)
+    changes = changelog.get("changes", [])
+    review_count = sum(change.get("needsReview") is True for change in changes)
     lines.extend(
         [
             f"较 `{_edition_label(previous)}` 共有 **{summary['total']}** 处不同<br>",
@@ -63,31 +84,38 @@ def render_release_changelog(
             f"> <kbd>− 删减</kbd> **{summary['removed']}** 处<br>",
             ">",
             f"> <kbd>± 修改</kbd> **{summary['changed']}** 处",
-            "",
-            "---",
         ]
     )
+    if review_count:
+        lines.extend(
+            [
+                "",
+                f"> <sub>?</sub> 待复核 **{review_count}** 处",
+            ]
+        )
+    lines.extend(["", "---"])
 
-    changes = changelog.get("changes", [])
     displayed = changes if max_changes is None else changes[:max_changes]
     for display_index, change in enumerate(displayed, start=1):
         lines.append("")
+        review_marker = _review_marker(change)
         if change["type"] == "replace":
             lines.append(
-                f"{display_index}. <kbd>−</kbd> "
+                f"{display_index}. {review_marker}<kbd>−</kbd> "
                 f"{_render_side(change['old'], 'replace')}<br>"
             )
             lines.append(
-                f"   <kbd>+</kbd> {_render_side(change['new'], 'replace')}"
+                f"   {review_marker}<kbd>+</kbd> "
+                f"{_render_side(change['new'], 'replace')}"
             )
         elif change["type"] == "delete":
             lines.append(
-                f"{display_index}. <kbd>−</kbd> "
+                f"{display_index}. {review_marker}<kbd>−</kbd> "
                 f"{_render_side(change['old'], 'delete')}"
             )
         else:
             lines.append(
-                f"{display_index}. <kbd>+</kbd> "
+                f"{display_index}. {review_marker}<kbd>+</kbd> "
                 f"{_render_side(change['new'], 'insert')}"
             )
 
