@@ -52,7 +52,10 @@ const renderStatus = (status: UpdateCheckStatus) => {
   const statusLink = document.querySelector<HTMLAnchorElement>(
     "[data-check-status-link]",
   );
-  if (statusLink) statusLink.dataset.status = status;
+  if (statusLink) {
+    statusLink.dataset.status = status;
+    statusLink.hidden = false;
+  }
   setText("[data-check-live-status]", label);
 };
 
