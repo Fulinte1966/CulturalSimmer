@@ -1,0 +1,72 @@
+.updates-page {
+  margin: 48px auto 96px;
+  max-width: 840px;
+}
+
+.updates-page-header {
+  border-bottom: 2px solid #000;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+}
+
+.updates-page h1 {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.updates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.updates-list > li {
+  background-image: var(--texture-divider-dots-horizontal);
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  background-size: 12px 12px;
+  padding: 24px 0 36px;
+}
+
+.updates-meta {
+  display: flex;
+  font-family: var(--font-heiti);
+  font-size: 12px;
+  font-weight: 500;
+  gap: 12px;
+  line-height: 18px;
+}
+
+.updates-list h2 {
+  font-family: var(--font-zhisong);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 27px;
+  margin: 6px 0 0;
+}
+
+.updates-list a {
+  color: #000;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.updates-list a:hover,
+.updates-list a:focus-visible {
+  color: var(--accent);
+}
+
+.updates-version,
+.updates-list ul {
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 18px;
+  margin: 6px 0 0;
+}
+
+.updates-list ul {
+  padding-left: 2em;
+}
