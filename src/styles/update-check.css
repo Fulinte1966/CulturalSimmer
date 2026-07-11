@@ -78,17 +78,18 @@
 .check-status::before,
 .check-status::after {
   border: 1px solid currentColor;
-  border-radius: 100px;
   content: "";
   pointer-events: none;
   position: absolute;
 }
 
 .check-status::before {
+  border-radius: 23px;
   inset: 0 0 0 1px;
 }
 
 .check-status::after {
+  border-radius: 22px;
   inset: 2px 2px 2px 3px;
 }
 
