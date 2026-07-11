@@ -81,18 +81,15 @@ const loadTallyEmbed = () => {
 const reloadTallyEmbed = () => {
   const iframe = document.querySelector<HTMLIFrameElement>("iframe[data-tally-src]");
   if (!iframe) return;
-  iframe.src = "about:blank";
-  requestAnimationFrame(() => {
-    iframe.removeAttribute("src");
-    const tallyWindow = window as Window & {
-      Tally?: { loadEmbeds: () => void };
-    };
-    if (tallyWindow.Tally) {
-      tallyWindow.Tally.loadEmbeds();
-    } else {
-      loadTallyEmbed();
-    }
-  });
+
+  const replacement = document.createElement("iframe");
+  replacement.dataset.tallySrc = iframe.dataset.tallySrc ?? "";
+  replacement.loading = "lazy";
+  replacement.width = "100%";
+  replacement.height = "100";
+  replacement.title = iframe.title;
+  iframe.replaceWith(replacement);
+  loadTallyEmbed();
 };
 
 const region = document.querySelector<HTMLElement>("[data-errata-region]");

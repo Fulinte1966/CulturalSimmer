@@ -326,10 +326,13 @@ html {
 }
 
 .bd-errata-panel--form {
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .bd-errata-form {
+  flex: 0 0 540px;
+  margin-inline: auto;
+  max-width: 540px;
   min-height: 568px;
   text-align: left;
   width: 540px;
