@@ -114,22 +114,23 @@ const serializedBooks = JSON.stringify(books).replace(/</g, "\\u003c");
                 data-status="invalid-request"
                 href={joinBasePath(base, "books/")}
                 aria-describedby="check-live-status"
+                hidden
               >
                 <span class="check-status-segments" aria-hidden="true">
                   <span></span><span></span><span></span><span></span>
                 </span>
                 <span class="check-status-characters" aria-hidden="true">
-                  <span data-check-status-character>正</span>
-                  <span data-check-status-character>在</span>
-                  <span data-check-status-character>检</span>
-                  <span data-check-status-character>查</span>
+                  <span data-check-status-character></span>
+                  <span data-check-status-character></span>
+                  <span data-check-status-character></span>
+                  <span data-check-status-character></span>
                 </span>
                 <span
                   id="check-live-status"
                   class="sr-only"
                   data-check-live-status
                   aria-live="polite"
-                >正在检查</span>
+                ></span>
               </a>
 
               <a

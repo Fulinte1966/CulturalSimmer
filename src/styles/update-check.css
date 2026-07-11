@@ -75,6 +75,10 @@
   width: 249px;
 }
 
+.check-status[hidden] {
+  display: none;
+}
+
 .check-status::before,
 .check-status::after {
   border: 1px solid currentColor;
