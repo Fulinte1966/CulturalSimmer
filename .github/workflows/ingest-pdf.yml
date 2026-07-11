@@ -82,7 +82,7 @@ jobs:
           npm run test:ui
           npm run build
 
-      - name: Create canonical Release
+      - name: Create canonical Release and site update
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

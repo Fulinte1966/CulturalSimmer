@@ -1,0 +1,90 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import { joinBasePath } from "../lib/basePath";
+import SiteUpdateLine from "./SiteUpdateLine.astro";
+import {
+  canOpenSiteUpdateDetail,
+  normalizeAnnouncementId,
+  type SiteFeedItem,
+} from "../lib/siteUpdates";
+
+interface Props {
+  pinnedItems: SiteFeedItem[];
+  recentItems: SiteFeedItem[];
+  showDivider: boolean;
+  announcements: CollectionEntry<"announcements">[];
+}
+
+const { pinnedItems, recentItems, showDivider, announcements } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const visibleAnnouncementIds = new Set(
+  [...pinnedItems, ...recentItems]
+    .filter(canOpenSiteUpdateDetail)
+    .map((item) => item.announcementId)
+);
+const renderedAnnouncements = await Promise.all(
+  announcements
+    .filter((entry) => visibleAnnouncementIds.has(normalizeAnnouncementId(entry.id)))
+    .map(async (entry) => ({ entry, Content: (await render(entry)).Content }))
+);
+
+const hasItems = pinnedItems.length > 0 || recentItems.length > 0;
+---
+
+<aside class="fm-site-updates" aria-label="本站消息" data-site-updates data-pagefind-ignore>
+  <img
+    class="fm-site-updates-logo"
+    src={joinBasePath(base, "assets/brand/site-updates-mark.svg")}
+    alt="本站消息"
+    width="96"
+    height="373"
+    draggable="false"
+  />
+
+  <div class="fm-site-updates-content">
+    <div
+      class="fm-site-updates-list"
+      data-site-updates-list
+      tabindex="0"
+      aria-label="本站消息列表"
+    >
+      {!hasItems && <p class="fm-site-update-empty">暂无本站消息。</p>}
+      {pinnedItems.map((item) => <SiteUpdateLine item={item} />)}
+      {showDivider && (
+        <div class="fm-site-updates-divider" aria-hidden="true">
+          <span>＊</span>
+          <span>＊</span>
+          <span>＊</span>
+        </div>
+      )}
+      {recentItems.map((item) => <SiteUpdateLine item={item} />)}
+    </div>
+
+    {renderedAnnouncements.map(({ entry, Content }) => (
+      <article
+        class="fm-site-update-detail"
+        data-site-update-detail={normalizeAnnouncementId(entry.id)}
+        hidden
+        aria-labelledby={`site-update-title-${normalizeAnnouncementId(entry.id)}`}
+      >
+        <div class="fm-site-update-main">
+          <h2 id={`site-update-title-${normalizeAnnouncementId(entry.id)}`}>{entry.data.title}</h2>
+          <div
+            class="fm-site-update-body"
+            data-site-updates-scroll
+            tabindex="0"
+          >
+            <Content />
+          </div>
+          <button type="button" class="fm-site-update-back" data-site-update-back>
+            〔返回〕
+          </button>
+        </div>
+      </article>
+    ))}
+  </div>
+</aside>
+
+<script>
+  import "../scripts/site-updates";
+</script>

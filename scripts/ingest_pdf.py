@@ -20,6 +20,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import yaml
 from changelog_model import normalize_changelog
@@ -36,6 +37,7 @@ from extract_content_snapshot import (
     write_snapshot,
 )
 from render_release_changelog import render_release_changelog
+from site_updates_data import append_generated_update
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -624,6 +626,7 @@ def cmd_publish(args: list[str]):
         "--notes-file", notes_path.resolve().as_posix(),
     )
     digest = None
+    release = {}
     release_json = _gh("api", f"repos/:owner/:repo/releases/tags/{meta['canonicalTag']}")
     if release_json:
         release = json.loads(release_json)
@@ -635,6 +638,22 @@ def cmd_publish(args: list[str]):
         raise SystemExit(
             f"GitHub did not return a digest for {meta['canonicalFilename']}"
         )
+
+    published_at = release.get("published_at") or datetime.now(
+        ZoneInfo("Asia/Shanghai")
+    ).isoformat(timespec="seconds")
+    is_first_edition = meta.get("previousEdition") is None
+    generated_update = {
+        "id": f"{meta['id']}-listed" if is_first_edition else meta["canonicalTag"].replace("_", "-"),
+        "type": "book-added" if is_first_edition else "book-updated",
+        "publishedAt": published_at,
+        "bookId": meta["id"],
+    }
+    if not is_first_edition:
+        generated_update["edition"] = meta["edition"]
+    append_generated_update(
+        ROOT / "src" / "data" / "generated-updates.json", generated_update
+    )
 
     manifest_path = ROOT / "src" / "data" / "manifests" / f"{meta['canonicalTag']}.json"
     if manifest_path.exists():
