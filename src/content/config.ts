@@ -55,6 +55,17 @@ const announcements = defineCollection({
       .refine((value) => !/[<>]/.test(value), "announcement label must not contain HTML")
       .refine((value) => !["新书", "更新"].includes(value), "announcement label is reserved"),
     publishedAt: z.coerce.date(),
+    kind: z.enum(["site-announcement", "important-erratum"]).default("site-announcement"),
+    bookId: z.string().trim().min(1).optional(),
+    edition: z.number().int().positive().optional(),
+    summary: z.array(z.string().trim().min(1)).max(8).default([]),
+  }).superRefine((value, context) => {
+    if (value.kind === "important-erratum" && (!value.bookId || !value.edition)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "important errata require bookId and edition",
+      });
+    }
   }),
 });
 

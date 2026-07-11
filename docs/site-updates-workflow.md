@@ -41,6 +41,8 @@
 title: 检查更新功能已启用。
 label: 功能
 publishedAt: 2026-07-09T10:00:00+08:00
+kind: site-announcement
+summary: []
 ---
 ```
 
@@ -51,6 +53,9 @@ publishedAt: 2026-07-09T10:00:00+08:00
 title: 文火《发刊词》
 label: 公告
 publishedAt: 2026-07-09T09:00:00+08:00
+kind: site-announcement
+summary:
+  - 公布本站维护方式
 ---
 
 这里填写 Markdown 正文。
@@ -64,6 +69,28 @@ publishedAt: 2026-07-09T09:00:00+08:00
 - 不得包含 `[]`、`［］` 或 HTML；
 - 不得超过六个字符；
 - 不得使用自动消息保留标签 `新书`、`更新`。
+
+`kind` 默认为 `site-announcement`。需要发布重要勘误时设为 `important-erratum`，并同时填写有效的 `bookId`、`edition` 和简短 `summary`；构建会核对该书及版次是否存在。普通公告也可填写最多八条 `summary`，这些摘要进入公开更新源，Markdown 正文仍只用于站内全文。
+
+## 公开更新源
+
+每次生产构建生成：
+
+- `/updates/feed.json`：最近 100 条权威事件；
+- `/updates/latest.json`：最新时间点的事件组；
+- `/updates/feed.schema.json`：Draft 2020-12 JSON Schema；
+- `/updates/`：供读者查看的更新归档页。
+
+自动消息映射为 `new_book` 和 `book_version`，人工消息映射为 `site_announcement` 或 `important_erratum`。稳定 ID 格式为：
+
+```text
+new-book-F0-1-1-v1
+book-version-F0-1-1-v2
+announcement-2026-07-13-maintenance
+erratum-2026-07-13-f0-1-1-v2-01
+```
+
+构建会按 Schema 校验日期、HTTPS URL、类型、摘要、最多 100 条记录和字段白名单，并额外拒绝重复 ID、本地路径及通知器配置名。`generatedAt` 表示本次构建时间，不参与事件去重；外部消费者必须使用 `updates[].id`。
 
 ## 创建人工消息
 
