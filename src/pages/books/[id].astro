@@ -187,7 +187,9 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                     editionLabels.length > 1 && "bd-edition-row--grid",
                   ]}
                 >
-                  {editionLabels.map((label) => <span>{label}</span>)}
+                  {editionLabels.map((label, index) => (
+                    <span id={`edition-${book.editions[index].edition}`}>{label}</span>
+                  ))}
                 </div>
               </div>
               <div class="bd-call-row">内部书号 {callNumber}</div>

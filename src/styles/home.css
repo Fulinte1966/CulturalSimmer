@@ -260,16 +260,14 @@
 }
 
 .fm-vertical-rule span {
-  background: url("/CulturalSimmer/assets/decor/border-vertical-cap-start.svg") center / 12px 12px no-repeat;
-  display: block;
-  font-size: 0;
+  align-items: center;
+  display: flex;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
   height: 12px;
-  line-height: 0;
+  justify-content: center;
+  line-height: 12px;
   width: 12px;
-}
-
-.fm-vertical-rule span:last-child {
-  background-image: url("/CulturalSimmer/assets/decor/border-vertical-cap-end.svg");
 }
 
 .fm-vertical-rule i {
@@ -359,45 +357,215 @@
   text-indent: 24px;
 }
 
-.fm-excerpt {
-  background-image: repeating-linear-gradient(
-    135deg,
-    #000 0,
-    #000 1px,
-    transparent 1px,
-    transparent 3px
-  );
+.fm-site-updates {
+  align-items: center;
+  background: #fff;
+  display: flex;
+  gap: 12px;
   height: 408px;
   left: 672px;
+  justify-content: center;
   overflow: hidden;
-  padding: 12px;
   position: absolute;
   top: 18px;
-  width: 396px;
+  width: 408px;
 }
 
-.fm-excerpt-inner {
-  background: #fff;
+.fm-site-updates-logo {
+  display: block;
+  flex: 0 0 96px;
+  height: 390px;
+  object-fit: fill;
+  user-select: none;
+  width: 96px;
+}
+
+.fm-site-updates-content {
+  flex: 0 0 300px;
+  height: 390px;
+  overflow: hidden;
+  position: relative;
+  width: 300px;
+}
+
+.fm-site-updates-list {
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-zhisong);
   font-size: 12px;
-  font-feature-settings: "fwid" 1, "dlig" 1;
-  font-variant-east-asian: full-width;
-  height: 384px;
+  height: 390px;
+  justify-content: safe center;
   line-height: 18px;
-  padding: 24px;
-  width: 372px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 0;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  width: 300px;
 }
 
-.fm-excerpt-inner p {
+.fm-site-updates-list[hidden] {
+  display: none;
+}
+
+.fm-site-updates-list::-webkit-scrollbar,
+.fm-site-update-body::-webkit-scrollbar {
+  display: none;
+}
+
+.fm-site-update-line {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0 0 18px;
+}
+
+.fm-site-update-meta {
+  font-family: var(--font-heiti);
+  font-weight: 500;
+}
+
+.fm-site-update-message {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: #000;
+  display: inline;
+  font: inherit;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.fm-site-update-open {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 1px;
+}
+
+.fm-site-update-open:hover,
+.fm-site-update-open:focus-visible,
+.fm-site-update-body a:hover,
+.fm-site-update-body a:focus-visible,
+.fm-site-update-back:hover,
+.fm-site-update-back:focus-visible {
+  color: #e22626;
+  opacity: 1;
+  text-decoration-color: #e22626;
+}
+
+.fm-site-updates-divider {
+  align-items: flex-start;
+  display: flex;
+  flex: 0 0 36px;
+  height: 36px;
+  justify-content: space-between;
+  line-height: 18px;
+  overflow: hidden;
+  padding: 0 60px;
+  width: 300px;
+}
+
+.fm-site-update-empty {
   margin: 0;
 }
 
-.fm-excerpt-inner .outline-level-2 {
-  padding-left: 1em;
+.fm-site-update-detail {
+  align-items: center;
+  display: flex;
+  height: 390px;
+  justify-content: center;
+  width: 300px;
+}
+
+.fm-site-update-detail[hidden] {
+  display: none;
+}
+
+.fm-site-update-main {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  max-height: 390px;
+  min-height: 0;
+  overflow: hidden;
+  width: 300px;
+}
+
+.fm-site-update-main h2 {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 36px;
+  margin: 0;
+  text-align: center;
+}
+
+.fm-site-update-body {
+  flex: 0 1 auto;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  line-height: 18px;
+  max-height: calc(100% - 72px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  width: 300px;
+}
+
+.fm-site-update-body :first-child {
+  margin-top: 0;
+}
+
+.fm-site-update-body :last-child {
+  margin-bottom: 0;
+}
+
+.fm-site-update-body p {
+  margin: 0;
+  text-indent: 2em;
+}
+
+.fm-site-update-body a {
+  color: #000;
+  text-decoration: underline;
+  text-decoration-color: #000;
+  text-underline-position: from-font;
+}
+
+.fm-site-updates-list:focus-visible,
+.fm-site-update-body:focus-visible {
+  outline: 0;
+}
+
+.fm-site-update-back {
+  align-self: stretch;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: #000;
+  cursor: pointer;
+  display: block;
+  flex: 0 0 12px;
+  font-family: var(--font-zhisong);
+  font-size: 12px;
+  height: 12px;
+  line-height: 12px;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  width: 300px;
 }
 
 .fm-midline {
-  background: url("/CulturalSimmer/assets/decor/divider-horizontal-mid.svg") center / 1152px 6px no-repeat;
+  background-image: var(--texture-divider-bars-horizontal);
+  background-repeat: repeat-x;
+  background-size: 12px 12px;
   flex: 0 0 12px;
   width: 1152px;
 }

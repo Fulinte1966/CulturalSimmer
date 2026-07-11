@@ -37,4 +37,25 @@ const books = defineCollection({
   }),
 });
 
-export const collections = { books };
+const announcements = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z
+      .string()
+      .trim()
+      .min(1, "announcement title must not be empty")
+      .max(80, "announcement title must not exceed 80 characters")
+      .refine((value) => !/[<>]/.test(value), "announcement title must not contain HTML"),
+    label: z
+      .string()
+      .trim()
+      .min(1, "announcement label must not be empty")
+      .max(6, "announcement label should not exceed 6 characters")
+      .refine((value) => !/[\[\]［］]/.test(value), "announcement label must not contain brackets")
+      .refine((value) => !/[<>]/.test(value), "announcement label must not contain HTML")
+      .refine((value) => !["新书", "更新"].includes(value), "announcement label is reserved"),
+    publishedAt: z.coerce.date(),
+  }),
+});
+
+export const collections = { books, announcements };

@@ -12,6 +12,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 import ingest_pdf
+from site_updates_data import append_generated_update
 from edition_policy import check_expected_edition, find_previous_edition_record
 from extract_content_snapshot import NORMALIZATION_PROFILE, write_snapshot
 
@@ -37,8 +38,10 @@ class IngestPdfTests(unittest.TestCase):
             metadata_path.write_text(
                 json.dumps(
                     {
+                        "id": "F0-9",
                         "title": "标题",
                         "edition": 2,
+                        "previousEdition": 1,
                         "canonicalTag": "F0-9_v2",
                         "canonicalFilename": "F0-9_v2.pdf",
                         "sourcePdfPath": str(source_pdf),
@@ -68,7 +71,8 @@ class IngestPdfTests(unittest.TestCase):
                                     "name": "F0-9_v2.pdf",
                                     "digest": "sha256:fixture",
                                 }
-                            ]
+                            ],
+                            "published_at": "2026-07-11T12:00:00Z",
                         }
                     )
                 return ""
@@ -89,6 +93,38 @@ class IngestPdfTests(unittest.TestCase):
             self.assertEqual(calls[-1][:3], ("release", "upload", "F0-9_v2"))
             manifest = json.loads(manifest_path.read_text("utf-8"))
             self.assertEqual(manifest["githubAssetDigest"], "sha256:fixture")
+            generated = json.loads(
+                (root / "src/data/generated-updates.json").read_text("utf-8")
+            )
+            self.assertEqual(
+                generated,
+                [
+                    {
+                        "id": "F0-9-v2",
+                        "type": "book-updated",
+                        "publishedAt": "2026-07-11T12:00:00Z",
+                        "bookId": "F0-9",
+                        "edition": 2,
+                    }
+                ],
+            )
+
+    def test_generated_site_update_append_is_atomic_and_idempotent(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "generated-updates.json"
+            update = {
+                "id": "F0-9-listed",
+                "type": "book-added",
+                "publishedAt": "2026-07-11T12:00:00Z",
+                "bookId": "F0-9",
+            }
+            self.assertTrue(append_generated_update(path, update))
+            self.assertFalse(append_generated_update(path, update))
+            self.assertEqual(len(json.loads(path.read_text("utf-8"))), 1)
+            with self.assertRaisesRegex(ValueError, "Conflicting"):
+                append_generated_update(
+                    path, {**update, "publishedAt": "2026-07-12T12:00:00Z"}
+                )
 
     def test_failed_push_rolls_back_only_canonical_release(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

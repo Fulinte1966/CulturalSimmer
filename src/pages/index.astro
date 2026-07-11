@@ -1,19 +1,25 @@
 ---
-import fs from "node:fs";
-import path from "node:path";
 import { getCollection } from "astro:content";
 import BookCover from "../components/BookCover.astro";
 import NewspaperLayout from "../components/NewspaperLayout.astro";
-import type { OutlineItem } from "../lib/outline";
+import SiteUpdates from "../components/SiteUpdates.astro";
+import generatedUpdates from "../data/generated-updates.json";
+import siteUpdatePins from "../data/site-update-pins.json";
 import "../styles/home.css";
 import { joinBasePath } from "../lib/basePath";
 import { getAllBooks } from "../lib/books";
 import { siteConfig } from "../lib/site";
+import {
+  buildSiteUpdates,
+  splitSiteUpdates,
+  type GeneratedSiteUpdate,
+} from "../lib/siteUpdates";
 import { getCalendarStatus, getWeatherStatus } from "../lib/uapis";
 
-const [books, entries, calendar, weather] = await Promise.all([
+const [books, entries, announcements, calendar, weather] = await Promise.all([
   getAllBooks(),
   getCollection("books"),
+  getCollection("announcements"),
   getCalendarStatus(),
   getWeatherStatus(),
 ]);
@@ -23,22 +29,6 @@ const leadBook = books.find((book) => book.id === "F0-1-1") ?? books[0];
 const leadEntry = leadBook
   ? entries.find((entry) => entry.data.id === leadBook.id)
   : undefined;
-
-let outline: OutlineItem[] = [];
-if (leadBook) {
-  try {
-    const outlineAbsPath = path.join(
-      process.cwd(),
-      "src",
-      "data",
-      "outlines",
-      `${leadBook.id}_v${leadBook.edition}.json`
-    );
-    outline = JSON.parse(fs.readFileSync(outlineAbsPath, "utf-8"));
-  } catch {
-    outline = [];
-  }
-}
 
 const bookHref = leadBook
   ? joinBasePath(base, `books/${leadBook.id}/`)
@@ -56,10 +46,12 @@ const summaryParagraphs = rawSummary
   .filter(Boolean)
   .slice(0, 4);
 
-const excerptItems =
-  outline.length > 0
-    ? outline.slice(0, 5)
-    : [];
+const siteUpdates = buildSiteUpdates(
+  generatedUpdates as GeneratedSiteUpdate[],
+  announcements,
+  books
+);
+const siteUpdateGroups = splitSiteUpdates(siteUpdates, siteUpdatePins);
 
 const quoteLines =
   siteConfig.frontPageSlogan?.length > 0
@@ -157,9 +149,9 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
           )}
 
           <div class="fm-vertical-rule" aria-hidden="true">
-            <span>✻</span>
+            <span>＊</span>
             <i></i>
-            <span>✻</span>
+            <span>＊</span>
           </div>
 
           <article class="fm-intro">
@@ -173,13 +165,12 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             </div>
           </article>
 
-          <aside class="fm-excerpt" aria-label="目录大纲">
-            <div class="fm-excerpt-inner">
-              {excerptItems.map((item) => (
-                <p class={`outline-level-${item.level}`}>{item.title}</p>
-              ))}
-            </div>
-          </aside>
+          <SiteUpdates
+            pinnedItems={siteUpdateGroups.pinnedItems}
+            recentItems={siteUpdateGroups.recentItems}
+            showDivider={siteUpdateGroups.showDivider}
+            announcements={announcements}
+          />
         </div>
         )}
       </section>

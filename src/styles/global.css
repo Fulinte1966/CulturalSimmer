@@ -611,6 +611,8 @@
   --soft-rule: #d8d5cd;
   --accent: #e22626;
   --accent-dark: #9f151a;
+  --texture-divider-bars-horizontal: url("/CulturalSimmer/assets/textures/divider-bars-horizontal.svg");
+  --texture-divider-dots-horizontal: url("/CulturalSimmer/assets/textures/divider-dots-horizontal.svg");
   --font-latin-inline: "CS Latin Termes";
   --font-latin-bold-inline: "CS Latin Termes Bold";
   --font-latin: "CS Latin Termes", "TeX Gyre Termes", "Times New Roman", serif;

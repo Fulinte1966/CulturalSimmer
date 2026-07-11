@@ -1,0 +1,31 @@
+---
+import {
+  canOpenSiteUpdateDetail,
+  formatSiteUpdateDate,
+  type SiteFeedItem,
+} from "../lib/siteUpdates";
+
+interface Props {
+  item: SiteFeedItem;
+}
+
+const { item } = Astro.props;
+---
+
+<p class="fm-site-update-line">
+  <span class="fm-site-update-meta">
+    <time datetime={item.publishedAt.toISOString()}>{formatSiteUpdateDate(item.publishedAt)}</time>
+    <span>　［{item.label}］</span>
+  </span>
+  {canOpenSiteUpdateDetail(item) ? (
+    <button
+      type="button"
+      class="fm-site-update-message fm-site-update-open"
+      data-site-update-open={item.announcementId}
+    >
+      {item.message}
+    </button>
+  ) : (
+    <span class="fm-site-update-message">{item.message}</span>
+  )}
+</p>
