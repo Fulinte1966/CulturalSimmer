@@ -75,28 +75,21 @@ def render_book_changelog(root: Path, book_path: Path) -> tuple[str, str]:
         raise ValueError(f"Book must define editions: {book_path}")
 
     ordered = sorted(editions, key=lambda item: int(item["edition"]), reverse=True)
-    lines = [
-        f"# 《{title}》版本更新日志",
-        "",
-        f"> 内部书号 `{book_id}`",
-        "",
-        "按最新版至最早版排列。",
-    ]
+    blocks: list[str] = []
     for edition in ordered:
         tag = _release_tag(book_id, edition)
         release_url = f"https://github.com/{GITHUB_REPOSITORY}/releases/tag/{tag}"
         changelog = _load_edition_changelog(root, book_id, edition)
-        lines.extend(
-            [
-                "",
-                "---",
-                "",
-                f"## [{tag}]({release_url})",
-                "",
-                render_release_changelog(changelog).rstrip(),
-            ]
+        blocks.append(
+            "\n".join(
+                [
+                    f"## [{tag}]({release_url})",
+                    "",
+                    render_release_changelog(changelog).rstrip(),
+                ]
+            )
         )
-    return book_id, "\n".join(lines) + "\n"
+    return book_id, "\n\n".join(blocks) + "\n"
 
 
 def build_repository_changelogs(root: Path = ROOT, *, check: bool = False) -> list[Path]:
