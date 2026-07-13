@@ -143,8 +143,10 @@
   letter-spacing: 8px;
   line-height: 40px;
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .fm-thick-divider,
@@ -179,7 +181,7 @@
   height: 216px;
   justify-content: center;
   overflow: hidden;
-  padding: 12px 6px;
+  padding: 12px 3px;
 }
 
 .fm-section-label span {
@@ -198,7 +200,7 @@
   row-gap: 0;
   text-align: center;
   text-orientation: upright;
-  width: 24px;
+  width: calc(1em + 2px);
   writing-mode: vertical-rl;
 }
 
@@ -348,7 +350,11 @@
   font-variant-east-asian: full-width;
   line-height: 18px;
   max-height: 250px;
-  overflow: hidden;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   width: 336px;
 }
 
@@ -416,12 +422,25 @@
 .fm-site-update-line {
   flex: 0 0 auto;
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 0 0 18px;
 }
 
 .fm-site-update-meta {
   font-family: var(--font-heiti);
   font-weight: 500;
+}
+
+.fm-site-update-date {
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+.fm-site-update-date-field {
+  display: inline-block;
+  inline-size: 2ch;
+  text-align: right;
 }
 
 .fm-site-update-message {
@@ -434,6 +453,10 @@
   margin: 0;
   padding: 0;
   text-align: left;
+}
+
+.fm-site-update-message-text {
+  display: inline;
 }
 
 .fm-site-update-open {
@@ -501,7 +524,10 @@
   font-weight: 700;
   line-height: 36px;
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   text-align: center;
+  text-wrap: balance;
 }
 
 .fm-site-update-body {
@@ -510,7 +536,10 @@
   font-size: 12px;
   line-height: 18px;
   max-height: calc(100% - 72px);
+  max-width: 100%;
   min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -823,6 +852,34 @@
   grid-template-rows: repeat(2, max-content);
   line-height: 10px;
   white-space: nowrap;
+}
+
+.fm-weather-item {
+  align-items: center;
+  column-gap: 0.5em;
+  display: grid;
+}
+
+.fm-weather-item--condition {
+  grid-template-columns: 2em minmax(max-content, 1fr);
+}
+
+.fm-weather-item--direction {
+  grid-template-columns: 2em minmax(max-content, 1fr);
+}
+
+.fm-weather-item--scale {
+  grid-template-columns: 2em minmax(max-content, 1fr);
+}
+
+.fm-weather-item--temperature {
+  grid-template-columns: 4em minmax(max-content, 1fr);
+}
+
+.fm-weather-value {
+  justify-self: stretch;
+  min-width: 0;
+  text-align: center;
 }
 
 .fm-weather-number {

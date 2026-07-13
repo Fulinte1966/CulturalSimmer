@@ -1,7 +1,7 @@
 ---
 import {
   canOpenSiteUpdateDetail,
-  formatSiteUpdateDate,
+  formatSiteUpdateDateParts,
   type SiteFeedItem,
 } from "../lib/siteUpdates";
 
@@ -10,11 +10,16 @@ interface Props {
 }
 
 const { item } = Astro.props;
+const dateParts = formatSiteUpdateDateParts(item.publishedAt);
 ---
 
 <p class="fm-site-update-line">
   <span class="fm-site-update-meta">
-    <time datetime={item.publishedAt.toISOString()}>{formatSiteUpdateDate(item.publishedAt)}</time>
+    <time class="fm-site-update-date" datetime={item.publishedAt.toISOString()}>
+      <span>{dateParts.year}</span>{" 年 "}
+      <span class="fm-site-update-date-field">{dateParts.month}</span>{" 月 "}
+      <span class="fm-site-update-date-field">{dateParts.day}</span>{" 日讯"}
+    </time>
     <span>　［{item.label}］</span>
   </span>
   {canOpenSiteUpdateDetail(item) ? (
@@ -23,9 +28,9 @@ const { item } = Astro.props;
       class="fm-site-update-message fm-site-update-open"
       data-site-update-open={item.announcementId}
     >
-      {item.message}
+      <span class="fm-site-update-message-text heti">{item.message}</span>
     </button>
   ) : (
-    <span class="fm-site-update-message">{item.message}</span>
+    <span class="fm-site-update-message heti">{item.message}</span>
   )}
 </p>

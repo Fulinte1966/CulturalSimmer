@@ -115,9 +115,46 @@ def _download_release_asset(
 def _load_classifications() -> dict[str, str]:
     path = ROOT / "src" / "data" / "classifications.yml"
     data = yaml.safe_load(path.read_text("utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError("classifications.yml must contain a mapping")
-    return {str(key): str(value) for key, value in data.items()}
+    if not isinstance(data, dict) or data.get("schemaVersion") != 1:
+        raise ValueError("classifications.yml must use schemaVersion: 1")
+
+    roots = data.get("classifications")
+    if not isinstance(roots, list):
+        raise ValueError("classifications.yml classifications must be a sequence")
+
+    labels: dict[str, str] = {}
+    source_codes: set = set()
+
+    def format_code(source_code: str) -> str:
+        if re.fullmatch(r"[A-Z]\d*", source_code) is None:
+            raise ValueError(f"Invalid source classification code: {source_code}")
+        prefix, digits = source_code[0], source_code[1:]
+        groups = [digits[index : index + 3] for index in range(0, len(digits), 3)]
+        return prefix + ".".join(groups)
+
+    def visit(nodes: list, parent_code: Optional[str] = None) -> None:
+        for node in nodes:
+            if not isinstance(node, dict):
+                raise ValueError("Every classification entry must be a mapping")
+            code = node.get("code")
+            label = node.get("label")
+            children = node.get("children", [])
+            if not isinstance(code, str) or not isinstance(label, str) or not label.strip():
+                raise ValueError("Every classification requires string code and label fields")
+            if code in source_codes:
+                raise ValueError(f"Duplicate classification code: {code}")
+            if parent_code and not code.startswith(parent_code):
+                raise ValueError(
+                    f"Classification {code} must start with parent code {parent_code}"
+                )
+            if not isinstance(children, list):
+                raise ValueError(f"Classification {code} children must be a sequence")
+            source_codes.add(code)
+            labels[format_code(code)] = label.strip()
+            visit(children, code)
+
+    visit(roots)
+    return labels
 
 
 def _load_frontmatter(path: Path) -> dict:

@@ -294,9 +294,11 @@ html {
   font-weight: 900;
   justify-self: stretch;
   line-height: 24px;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 12px 0;
   text-align: left;
-  word-wrap: break-word;
 }
 
 .fm-call-row[data-level="1"] .fm-call-label {
@@ -409,13 +411,15 @@ html {
 .fm-pagination {
   color: #000;
   display: flex;
+  flex-wrap: wrap;
   font-family: var(--fm-ui);
   font-size: 12px;
   gap: 12px;
   justify-content: center;
   line-height: 14px;
+  max-width: 100%;
   white-space: nowrap;
-  width: 257px;
+  width: auto;
 }
 
 .fm-pagination button {

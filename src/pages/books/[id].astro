@@ -100,7 +100,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
         <nav class="bd-breadcrumb" aria-label="面包屑">
           <a href={joinBasePath(base, "")}>主页</a>
           <span>・</span>
-          <span>《{title}》{subtitle}</span>
+          <span>{title}</span>
         </nav>
 
         <div class="bd-date-line">
@@ -156,7 +156,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
         <section class="bd-text" aria-labelledby="book-title" data-errata-region>
           <div class="bd-text-content" data-book-detail-content>
           <div class="bd-info">
-            <div class="bd-title-block">
+            <div class="bd-title-block heti">
               {book.series && <p class="bd-series">{book.series}</p>}
               <h1 id="book-title" class:list={{ "bd-title--long": title.length > 12 }} data-pagefind-meta="title">
                 {title}
@@ -168,7 +168,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               )}
             </div>
 
-            {author && <p class="bd-author" data-pagefind-meta="author">{author}</p>}
+            {author && <p class="bd-author heti" data-pagefind-meta="author">{author}</p>}
 
             <div class="bd-meta-ornament" aria-hidden="true">＊</div>
 
@@ -243,7 +243,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           <div class="bd-intro">
             <section class="bd-abstract" aria-labelledby="summary-heading">
               <h2 id="summary-heading">内容提要</h2>
-              <div class="bd-body">
+              <div class="bd-body heti">
                 <Content />
               </div>
             </section>
@@ -252,7 +252,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
               <h2 id="outline-heading">目录大纲</h2>
               {
                 outline.length > 0 ? (
-                  <ol class="bd-outline-list">
+                  <ol class="bd-outline-list heti">
                     {outline.map((item) => (
                       <li class={`bd-outline-level-${item.level}`}>
                         <span>{item.title}</span>
@@ -284,7 +284,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                 height="222"
                 aria-hidden="true"
               />
-              <p class="bd-errata-copy">
+              <p class="bd-errata-copy heti">
                 请扫描或点击书末“书籍勘误”二维码<br />提交《读者勘误表》
               </p>
             </div>

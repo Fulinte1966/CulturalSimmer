@@ -147,7 +147,22 @@ https://github.com/Fulinte1966/CulturalSimmer/releases/download/A12-8-2_v1/A12-8
 
 ## 分类表
 
-分类表位于 `src/data/classifications.yml`，采用自定义分类法。第一版仅用于显示分类入口和分类页标题，不做层级树浏览。
+分类表位于 `src/data/classifications.yml`，采用版本化的树形 YAML。顶层使用有序序列保存显示顺序，每个节点由 `code`、本级 `label` 和可选的 `children` 组成；`label` 不重复父级标题。
+
+```yaml
+schemaVersion: 1
+classifications:
+  - code: A
+    label: 马列毛主义
+    children:
+      - code: A1
+        label: 马克思、恩格斯著作
+        children:
+          - code: A11
+            label: 选集、文集、选读
+```
+
+分类代码必须唯一，子级代码必须以前级代码开头。YAML 中的代码只保存大写字母和数字，不写索书号分隔点；加载时会从字母后的第一位开始，每三个数字自动插入 `.`，例如 `I2104` 显示为 `I210.4`、`K9263` 显示为 `K926.3`。索引页、分类页、书号校验和 PDF 上传流程均读取这一个文件；修改后应运行 `npm run validate` 和相关测试。
 
 ## 技术栈
 

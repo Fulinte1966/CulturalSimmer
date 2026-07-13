@@ -22,6 +22,9 @@ class IngestPdfTests(unittest.TestCase):
         labels = ingest_pdf._load_classifications()
         self.assertEqual(labels["F"], "经济")
         self.assertEqual(labels["F0"], "马克思主义政治经济学")
+        self.assertEqual(labels["A11"], "选集、文集、选读")
+        self.assertEqual(labels["I210.4"], "鲁迅著作·杂文、散文")
+        self.assertNotIn("I2104", labels)
 
     def test_publish_normalizes_release_asset_filename(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

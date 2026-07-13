@@ -7,6 +7,8 @@ import {
   buildAutomaticSiteUpdate,
   buildManualSiteUpdate,
   canOpenSiteUpdateDetail,
+  formatSiteUpdateDate,
+  formatSiteUpdateDateParts,
   normalizeAnnouncementId,
   splitSiteUpdates,
   upsertGeneratedUpdate,
@@ -35,6 +37,17 @@ const update = (
   label: "功能",
   message: id,
   hasBody: false,
+});
+
+test("formats Shanghai dates as reusable numeric fields", () => {
+  const date = new Date("2026-07-09T00:00:00+08:00");
+  assert.deepEqual(formatSiteUpdateDateParts(date), {
+    year: "2026",
+    month: "7",
+    day: "9",
+  });
+  assert.equal(formatSiteUpdateDate(date), "2026 年 7 月 9 日讯");
+  assert.throws(() => formatSiteUpdateDateParts(new Date("invalid")));
 });
 
 test("derives automatic labels and messages without links", () => {

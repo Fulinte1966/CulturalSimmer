@@ -1,85 +1,189 @@
-A: 马列毛主义
-A1: 马克思、恩格斯著作
-A11: 马克思、恩格斯著作·选集、文集、选读
-A12: 马克思、恩格斯著作·单行著作
-A13: 马克思、恩格斯著作·书信集、日记、函电
-A2: 列宁著作
-A21: 列宁著作·选集、文集、选读
-A22: 列宁著作·单行著作
-A3: 斯大林著作
-A32: 斯大林著作·单行著作
-A4: 毛泽东著作
-A41: 毛泽东著作·选集、选读
-A42: 毛泽东著作·单行著作
-A44: 毛泽东著作·诗词
-A46: 毛泽东著作·专题汇编
-A5: 马克思、恩格斯、列宁、斯大林、毛泽东著作汇编
-A8: 马克思主义、列宁主义、毛泽东思想的学习、研究和参考资料
-A9: 张春桥、姚文元著作
-A91: 张春桥、姚文元著作·选集、文集、选读
-A92: 张春桥、姚文元著作·单行著作
-A93: 张春桥、姚文元著作·书信集、日记、函电
+schemaVersion: 1
+classifications:
+  - code: A
+    label: 马列毛主义
+    children:
+      - code: A1
+        label: 马克思、恩格斯著作
+        children:
+          - code: A11
+            label: 选集、文集、选读
+          - code: A12
+            label: 单行著作
+          - code: A13
+            label: 书信集、日记、函电
+      - code: A2
+        label: 列宁著作
+        children:
+          - code: A21
+            label: 选集、文集、选读
+          - code: A22
+            label: 单行著作
+      - code: A3
+        label: 斯大林著作
+        children:
+          - code: A32
+            label: 单行著作
+      - code: A4
+        label: 毛泽东著作
+        children:
+          - code: A41
+            label: 选集、选读
+          - code: A42
+            label: 单行著作
+          - code: A44
+            label: 诗词
+          - code: A46
+            label: 专题汇编
+      - code: A5
+        label: 马克思、恩格斯、列宁、斯大林、毛泽东著作汇编
+      - code: A8
+        label: 马克思主义、列宁主义、毛泽东思想的学习、研究和参考资料
+      - code: A9
+        label: 张春桥、姚文元著作
+        children:
+          - code: A91
+            label: 选集、文集、选读
+          - code: A92
+            label: 单行著作
+          - code: A93
+            label: 书信集、日记、函电
 
-B: 哲学
-B1: 世界哲学
-B2: 中国哲学
-B22: 中国哲学·先秦哲学
-B81: 逻辑学（论理学）
-B812: 逻辑学·形式逻辑（名学、辩学）
-B9: 无神论、宗教
-B932: 无神论、宗教·神话
+  - code: B
+    label: 哲学
+    children:
+      - code: B1
+        label: 世界哲学
+      - code: B2
+        label: 中国哲学
+        children:
+          - code: B22
+            label: 先秦哲学
+      - code: B81
+        label: 逻辑学（论理学）
+        children:
+          - code: B812
+            label: 形式逻辑（名学、辩学）
+      - code: B9
+        label: 无神论、宗教
+        children:
+          - code: B932
+            label: 神话
 
-D: 政治
-D4: 工人、农民、青年、妇女运动与组织
+  - code: D
+    label: 政治
+    children:
+      - code: D4
+        label: 工人、农民、青年、妇女运动与组织
 
-F: 经济
-F0: 马克思主义政治经济学
+  - code: F
+    label: 经济
+    children:
+      - code: F0
+        label: 马克思主义政治经济学
 
-H: 语言、文字
-H1: 汉语
-H14: 汉语·语法、修辞
-H19: 汉语·汉语教学
+  - code: H
+    label: 语言、文字
+    children:
+      - code: H1
+        label: 汉语
+        children:
+          - code: H14
+            label: 语法、修辞
+          - code: H19
+            label: 汉语教学
 
-I: 文学
-I0: 文艺理论
-I04: 文艺理论·文艺创作方法和经验
-I1: 世界文学
-I11: 世界文学·文学作品集
-I109: 世界文学·文学史
-I2: 中国文学
-I209: 中国文学·文学史、文学思想史
-I210.4: 中国文学·鲁迅著作·杂文、散文
-I22: 中国文学·诗歌、韵文
-I242: 中国文学·小说·古代作品
-I262: 中国文学·散文、杂著·古代作品
-I28: 中国文学·儿童文学、儿童读物
+  - code: I
+    label: 文学
+    children:
+      - code: I0
+        label: 文艺理论
+        children:
+          - code: I04
+            label: 文艺创作方法和经验
+      - code: I1
+        label: 世界文学
+        children:
+          - code: I11
+            label: 文学作品集
+          - code: I109
+            label: 文学史
+      - code: I2
+        label: 中国文学
+        children:
+          - code: I209
+            label: 文学史、文学思想史
+          - code: I2104
+            label: 鲁迅著作·杂文、散文
+          - code: I22
+            label: 诗歌、韵文
+          - code: I242
+            label: 小说·古代作品
+          - code: I262
+            label: 散文、杂著·古代作品
+          - code: I28
+            label: 儿童文学、儿童读物
 
-J: 艺术
-J2: 绘画
-J21: 绘画·绘画技法
-J22: 绘画·中国绘画作品
-J6: 音乐
-J61: 音乐技术理论与方法
-J642: 中国音乐作品·歌曲
-J643: 中国音乐作品·戏剧音乐、配乐音乐曲
+  - code: J
+    label: 艺术
+    children:
+      - code: J2
+        label: 绘画
+        children:
+          - code: J21
+            label: 绘画技法
+          - code: J22
+            label: 中国绘画作品
+      - code: J6
+        label: 音乐
+        children:
+          - code: J61
+            label: 音乐技术理论与方法
+          - code: J642
+            label: 中国音乐作品·歌曲
+          - code: J643
+            label: 中国音乐作品·戏剧音乐、配乐音乐
 
-K: 历史、地理
-K1: 世界史
-K2: 中国史
-K207: 中国史·通史·研究、考订、评论
-K209: 中国史·通史·普及读物
-K25: 中国史·半殖民地、半封建社会（1840-1949年）
-K9: 地理
-K926: 中国地理·中南地区
-K926.3: 中国地理·中南地区·湖北省
+  - code: K
+    label: 历史、地理
+    children:
+      - code: K1
+        label: 世界史
+      - code: K2
+        label: 中国史
+        children:
+          - code: K207
+            label: 通史·研究、考订、评论
+          - code: K209
+            label: 通史·普及读物
+          - code: K25
+            label: 半殖民地、半封建社会（1840-1949年）
+      - code: K9
+        label: 地理
+        children:
+          - code: K926
+            label: 中国地理·中南地区
+            children:
+              - code: K9263
+                label: 湖北省
 
-T: 课程教材
+  - code: T
+    label: 课程教材
 
-Z: 综合性图书
-Z2: 百科全书、类书
-Z228: 中国百科全书、类书·综合性普及读物
-Z3: 辞典
-Z6: 期刊、连续性出版物
-Z8: 图书目录、文摘、索引
+  - code: Z
+    label: 综合性图书
+    children:
+      - code: Z2
+        label: 百科全书、类书
+        children:
+          - code: Z228
+            label: 中国百科全书、类书·综合性普及读物
+      - code: Z3
+        label: 辞典
+      - code: Z6
+        label: 期刊、连续性出版物
+      - code: Z8
+        label: 图书目录、文摘、索引
 
-P: 印刷工业
+  - code: P
+    label: 印刷工业

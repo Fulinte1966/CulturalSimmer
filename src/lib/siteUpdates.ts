@@ -44,6 +44,12 @@ export interface SplitSiteUpdates {
   showDivider: boolean;
 }
 
+export interface SiteUpdateDateParts {
+  year: string;
+  month: string;
+  day: string;
+}
+
 export function validateAnnouncementLabel(label: string): string {
   const normalized = label.trim();
   if (!normalized) throw new Error("Announcement label must not be empty");
@@ -70,7 +76,7 @@ export function normalizeAnnouncementId(id: string): string {
   return id.replace(/\.md$/i, "");
 }
 
-export function formatSiteUpdateDate(date: Date): string {
+export function formatSiteUpdateDateParts(date: Date): SiteUpdateDateParts {
   if (Number.isNaN(date.getTime())) throw new Error("Invalid site update date");
   const parts = new Intl.DateTimeFormat("zh-CN", {
     timeZone: "Asia/Shanghai",
@@ -80,7 +86,16 @@ export function formatSiteUpdateDate(date: Date): string {
   }).formatToParts(date);
   const value = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((part) => part.type === type)?.value;
-  return `${value("year")} 年 ${value("month")} 月 ${value("day")} 日讯`;
+  return {
+    year: value("year") ?? "",
+    month: value("month") ?? "",
+    day: value("day") ?? "",
+  };
+}
+
+export function formatSiteUpdateDate(date: Date): string {
+  const { year, month, day } = formatSiteUpdateDateParts(date);
+  return `${year} 年 ${month} 月 ${day} 日讯`;
 }
 
 function parsePublishedAt(value: string | Date, id: string): Date {

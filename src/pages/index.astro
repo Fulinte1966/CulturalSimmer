@@ -160,7 +160,7 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
               <h1 id="fm-lead-title">{leadBook.title}</h1>
               {leadBook.subtitle && <p class="fm-subtitle">{leadBook.subtitle}</p>}
             </div>
-            <div class="fm-intro-body">
+            <div class="fm-intro-body heti">
               {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
             </div>
           </article>
@@ -215,14 +215,38 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             <p>天气预报</p>
           </div>
           <div class="fm-weather-detail">
-            <p>白天 <span data-weather-field="dayWeather">{dayWeather}</span></p>
-            <p>风向 <span data-weather-field="dayWindDir">{dayWindDir}</span></p>
-            <p>风力 <span data-weather-field="dayWindScale"><span class="fm-weather-number" data-weather-number>{dayWindScaleParts.number}</span><span data-weather-unit>{dayWindScaleParts.unit}</span></span></p>
-            <p><strong>最高温度</strong> <span class="fm-weather-number" data-weather-field="tempMax">{tempMax}</span>度</p>
-            <p>夜间 <span data-weather-field="nightWeather">{nightWeather}</span></p>
-            <p>风向 <span data-weather-field="nightWindDir">{nightWindDir}</span></p>
-            <p>风力 <span data-weather-field="nightWindScale"><span class="fm-weather-number" data-weather-number>{nightWindScaleParts.number}</span><span data-weather-unit>{nightWindScaleParts.unit}</span></span></p>
-            <p><strong>最低温度</strong> <span class="fm-weather-number" data-weather-field="tempMin">{tempMin}</span>度</p>
+            <p class="fm-weather-item fm-weather-item--condition">
+              <span class="fm-weather-key">白天</span>
+              <span class="fm-weather-value" data-weather-field="dayWeather">{dayWeather}</span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--direction">
+              <span class="fm-weather-key">风向</span>
+              <span class="fm-weather-value" data-weather-field="dayWindDir">{dayWindDir}</span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--scale">
+              <span class="fm-weather-key">风力</span>
+              <span class="fm-weather-value" data-weather-field="dayWindScale"><span class="fm-weather-number" data-weather-number>{dayWindScaleParts.number}</span><span data-weather-unit>{dayWindScaleParts.unit}</span></span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--temperature">
+              <strong class="fm-weather-key">最高温度</strong>
+              <span class="fm-weather-value"><span class="fm-weather-number" data-weather-field="tempMax">{tempMax}</span>度</span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--condition">
+              <span class="fm-weather-key">夜间</span>
+              <span class="fm-weather-value" data-weather-field="nightWeather">{nightWeather}</span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--direction">
+              <span class="fm-weather-key">风向</span>
+              <span class="fm-weather-value" data-weather-field="nightWindDir">{nightWindDir}</span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--scale">
+              <span class="fm-weather-key">风力</span>
+              <span class="fm-weather-value" data-weather-field="nightWindScale"><span class="fm-weather-number" data-weather-number>{nightWindScaleParts.number}</span><span data-weather-unit>{nightWindScaleParts.unit}</span></span>
+            </p>
+            <p class="fm-weather-item fm-weather-item--temperature">
+              <strong class="fm-weather-key">最低温度</strong>
+              <span class="fm-weather-value"><span class="fm-weather-number" data-weather-field="tempMin">{tempMin}</span>度</span>
+            </p>
           </div>
           <div class="fm-weather-days">
             {futureForecasts.map((day, index) => (
