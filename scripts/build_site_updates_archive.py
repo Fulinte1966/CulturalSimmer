@@ -16,14 +16,6 @@ from site_updates_data import load_generated_updates
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs" / "site-updates-archive.md"
-PUBLIC_SITE_URL = "https://fulinte1966.github.io/CulturalSimmer/"
-GITHUB_REPOSITORY = "Fulinte1966/CulturalSimmer"
-TYPE_LABELS = {
-    "new_book": "新书上架",
-    "book_version": "版本更新",
-    "important_erratum": "重要勘误",
-    "site_announcement": "本站公告",
-}
 
 
 def _load_frontmatter(path: Path) -> tuple[dict, str]:
@@ -78,15 +70,6 @@ def _book_title(book: dict) -> str:
     return f"{book['title']}{book.get('subtitle') or ''}"
 
 
-def _edition_summary(record: dict) -> str:
-    year, month = str(record["editionDate"]).split("-", 1)
-    return f"{int(year)} 年 {int(month)} 月第 {int(record['edition'])} 版"
-
-
-def _book_url(book_id: str) -> str:
-    return f"{PUBLIC_SITE_URL}books/{book_id}/"
-
-
 def _automatic_entries(root: Path, books: dict[str, dict]) -> list[dict]:
     entries: list[dict] = []
     for update in load_generated_updates(root / "src/data/generated-updates.json"):
@@ -99,17 +82,19 @@ def _automatic_entries(root: Path, books: dict[str, dict]) -> list[dict]:
             if is_new
             else int(update["edition"])
         )
-        record = _find_edition(book, edition)
+        _find_edition(book, edition)
+        title = _book_title(book)
         entries.append(
             {
                 "id": f"{'new-book' if is_new else 'book-version'}-{book['id']}-v{edition}",
-                "type": "new_book" if is_new else "book_version",
                 "publishedAt": _parse_datetime(update["publishedAt"], update["id"]),
-                "bookId": book["id"],
-                "title": _book_title(book),
-                "version": f"v{edition}",
-                "summary": [_edition_summary(record)],
-                "url": _book_url(book["id"]),
+                "label": "新书" if is_new else "更新",
+                "heading": f"{book['id']}_v{edition}",
+                "content": (
+                    f"《{title}》已上架。"
+                    if is_new
+                    else f"《{title}》已更新第 {edition} 版。"
+                ),
             }
         )
     return entries
@@ -118,7 +103,7 @@ def _automatic_entries(root: Path, books: dict[str, dict]) -> list[dict]:
 def _announcement_entries(root: Path, books: dict[str, dict]) -> list[dict]:
     entries: list[dict] = []
     for path in sorted((root / "src/content/announcements").glob("*.md")):
-        data, _ = _load_frontmatter(path)
+        data, body = _load_frontmatter(path)
         kind = str(data.get("kind") or "site-announcement")
         summary = data.get("summary") or []
         if not isinstance(summary, list) or not all(isinstance(item, str) for item in summary):
@@ -131,29 +116,24 @@ def _announcement_entries(root: Path, books: dict[str, dict]) -> list[dict]:
             if book is None or edition < 1:
                 raise ValueError(f"Important erratum requires a valid book and edition: {path}")
             _find_edition(book, edition)
-            entry_type = "important_erratum"
-            url = _book_url(book_id)
-            version = f"v{edition}"
         elif kind == "site-announcement":
-            book_id = None
-            entry_type = "site_announcement"
-            url = None
-            version = None
+            pass
         else:
             raise ValueError(f"Unknown announcement kind in {path}: {kind}")
         title = str(data.get("title") or "").strip()
+        label = str(data.get("label") or "").strip()
         if not title:
             raise ValueError(f"Announcement title must not be empty: {path}")
+        if not label:
+            raise ValueError(f"Announcement label must not be empty: {path}")
         entries.append(
             {
-                "id": f"{'erratum' if entry_type == 'important_erratum' else 'announcement'}-{normalized_id}",
-                "type": entry_type,
+                "id": f"{'erratum' if kind == 'important-erratum' else 'announcement'}-{normalized_id}",
                 "publishedAt": _parse_datetime(data.get("publishedAt"), path.name),
-                "bookId": book_id,
-                "title": title,
-                "version": version,
-                "summary": summary,
-                "url": url,
+                "label": label,
+                "heading": title,
+                "content": body
+                or "\n\n".join(item.strip() for item in summary if item.strip()),
             }
         )
     return entries
@@ -183,14 +163,14 @@ def _escape_markdown(value: object) -> str:
         .replace(">", "&gt;")
         .replace("\\", "\\\\")
     )
-    for character in ("[", "]", "*", "_", "`", "~"):
+    for character in ("[", "]", "*", "`", "~"):
         text = text.replace(character, f"\\{character}")
     return text
 
 
 def _format_date(value: datetime) -> str:
     local = value.astimezone(ZoneInfo("Asia/Shanghai"))
-    return f"{local.year} 年 {local.month} 月 {local.day} 日"
+    return f"{local.year}-{local.month}-{local.day}"
 
 
 def render_site_updates_archive(entries: list[dict]) -> str:
@@ -207,25 +187,17 @@ def render_site_updates_archive(entries: list[dict]) -> str:
         lines.extend(
             [
                 "",
-                "---",
-                "",
-                f"## {_format_date(entry['publishedAt'])}　［{TYPE_LABELS[entry['type']]}］",
+                (
+                    f"### `{_format_date(entry['publishedAt'])}` "
+                    f"`{_escape_markdown(entry['label'])}` "
+                    f"{_escape_markdown(entry['heading'])}"
+                ),
                 "",
             ]
         )
-        subject = _escape_markdown(entry["title"])
-        if entry.get("bookId"):
-            subject = f"{_escape_markdown(entry['bookId'])}　《{subject}》"
-        if entry.get("url"):
-            lines.append(f"### [{subject}]({entry['url']})")
-        else:
-            lines.append(f"### {subject}")
-        if entry.get("version"):
-            lines.extend(["", f"**版本：** `{entry['version']}`"])
-        if entry["summary"]:
-            lines.append("")
-            lines.extend(f"- {_escape_markdown(item)}" for item in entry["summary"])
-        lines.extend(["", f"<!-- update-id: {entry['id']} -->"])
+        if entry["content"]:
+            lines.extend([entry["content"], ""])
+        lines.append(f"<!-- update-id: {entry['id']} -->")
     return "\n".join(lines) + "\n"
 
 

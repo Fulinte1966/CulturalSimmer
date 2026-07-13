@@ -59,7 +59,8 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             "kind: site-announcement\n"
             "summary:\n"
             "  - 恢复正常访问\n"
-            "---\n",
+            "---\n"
+            "系统维护已经完成。\n",
             encoding="utf-8",
         )
         return root
@@ -71,11 +72,16 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             markdown = output.read_text(encoding="utf-8")
 
             self.assertTrue(markdown.startswith("# 本站更新归档\n"))
-            self.assertLess(markdown.index("维护完成"), markdown.index("版本更新"))
-            self.assertLess(markdown.index("版本更新"), markdown.index("新书上架"))
-            self.assertIn("F0-9　《测试书（上册）》", markdown)
-            self.assertIn("2026 年 8 月第 2 版", markdown)
+            self.assertLess(markdown.index("维护完成"), markdown.index("F0-9_v2"))
+            self.assertLess(markdown.index("F0-9_v2"), markdown.index("F0-9_v1"))
+            self.assertIn("### `2026-8-4` `维护` 维护完成", markdown)
+            self.assertIn("系统维护已经完成。", markdown)
+            self.assertIn("### `2026-8-3` `更新` F0-9_v2", markdown)
+            self.assertIn("《测试书（上册）》已更新第 2 版。", markdown)
+            self.assertIn("### `2026-7-2` `新书` F0-9_v1", markdown)
+            self.assertIn("《测试书（上册）》已上架。", markdown)
             self.assertIn("<!-- update-id: book-version-F0-9-v2 -->", markdown)
+            self.assertNotIn("\n---\n", markdown)
             self.assertNotIn("generatedAt", markdown)
             build_site_updates_archive(root, check=True)
 
@@ -86,6 +92,27 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             output.write_text("stale\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "out of date"):
                 build_site_updates_archive(root, check=True)
+
+    def test_announcement_without_body_uses_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._root(directory)
+            announcement = root / "src/content/announcements/2026-08-05-notice.md"
+            announcement.write_text(
+                "---\n"
+                "title: 服务公告\n"
+                "label: 公告\n"
+                "publishedAt: 2026-08-05T09:00:00+08:00\n"
+                "summary:\n"
+                "  - 第一项说明。\n"
+                "  - 第二项说明。\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            markdown = build_site_updates_archive(root).read_text(encoding="utf-8")
+
+            self.assertIn("### `2026-8-5` `公告` 服务公告", markdown)
+            self.assertIn("第一项说明。\n\n第二项说明。", markdown)
 
 
 if __name__ == "__main__":
