@@ -16,6 +16,7 @@ const book = {
     { edition: 2, editionDate: "2026-08" },
   ],
 };
+const archiveUrl = "https://github.com/example/library/blob/main/docs/site-updates-archive.md";
 
 function build() {
   return buildPublicUpdateFeed({
@@ -30,7 +31,7 @@ function build() {
     books: [book],
     generatedAt: new Date("2026-08-03T00:00:00Z"),
     siteUrl: "https://example.com/CulturalSimmer/",
-    updatesPageUrl: "https://example.com/CulturalSimmer/updates/",
+    updatesPageUrl: archiveUrl,
   });
 }
 
@@ -62,7 +63,7 @@ test("builds an important erratum linked to an existing edition", () => {
     books: [book],
     generatedAt: new Date("2026-08-04T01:00:00Z"),
     siteUrl: "https://example.com/CulturalSimmer/",
-    updatesPageUrl: "https://example.com/CulturalSimmer/updates/",
+    updatesPageUrl: archiveUrl,
   });
   assert.equal(feed.updates[0].type, "important_erratum");
   assert.equal(feed.updates[0].version, "v2");
@@ -79,4 +80,9 @@ test("latest feed returns the newest timestamp group", () => {
   const latest = latestPublicUpdateFeed(build());
   assert.equal(latest.updates.length, 1);
   assert.equal(latest.updates[0].type, "site_announcement");
+});
+
+test("publishes the repository archive as the human-readable update URL", () => {
+  assert.equal(build().updatesPageUrl, archiveUrl);
+  assert.equal(build().updates.find((item) => item.type === "site_announcement")?.url, archiveUrl);
 });

@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 import yaml
 
+from build_site_updates_archive import build_site_updates_archive
 from site_updates_data import atomic_write_json, load_generated_updates
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,6 +109,7 @@ def command_new(args: argparse.Namespace) -> None:
     temporary = target.with_suffix(".md.tmp")
     temporary.write_text(content, encoding="utf-8")
     temporary.replace(target)
+    build_site_updates_archive(ROOT)
     print(f"已创建 {target.relative_to(ROOT)}")
 
     should_pin = args.pin

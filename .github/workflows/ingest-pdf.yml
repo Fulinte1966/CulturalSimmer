@@ -79,6 +79,7 @@ jobs:
           npm run test:ingest
           npm run test:changelog
           npm run test:reading
+          npm run test:updates
           npm run test:ui
           npm run build
 
@@ -94,7 +95,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content/books/ src/data/ public/covers/ src/data/manifests/
+          git add src/content/books/ src/data/ public/covers/ src/data/manifests/ docs/site-updates-archive.md
           if git diff --cached --quiet; then
             echo "No generated changes to commit"
             exit 1

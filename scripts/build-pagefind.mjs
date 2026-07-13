@@ -10,7 +10,7 @@ if (!hasBooks) {
   process.exit(0);
 }
 
-const result = spawnSync("pagefind", ["--site", "dist"], {
+const result = spawnSync("pagefind", ["--site", "dist", "--glob", "books/**/*.html"], {
   stdio: "inherit",
   shell: process.platform === "win32",
 });

@@ -60,6 +60,20 @@ class IngestPdfTests(unittest.TestCase):
             manifest_path.write_text(
                 json.dumps({"githubAssetDigest": None}), encoding="utf-8"
             )
+            book_path = root / "src/content/books/F0-9.md"
+            book_path.parent.mkdir(parents=True)
+            book_path.write_text(
+                "---\n"
+                "id: F0-9\n"
+                "title: 标题\n"
+                "editions:\n"
+                "  - edition: 1\n"
+                "    editionDate: 2026-06\n"
+                "  - edition: 2\n"
+                "    editionDate: 2026-07\n"
+                "---\n",
+                encoding="utf-8",
+            )
 
             def fake_gh(*args):
                 calls.append(args)
@@ -108,6 +122,9 @@ class IngestPdfTests(unittest.TestCase):
                     }
                 ],
             )
+            archive = (root / "docs/site-updates-archive.md").read_text("utf-8")
+            self.assertIn("F0-9　《标题》", archive)
+            self.assertIn("<!-- update-id: book-version-F0-9-v2 -->", archive)
 
     def test_generated_site_update_append_is_atomic_and_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

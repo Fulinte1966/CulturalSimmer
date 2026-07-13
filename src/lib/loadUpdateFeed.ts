@@ -17,6 +17,6 @@ export async function loadPublicUpdateFeed(generatedAt = new Date()): Promise<Pu
     books,
     generatedAt,
     siteUrl,
-    updatesPageUrl: new URL("updates/", siteUrl).toString(),
+    updatesPageUrl: siteConfig.updatesArchiveUrl,
   });
 }
