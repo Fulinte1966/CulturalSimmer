@@ -23,6 +23,7 @@ from typing import Optional
 from zoneinfo import ZoneInfo
 
 import yaml
+from build_site_updates_archive import build_site_updates_archive
 from changelog_model import normalize_changelog
 from compare_content_snapshots import compare_content_snapshots
 from edition_policy import (
@@ -654,6 +655,7 @@ def cmd_publish(args: list[str]):
     append_generated_update(
         ROOT / "src" / "data" / "generated-updates.json", generated_update
     )
+    build_site_updates_archive(ROOT)
 
     manifest_path = ROOT / "src" / "data" / "manifests" / f"{meta['canonicalTag']}.json"
     if manifest_path.exists():

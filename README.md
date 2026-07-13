@@ -91,7 +91,7 @@ F0-1-1_v2
 
 主页“本站消息”会合并电子书入库生成的 `［新书］`、`［更新］` 消息和人工公告，并支持有序置顶及栏目内全文阅读。数据格式、创建命令和维护规则见 [本站消息维护规范](docs/site-updates-workflow.md)。
 
-生产构建同时生成公开更新源 [`/updates/feed.json`](https://fulinte1966.github.io/CulturalSimmer/updates/feed.json)、最新摘要 `latest.json`、JSON Schema 和更新归档页。更新 ID 只由书号、版次或公告文件名确定，重复构建不会产生新事件；外部通知器只按 ID 判断是否已发送。
+生产构建同时生成公开更新源 [`/updates/feed.json`](https://fulinte1966.github.io/CulturalSimmer/updates/feed.json)、最新摘要 `latest.json`、JSON Schema 和仓库内的 [`docs/site-updates-archive.md`](docs/site-updates-archive.md)。网站不提供完整更新正文页，首页“本站消息”只展示置顶和最近动态；`/updates/` 仅为旧链接保留静态跳转。更新 ID 只由书号、版次或公告文件名确定，重复构建不会产生新事件；外部通知器只按 ID 判断是否已发送。
 
 书末“检查更新”二维码使用 `/check/?bookId={内部书号}&edition={版次}`。页面只以 URL 中的书号和版次进行匹配，书名、封面、最新版本和下载入口均以仓库数据为准。每次生产构建还会把同一书目的各版日志合并为 `src/data/changelogs/{内部书号}.md`，供检查更新页面跳转查看。
 
