@@ -73,15 +73,6 @@ html {
   position: absolute;
 }
 
-.bd-head-texture {
-  background: linear-gradient(90deg, transparent, rgb(0 0 0 / 4%), transparent);
-  height: 32px;
-  inset: 0 0 auto;
-  opacity: 0.5;
-  pointer-events: none;
-  position: absolute;
-}
-
 .bd-breadcrumb {
   align-items: center;
   display: flex;
