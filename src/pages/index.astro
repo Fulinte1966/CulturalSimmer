@@ -37,7 +37,7 @@ const shelfBooks = books.slice(0, 10);
 
 const rawSummary =
   leadBook?.description ||
-  leadEntry?.body.trim() ||
+  leadEntry?.body?.trim() ||
   "";
 const summaryParagraphs = rawSummary
   .replace(/\r\n/g, "\n")

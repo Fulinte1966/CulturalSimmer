@@ -271,7 +271,7 @@
 }
 
 .fm-vertical-rule i {
-  background: url("/CulturalSimmer/assets/decor/border-vertical-repeat.svg") center top / 12px 12px repeat-y;
+  background: url("/assets/decor/border-vertical-repeat.svg") center top / 12px 12px repeat-y;
   display: block;
   flex: 0 0 360px;
   height: 360px;
@@ -596,7 +596,7 @@
 
 .fm-shelf-badge {
   align-items: center;
-  background: url("/CulturalSimmer/assets/badges/badge-shelf.svg") center / contain no-repeat;
+  background: url("/assets/badges/badge-shelf.svg") center / contain no-repeat;
   color: #000;
   display: flex;
   font-family: var(--font-heiti-display);

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import fs from "node:fs";
 import path from "node:path";
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
@@ -24,7 +24,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { id } = entry.data;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 const [book, calendar] = await Promise.all([
   getBookById(id),
   getCalendarStatus(),
