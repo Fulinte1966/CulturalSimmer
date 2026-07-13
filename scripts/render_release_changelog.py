@@ -66,10 +66,10 @@ def render_release_changelog(
     changelog: dict[str, Any], *, max_changes: int | None = None
 ) -> str:
     current = changelog["toEdition"]
-    lines = [f"### {_edition_label(current)}", "", "---", ""]
+    lines = [f"### {_edition_label(current)}", ""]
     previous = changelog.get("fromEdition")
     if previous is None:
-        lines.append("初次发布。")
+        lines.append("初版发行")
         return "\n".join(lines) + "\n"
 
     summary = calculate_changelog_summary(changelog)
@@ -93,9 +93,9 @@ def render_release_changelog(
                 f"> <sub>?</sub> 待复核 **{review_count}** 处",
             ]
         )
-    lines.extend(["", "---"])
-
     displayed = changes if max_changes is None else changes[:max_changes]
+    if displayed:
+        lines.extend(["", "---"])
     for display_index, change in enumerate(displayed, start=1):
         lines.append("")
         review_marker = _review_marker(change)
@@ -127,4 +127,5 @@ def render_release_changelog(
                 f"**{max_changes}** 处差异；完整结果见 changelog JSON。",
             ]
         )
+    lines.extend(["", "---"])
     return "\n".join(lines) + "\n"

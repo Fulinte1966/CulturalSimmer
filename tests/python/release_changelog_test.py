@@ -22,7 +22,7 @@ class ReleaseChangelogTests(unittest.TestCase):
         }
         self.assertEqual(
             render_release_changelog(changelog),
-            "### 2026 年 6 月第 1 版\n\n---\n\n初次发布。\n",
+            "### 2026 年 6 月第 1 版\n\n初版发行\n",
         )
 
     def test_replace_insert_delete_and_page_ranges_follow_template(self) -> None:
@@ -47,12 +47,36 @@ class ReleaseChangelogTests(unittest.TestCase):
         }
         markdown = render_release_changelog(changelog)
         self.assertTrue(markdown.startswith("### 2026 年 7 月第 2 版"))
+        self.assertNotIn("### 2026 年 7 月第 2 版\n\n---", markdown)
         self.assertIn("较 `2026 年 6 月第 1 版` 共有 **3** 处不同", markdown)
         self.assertIn("`第 ii—iii 页` 认真 ***做*** 好出版工作。", markdown)
         self.assertIn("认真 ~~**删除**~~ 好出版工作。", markdown)
         self.assertIn("认真 **新增** 好出版工作。", markdown)
         self.assertNotIn("待复核", markdown)
         self.assertNotIn("<sub>?</sub>", markdown)
+        self.assertTrue(markdown.endswith("\n---\n"))
+
+    def test_unchanged_later_edition_uses_compact_template(self) -> None:
+        changelog = {
+            "toEdition": {"edition": 2, "editionDate": "2026-07"},
+            "fromEdition": {"edition": 1, "editionDate": "2026-07"},
+            "summary": {"total": 0, "added": 0, "removed": 0, "changed": 0},
+            "changes": [],
+        }
+        self.assertEqual(
+            render_release_changelog(changelog),
+            "### 2026 年 7 月第 2 版\n"
+            "\n"
+            "较 `2026 年 7 月第 1 版` 共有 **0** 处不同<br>\n"
+            "\n"
+            "> <kbd>+ 新增</kbd> **0** 处<br>\n"
+            ">\n"
+            "> <kbd>− 删减</kbd> **0** 处<br>\n"
+            ">\n"
+            "> <kbd>± 修改</kbd> **0** 处\n"
+            "\n"
+            "---\n",
+        )
 
     def test_review_required_is_counted_and_marked_on_both_replace_sides(self) -> None:
         old_side = {

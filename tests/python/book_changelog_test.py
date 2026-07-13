@@ -69,7 +69,10 @@ class BookChangelogTests(unittest.TestCase):
 
             self.assertLess(markdown.index("F0-9_v2"), markdown.index("F0-9_v1"))
             self.assertIn("共有 **1** 处不同", markdown)
-            self.assertIn("初次发布。", markdown)
+            self.assertIn("初版发行", markdown)
+            self.assertFalse(markdown.startswith("# 《测试书》版本更新日志"))
+            self.assertNotIn("\n---\n\n---\n", markdown)
+            self.assertEqual(markdown.count("\n---\n"), 2)
             build_repository_changelogs(root, check=True)
 
     def test_missing_noninitial_changelog_fails(self) -> None:
