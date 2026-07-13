@@ -95,7 +95,7 @@ Runtime decorative assets live under `public/assets/`:
 
 Use lowercase kebab-case for project-authored assets and prefer role-first names. See `docs/asset-conventions.md`.
 
-For public URLs in Astro components and pages, use `joinBasePath(import.meta.env.BASE_URL, "...")`. CSS-only URLs currently include the GitHub Pages base path.
+For public URLs in Astro components and pages, use `joinBasePath(import.meta.env.BASE_URL, "...")`. Reference `public/` assets in CSS from root paths such as `/assets/...` and `/fonts/...`; Vite rewrites them using the configured base path during production builds.
 
 ## Repository Hygiene
 

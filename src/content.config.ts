@@ -1,9 +1,11 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const bookIdRegex = /^[A-Z](?:\d+(?:\.\d+)?)?-\d+(?:-\d+)?$/;
 
 const books = defineCollection({
-  type: "content",
+  loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/books" }),
   schema: z.object({
     id: z.string().regex(bookIdRegex, "id must be a valid call number like A8-3 or A12-8-2"),
     title: z.string().min(1),
@@ -15,8 +17,8 @@ const books = defineCollection({
     publisher: z.string().optional(),
     source: z.string().optional(),
     rights: z.string().optional(),
-    licenseUrl: z.string().url().optional(),
-    zlibraryUrl: z.string().url().optional(),
+    licenseUrl: z.url().optional(),
+    zlibraryUrl: z.url().optional(),
     tags: z.array(z.string()).default([]),
     cover: z.string().optional(),
     totalVolumes: z
@@ -38,7 +40,7 @@ const books = defineCollection({
 });
 
 const announcements = defineCollection({
-  type: "content",
+  loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/announcements" }),
   schema: z.object({
     title: z
       .string()
@@ -62,7 +64,7 @@ const announcements = defineCollection({
   }).superRefine((value, context) => {
     if (value.kind === "important-erratum" && (!value.bookId || !value.edition)) {
       context.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "important errata require bookId and edition",
       });
     }
