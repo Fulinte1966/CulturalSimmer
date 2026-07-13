@@ -1,9 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+import { parse } from "yaml";
 
 export interface ClassificationNode {
   code: string;
@@ -13,159 +10,133 @@ export interface ClassificationNode {
   children: ClassificationNode[];
 }
 
-// ---------------------------------------------------------------------------
-// Cache
-// ---------------------------------------------------------------------------
-
-let _treeCache: ClassificationNode[] | null = null;
-let _flatCache: Map<string, ClassificationNode> | null = null;
-
-// ---------------------------------------------------------------------------
-// YAML loader
-// ---------------------------------------------------------------------------
-
-function loadYaml(): Map<string, string> {
-  const filePath = path.join(
-    process.cwd(),
-    "src",
-    "data",
-    "classifications.yml"
-  );
-  const content = fs.readFileSync(filePath, "utf-8");
-  const map = new Map<string, string>();
-
-  for (const line of content.split(/\r?\n/)) {
-    const match = line.match(/^([A-Z](?:\d+(?:\.\d+)?)?):\s*(.+)$/);
-    if (match) {
-      map.set(match[1], match[2].trim());
-    }
-  }
-
-  return map;
+interface ClassificationSourceNode {
+  code: string;
+  label: string;
+  children?: ClassificationSourceNode[];
 }
 
-// ---------------------------------------------------------------------------
-// Tree builder
-// ---------------------------------------------------------------------------
+interface ClassificationDocument {
+  schemaVersion: number;
+  classifications: ClassificationSourceNode[];
+}
 
-function buildTree(entries: Map<string, string>): ClassificationNode[] {
-  const nodes = new Map<string, ClassificationNode>();
-  const roots: ClassificationNode[] = [];
+const SOURCE_CLASSIFICATION_CODE = /^[A-Z]\d*$/;
 
-  // Create nodes for every classification key
-  for (const [code, label] of entries) {
-    nodes.set(code, {
-      code,
-      label,
-      depth: 0, // computed below
-      children: [],
-    });
+let treeCache: ClassificationNode[] | null = null;
+let flatCache: Map<string, ClassificationNode> | null = null;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function formatClassificationCode(sourceCode: string): string {
+  if (!SOURCE_CLASSIFICATION_CODE.test(sourceCode)) {
+    throw new Error(`Invalid source classification code: ${sourceCode}`);
   }
 
-  // Link parent-child relationships
-  for (const code of entries.keys()) {
-    const node = nodes.get(code)!;
-    const parentCode = findParentCode(code, entries);
+  const prefix = sourceCode[0];
+  const digits = sourceCode.slice(1);
+  const groups = digits.match(/.{1,3}/g) ?? [];
+  return `${prefix}${groups.join(".")}`;
+}
 
-    if (parentCode) {
-      const parent = nodes.get(parentCode);
-      if (parent) {
-        node.parentCode = parentCode;
-        node.depth = parent.depth + 1;
-        parent.children.push(node);
-        continue;
-      }
+function readDocument(): ClassificationDocument {
+  const filePath = path.join(process.cwd(), "src", "data", "classifications.yml");
+  const document = parse(fs.readFileSync(filePath, "utf-8")) as unknown;
+
+  if (!isRecord(document) || document.schemaVersion !== 1) {
+    throw new Error("classifications.yml must use schemaVersion: 1");
+  }
+  if (!Array.isArray(document.classifications)) {
+    throw new Error("classifications.yml classifications must be a sequence");
+  }
+
+  return document as unknown as ClassificationDocument;
+}
+
+function buildTree(sourceNodes: ClassificationSourceNode[]): ClassificationNode[] {
+  const seen = new Set<string>();
+
+  const buildNode = (
+    source: ClassificationSourceNode,
+    parentSourceCode: string | undefined,
+    parentCode: string | undefined,
+    depth: number,
+  ): ClassificationNode => {
+    if (!isRecord(source)) {
+      throw new Error("Every classification entry must be a mapping");
     }
 
-    // No parent found — top-level node
-    node.depth = 1;
-    roots.push(node);
-  }
-
-  // Sort children by YAML source order (the insertion order from the Map
-  // preserves the original file order, so just sort roots).
-  roots.sort((a, b) => sortBySourceOrder(a.code, b.code, entries));
-
-  return roots;
-}
-
-/** Find the longest existing proper code prefix of *code*. */
-function findParentCode(
-  code: string,
-  entries: Map<string, string>
-): string | undefined {
-  // Strip characters from the right until we find a known code.
-  for (let i = code.length - 1; i > 0; i--) {
-    const candidate = code.slice(0, i);
-    if (candidate !== code && entries.has(candidate)) {
-      return candidate;
+    const { code, label, children } = source;
+    if (typeof code !== "string" || !SOURCE_CLASSIFICATION_CODE.test(code)) {
+      throw new Error(`Invalid source classification code: ${String(code)}`);
     }
-  }
-  return undefined;
-}
+    if (typeof label !== "string" || label.trim() === "") {
+      throw new Error(`Classification ${code} requires a non-empty label`);
+    }
+    if (seen.has(code)) {
+      throw new Error(`Duplicate classification code: ${code}`);
+    }
+    if (parentSourceCode && !code.startsWith(parentSourceCode)) {
+      throw new Error(
+        `Classification ${code} must start with parent code ${parentSourceCode}`,
+      );
+    }
+    if (children !== undefined && !Array.isArray(children)) {
+      throw new Error(`Classification ${code} children must be a sequence`);
+    }
 
-function sortBySourceOrder(
-  a: string,
-  b: string,
-  entries: Map<string, string>
-): number {
-  // Order by position in the YAML file
-  const keys = [...entries.keys()];
-  const ai = keys.indexOf(a);
-  const bi = keys.indexOf(b);
-  if (ai !== -1 && bi !== -1) return ai - bi;
-  return a.localeCompare(b);
-}
+    seen.add(code);
+    const formattedCode = formatClassificationCode(code);
+    return {
+      code: formattedCode,
+      label: label.trim(),
+      parentCode,
+      depth,
+      children: (children ?? []).map((child) =>
+        buildNode(child, code, formattedCode, depth + 1),
+      ),
+    };
+  };
 
-// ---------------------------------------------------------------------------
-// Lazy init
-// ---------------------------------------------------------------------------
+  return sourceNodes.map((source) => buildNode(source, undefined, undefined, 1));
+}
 
 function ensureTree(): void {
-  if (_treeCache && _flatCache) return;
+  if (treeCache && flatCache) return;
 
-  const entries = loadYaml();
-  _treeCache = buildTree(entries);
+  treeCache = buildTree(readDocument().classifications);
+  flatCache = new Map();
 
-  // Build flat lookup
-  _flatCache = new Map();
-  const stack = [..._treeCache];
-  while (stack.length > 0) {
-    const node = stack.pop()!;
-    _flatCache.set(node.code, node);
-    stack.push(...node.children);
-  }
+  const visit = (nodes: ClassificationNode[]) => {
+    for (const node of nodes) {
+      flatCache!.set(node.code, node);
+      visit(node.children);
+    }
+  };
+  visit(treeCache);
 }
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
 
 export function getClassificationNodes(): ClassificationNode[] {
   ensureTree();
-  return _treeCache!;
+  return treeCache!;
 }
 
 export function getFlatClassificationMap(): Map<string, ClassificationNode> {
   ensureTree();
-  return _flatCache!;
+  return flatCache!;
 }
 
 export function getTopLevelClassifications(): ClassificationNode[] {
-  ensureTree();
-  return _treeCache!;
+  return getClassificationNodes();
 }
 
-export function getClassificationNode(
-  code: string
-): ClassificationNode | undefined {
-  ensureTree();
-  return _flatCache!.get(code);
+export function getClassificationNode(code: string): ClassificationNode | undefined {
+  return getFlatClassificationMap().get(code);
 }
 
-export function getClassificationAncestors(
-  code: string
-): ClassificationNode[] {
+export function getClassificationAncestors(code: string): ClassificationNode[] {
   const result: ClassificationNode[] = [];
   let current = getClassificationNode(code);
   while (current?.parentCode) {
@@ -178,6 +149,5 @@ export function getClassificationAncestors(
 }
 
 export function getClassificationLabel(code: string): string {
-  const node = getClassificationNode(code);
-  return node?.label ?? code;
+  return getClassificationNode(code)?.label ?? code;
 }

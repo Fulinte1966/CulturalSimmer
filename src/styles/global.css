@@ -688,6 +688,54 @@ figure {
   margin: 0;
 }
 
+/* Heti is scoped to prose containers; interface labels keep their designed metrics. */
+.heti {
+  hyphens: auto;
+  line-break: strict;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  text-autospace: no-autospace;
+  word-break: normal;
+}
+
+.heti :where(p, li, h1, h2, h3, h4, h5, h6, blockquote) {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.heti p {
+  text-align: justify;
+  text-align-last: start;
+  text-justify: auto;
+}
+
+.heti heti-spacing,
+.heti heti-adjacent {
+  display: inline;
+}
+
+.heti .heti-spacing-start {
+  margin-inline-end: 0.25em;
+}
+
+.heti .heti-spacing-end {
+  margin-inline-start: 0.25em;
+}
+
+.heti heti-adjacent {
+  text-spacing-trim: space-all;
+  unicode-bidi: isolate;
+}
+
+.heti .heti-adjacent-half {
+  margin-inline-end: -0.5em;
+}
+
+.heti .heti-adjacent-quarter {
+  margin-inline-end: -0.25em;
+}
+
 .sr-only {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
@@ -827,6 +875,8 @@ figure {
   gap: 14px;
   height: 100%;
   justify-content: center;
+  min-width: 0;
+  overflow: hidden;
   padding: 24px;
   text-align: center;
 }
@@ -837,11 +887,15 @@ figure {
   font-size: 18px;
   font-weight: 700;
   line-height: 1.4;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .placeholder-subtitle {
   font-family: var(--font-fangsong);
   font-size: 16px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .book-cover--model {

@@ -4,14 +4,9 @@ import BookCover from "../../components/BookCover.astro";
 import "../../styles/category-index.css";
 import { joinBasePath } from "../../lib/basePath";
 import { getAllBooks } from "../../lib/books";
+import { getClassificationNodes } from "../../lib/classification";
 import { getCalendarStatus } from "../../lib/uapis";
 import bookMarkUrl from "../../assets/icons/icon-index-toggle-book.svg?url";
-
-interface IndexNode {
-  code: string;
-  label: string;
-  children?: IndexNode[];
-}
 
 const [books, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
 const base = import.meta.env.BASE_URL;
@@ -19,47 +14,16 @@ const pageSize = 10;
 const displayBooks = books;
 const initialPageCount = Math.max(1, Math.ceil(displayBooks.length / pageSize));
 
-const indexTree: IndexNode = {
+const indexTree = {
   code: "",
   label: "书目索引",
-  children: [
-    {
-      code: "A",
-      label: "马克思主义、列宁主义、毛泽东主义",
-      children: [
-        {
-          code: "A1",
-          label: "马克思、恩格斯著作",
-          children: [
-            { code: "A11", label: "选集、文集、选读" },
-            { code: "A12", label: "单行著作" },
-            { code: "A13", label: "书信集、日记、函电" },
-            { code: "A15", label: "手迹" },
-            { code: "A16", label: "专题汇编" },
-            { code: "A18", label: "语录" },
-          ],
-        },
-        { code: "A2", label: "列宁著作" },
-        { code: "A3", label: "斯大林著作" },
-        { code: "A4", label: "毛泽东著作" },
-        { code: "A5", label: "马克思、恩格斯、列宁、斯大林、毛泽东著作汇编" },
-        { code: "A6", label: "马克思、恩格斯、列宁、斯大林、毛泽东的生平和传记" },
-        { code: "A7", label: "马克思主义、列宁主义、毛泽东主义的学习、研究和参考资料" },
-      ],
-    },
-    { code: "B", label: "哲学" },
-    { code: "C", label: "社会科学总论" },
-    { code: "D", label: "政治" },
-    { code: "F", label: "经济" },
-    { code: "I", label: "文学" },
-    { code: "K", label: "历史、地理" },
-  ],
+  children: getClassificationNodes(),
 };
 
 const rootRows = indexTree.children ?? [];
 ---
 
-<NewspaperLayout title="文火索引" description="文火电子书馆书目索引">
+<NewspaperLayout title="索引" description="文火电子书馆书目索引">
   <main class="figma-homepage" data-pagefind-ignore="all">
     <div class="fm-frame" aria-label="文火索引">
       <header class="fm-index-head">

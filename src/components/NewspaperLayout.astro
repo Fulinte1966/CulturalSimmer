@@ -22,6 +22,7 @@ const { title, description, searchable = false } = Astro.props;
   <body>
     <slot />
     <script>
+      import "../scripts/cjk-spacing";
       import "../scripts/prevent-drag";
     </script>
   </body>

@@ -2,6 +2,7 @@ import {
   resolveUpdateCheck,
   type UpdateCheckStatus,
 } from "../lib/updateCheck";
+import { applyCjkSpacing } from "./cjk-spacing";
 
 interface CheckBook {
   id: string;
@@ -117,7 +118,6 @@ const renderBook = (book: CheckBook) => {
     setText("[data-check-placeholder-subtitle]", book.subtitle ?? "");
   }
   cover.hidden = false;
-  document.title = `${book.title} · 检查更新 · 电子书馆`;
 };
 
 if (result.book) {
@@ -129,6 +129,9 @@ if (result.book) {
   setText("[data-check-author]", "未找到对应书目");
 }
 renderStatus(result.status);
+
+const bookInfo = document.querySelector<HTMLElement>(".check-book-info");
+if (bookInfo) applyCjkSpacing(bookInfo);
 
 const page = document.querySelector<HTMLElement>("[data-check-page]");
 page?.setAttribute("aria-busy", "false");

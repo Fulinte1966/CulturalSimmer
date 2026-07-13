@@ -93,6 +93,7 @@ html {
   line-height: 18px;
   overflow: hidden;
   position: absolute;
+  text-overflow: ellipsis;
   top: 0;
   white-space: nowrap;
   width: 760px;
@@ -361,8 +362,10 @@ html {
   font-variant-east-asian: full-width;
   font-weight: 400;
   line-height: 150%;
-  overflow-wrap: normal;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .bd-title-block {
@@ -372,7 +375,15 @@ html {
   font-feature-settings: "halt" 1, "palt" 1;
   font-variant-east-asian: proportional-width;
   gap: 6px;
+  min-width: 0;
   width: 100%;
+}
+
+.bd-title-block > *,
+.bd-author {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .bd-series {
@@ -404,12 +415,14 @@ html {
   font-size: 40px;
   font-weight: 500;
   line-height: 1;
+  text-wrap: balance;
 }
 
 .bd-author {
   font-family: var(--font-zhisong);
   font-size: 24px;
   line-height: 1;
+  text-wrap: balance;
 }
 
 .bd-meta-ornament {
@@ -426,6 +439,8 @@ html {
   flex-direction: column;
   gap: 6px;
   justify-content: center;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .bd-metrics-body {
@@ -433,16 +448,20 @@ html {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  height: 30px;
+  height: auto;
   justify-content: center;
+  min-height: 30px;
+  max-width: 100%;
 }
 
 .bd-stat-row {
   align-items: center;
   display: inline-flex;
   gap: 10px;
-  height: 12px;
-  justify-content: flex-start;
+  flex-wrap: wrap;
+  height: auto;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .bd-edition-row {
@@ -450,6 +469,7 @@ html {
   gap: 2px 10px;
   height: auto;
   justify-content: center;
+  max-width: 100%;
   min-width: 184px;
   width: max-content;
 }
@@ -496,8 +516,10 @@ html {
 .bd-actions {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
+  max-width: 100%;
 }
 
 .bd-download {
@@ -627,6 +649,8 @@ html {
   font-feature-settings: "fwid" 1;
   font-variant-east-asian: full-width;
   line-height: 1.5;
+  min-width: 0;
+  overflow-wrap: anywhere;
   text-align: left;
   width: 100%;
 }
@@ -648,16 +672,19 @@ html {
   line-height: 1.5;
   list-style: none;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 0;
   text-align: left;
-  width: max-content;
   max-width: 100%;
+  width: max-content;
 }
 
 .bd-outline {
   align-self: center;
   margin-inline: auto;
   max-width: 100%;
+  min-width: 0;
   width: max-content;
 }
 

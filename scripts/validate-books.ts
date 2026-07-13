@@ -16,27 +16,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getFlatClassificationMap } from "../src/lib/classification";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 
 const BOOK_ID_REGEX = /^[A-Z](?:\d+(?:\.\d+)?)?-\d+(?:-\d+)?$/;
 const ID_PARSE_REGEX = /^([A-Z](?:\d+(?:\.\d+)?)?)-(\d+)(?:-(\d+))?$/;
-
-// ---- Load classifications ----
-function loadClassifications(): Map<string, string> {
-  const ymlPath = path.join(rootDir, "src", "data", "classifications.yml");
-  const content = fs.readFileSync(ymlPath, "utf-8");
-  const map = new Map<string, string>();
-
-  for (const line of content.split("\n")) {
-    const match = line.match(/^([A-Z][A-Za-z0-9.]*):\s*(.+)/);
-    if (match) {
-      map.set(match[1], match[2].trim());
-    }
-  }
-  return map;
-}
 
 // ---- Load book entries from filesystem ----
 interface BookEntry {
@@ -158,7 +144,7 @@ function loadBooks(): BookEntry[] {
 
 // ---- Main validation ----
 function main() {
-  const classifications = loadClassifications();
+  const classifications = getFlatClassificationMap();
   const books = loadBooks();
 
   let errors = 0;
