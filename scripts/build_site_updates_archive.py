@@ -174,31 +174,22 @@ def _format_date(value: datetime) -> str:
 
 
 def render_site_updates_archive(entries: list[dict]) -> str:
-    lines = [
-        "# 本站更新归档",
-        "",
-        "> 本文件由仓库中的自动更新记录和人工公告生成，请勿手动编辑。",
-        "> 网站首页仅展示置顶消息和最近动态；正式电子书版本记录以书目详情页和 GitHub Releases 为准。",
-    ]
     if not entries:
-        lines.extend(["", "暂无更新记录。"])
-        return "\n".join(lines) + "\n"
+        return ""
+    blocks: list[str] = []
     for entry in entries:
-        lines.extend(
-            [
-                "",
-                (
-                    f"### `{_format_date(entry['publishedAt'])}` "
-                    f"`{_escape_markdown(entry['label'])}` "
-                    f"{_escape_markdown(entry['heading'])}"
-                ),
-                "",
-            ]
-        )
+        lines = [
+            (
+                f"### `{_format_date(entry['publishedAt'])}` "
+                f"`{_escape_markdown(entry['label'])}` "
+                f"{_escape_markdown(entry['heading'])}"
+            )
+        ]
         if entry["content"]:
-            lines.extend([entry["content"], ""])
-        lines.append(f"<!-- update-id: {entry['id']} -->")
-    return "\n".join(lines) + "\n"
+            lines.extend(["", entry["content"]])
+        lines.extend(["", f"<!-- update-id: {entry['id']} -->"])
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks) + "\n"
 
 
 def build_site_updates_archive(

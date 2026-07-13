@@ -71,7 +71,9 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             output = build_site_updates_archive(root)
             markdown = output.read_text(encoding="utf-8")
 
-            self.assertTrue(markdown.startswith("# 本站更新归档\n"))
+            self.assertTrue(markdown.startswith("### `2026-8-4` `维护` 维护完成\n"))
+            self.assertNotIn("# 本站更新归档", markdown)
+            self.assertNotIn("请勿手动编辑", markdown)
             self.assertLess(markdown.index("维护完成"), markdown.index("F0-9_v2"))
             self.assertLess(markdown.index("F0-9_v2"), markdown.index("F0-9_v1"))
             self.assertIn("### `2026-8-4` `维护` 维护完成", markdown)
