@@ -83,6 +83,18 @@ summary:
 
 网站不提供完整更新正文页。`/updates/` 只为已经发布的旧链接保留静态跳转，并指向 GitHub 默认分支中的 Markdown 归档。公开 feed 为兼容现有消费者继续保留字段名 `updatesPageUrl`，其值同样指向该归档，不代表站内页面。
 
+归档中的每条记录采用统一格式，日期按北京时间输出且不补零：
+
+```markdown
+### `YYYY-M-D` `标签` ReleaseTag 或公告标题
+
+正文
+
+<!-- update-id: 稳定事件 ID -->
+```
+
+自动消息的标签固定为 `新书` 或 `更新`，标题使用对应的 Release tag；正文分别为“《书名》已上架。”或“《书名》已更新第 n 版。”。人工公告使用源文件中的 `label`、`title` 和 Markdown 正文；正文为空时使用 `summary` 作为回退内容。
+
 自动消息映射为 `new_book` 和 `book_version`，人工消息映射为 `site_announcement` 或 `important_erratum`。稳定 ID 格式为：
 
 ```text
@@ -145,7 +157,7 @@ npm run updates:pins
 
 人工全文在 Astro 构建期通过 `render()` 转为静态 HTML，并且只嵌入首页当前可见消息对应的正文。打开全文会保存列表滚动位置和触发按钮；`〔返回〕` 或 `Escape` 恢复列表、滚动位置和焦点。全文区域使用浏览器原生滚动，支持鼠标滚轮、触控板、触屏和键盘，滚动不会改变主页布局。
 
-本站消息区域已排除 Pagefind，不提供独立正文归档页、搜索、RSS、邮件订阅或后台管理界面。完整事件记录由 `scripts/build_site_updates_archive.py` 从结构化数据确定性生成；Markdown 只是可读镜像，不能反向作为事实来源，也不能替代独立备份。人工公告正文仍保存在 `src/content/announcements/*.md`，归档只汇总标题、摘要和关联信息，避免复制两份可编辑正文。
+本站消息区域已排除 Pagefind，不提供独立正文归档页、搜索、RSS、邮件订阅或后台管理界面。完整事件记录由 `scripts/build_site_updates_archive.py` 从结构化数据确定性生成；Markdown 只是自动生成的可读镜像，不能反向作为事实来源，也不能替代独立备份。人工公告的可编辑正文仍以 `src/content/announcements/*.md` 为准。
 
 归档文件不记录构建时间，避免每日天气部署产生无意义修改。新增电子书事件和使用管理命令创建公告时会立即重建归档；直接编辑公告后运行：
 

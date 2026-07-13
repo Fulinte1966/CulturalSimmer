@@ -123,7 +123,8 @@ class IngestPdfTests(unittest.TestCase):
                 ],
             )
             archive = (root / "docs/site-updates-archive.md").read_text("utf-8")
-            self.assertIn("F0-9　《标题》", archive)
+            self.assertIn("`更新` F0-9_v2", archive)
+            self.assertIn("《标题》已更新第 2 版。", archive)
             self.assertIn("<!-- update-id: book-version-F0-9-v2 -->", archive)
 
     def test_generated_site_update_append_is_atomic_and_idempotent(self) -> None:
