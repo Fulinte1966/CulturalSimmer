@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "bookId": "F0-1-1",
+  "normalizationProfile": "culturalsimmer-content-v3",
+  "fromEdition": {
+    "edition": 1,
+    "editionDate": "2026-07"
+  },
+  "toEdition": {
+    "edition": 2,
+    "editionDate": "2026-07"
+  },
+  "summary": {
+    "total": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0
+  },
+  "comparison": {
+    "algorithm": "SequenceMatcher coarse-refine bounded",
+    "elapsedSeconds": 11.218,
+    "oldTokenCount": 118448,
+    "newTokenCount": 118448
+  },
+  "changes": []
+}
