@@ -19,8 +19,20 @@ const syncCoverStagePosition = () => {
   const coverStage = document.querySelector<HTMLElement>(".bd-cover-stage");
   if (!frame || !coverStage) return;
 
+  const compactLayout = window.matchMedia(
+    "(max-width: 899px), (min-width: 900px) and (max-width: 1199px) and (orientation: portrait)",
+  );
+  if (compactLayout.matches) {
+    coverStage.style.removeProperty("left");
+    return;
+  }
+
   const frameRect = frame.getBoundingClientRect();
-  coverStage.style.left = `${frameRect.left + 72}px`;
+  const tabletLayout = window.matchMedia(
+    "(min-width: 900px) and (max-width: 1199px) and (orientation: landscape)",
+  );
+  const frameOffset = tabletLayout.matches ? 12 : 72;
+  coverStage.style.left = `${frameRect.left + frameOffset}px`;
 };
 
 let coverStageFrame = 0;

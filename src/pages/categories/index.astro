@@ -261,6 +261,28 @@ const rootRows = indexTree.children ?? [];
     }
   }
 
+  let rowAlignmentFrame = 0;
+
+  function updateRowAlignment() {
+    rowAlignmentFrame = 0;
+    document.querySelectorAll(".fm-call-row").forEach((row) => {
+      const label = row.querySelector(".fm-call-label");
+      if (!label) return;
+
+      const style = getComputedStyle(label);
+      const contentHeight = label.scrollHeight
+        - parseFloat(style.paddingTop)
+        - parseFloat(style.paddingBottom);
+      const lineHeight = parseFloat(style.lineHeight);
+      row.toggleAttribute("data-multiline", contentHeight > lineHeight * 1.5);
+    });
+  }
+
+  function scheduleRowAlignment() {
+    if (rowAlignmentFrame) cancelAnimationFrame(rowAlignmentFrame);
+    rowAlignmentFrame = requestAnimationFrame(updateRowAlignment);
+  }
+
   function updateMode() {
     const system = document.querySelector(".fm-index-system");
     const toggle = document.querySelector(".fm-index-toggle");
@@ -334,6 +356,7 @@ const rootRows = indexTree.children ?? [];
     renderRows();
     updateMode();
     updateBooks();
+    scheduleRowAlignment();
   }
 
   walk(root, null);
@@ -378,4 +401,10 @@ const rootRows = indexTree.children ?? [];
   });
 
   render();
+
+  const callTree = document.querySelector(".fm-call-tree");
+  if (callTree && "ResizeObserver" in window) {
+    new ResizeObserver(scheduleRowAlignment).observe(callTree);
+  }
+  document.fonts?.ready.then(scheduleRowAlignment);
 </script>

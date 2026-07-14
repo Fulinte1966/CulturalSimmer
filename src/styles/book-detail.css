@@ -128,16 +128,20 @@ html {
 }
 
 .bd-proof {
+  --bd-proof-frame-height: 72.25px;
+  --bd-proof-frame-width: 53.25px;
+  --bd-proof-frame-x: 2.625px;
+  --bd-proof-frame-y: 2.625px;
   background: transparent;
   border: 0;
   color: var(--bd-ink);
   cursor: pointer;
-  height: 67px;
+  height: var(--bd-proof-frame-height);
   padding: 0;
   position: absolute;
-  right: 12px;
-  top: 40px;
-  width: 48px;
+  right: calc(12px - var(--bd-proof-frame-x));
+  top: calc(40px - var(--bd-proof-frame-y));
+  width: var(--bd-proof-frame-width);
 }
 
 .bd-proof:focus-visible {
@@ -147,18 +151,18 @@ html {
 
 .bd-proof-mark {
   display: block;
-  height: 67px;
+  height: 100%;
   object-fit: contain;
-  width: 48px;
+  width: 100%;
 }
 
 .bd-proof-text {
   height: 24px;
-  left: 13px;
+  left: calc(13px + var(--bd-proof-frame-x));
   overflow: visible;
   pointer-events: none;
   position: absolute;
-  top: 12px;
+  top: calc(12px + var(--bd-proof-frame-y));
   width: 26px;
 }
 
@@ -704,4 +708,200 @@ html {
 
 .bd-frame [data-pagefind-meta] {
   scroll-margin-top: 24px;
+}
+
+@media (min-width: 900px) and (max-width: 1199px) and (orientation: landscape) {
+  .book-detail-page {
+    --bd-frame: calc(100vw - 104px);
+    padding-inline: 52px;
+    width: 100%;
+  }
+
+  .bd-grid {
+    left: 52px;
+  }
+
+  .bd-head::before {
+    inset-inline: -52px;
+  }
+
+  .bd-breadcrumb {
+    width: min(620px, calc(100% - 240px));
+  }
+
+  .bd-main {
+    gap: 36px;
+  }
+
+  .bd-main::before {
+    flex-basis: 272px;
+    width: 272px;
+  }
+
+  .bd-cover-stage {
+    left: max(calc(50vw - 448px), 64px);
+    width: 272px;
+  }
+
+  .bd-cover-stage .book-cover--model {
+    --model-scale: 0.9;
+    --model-width: 272px;
+  }
+
+  .bd-text {
+    width: min(588px, calc(var(--bd-frame) - 308px));
+  }
+
+  .bd-title-block h1 {
+    max-width: 100%;
+  }
+
+  .bd-rule {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 899px),
+  (min-width: 900px) and (max-width: 1199px) and (orientation: portrait) {
+  .book-detail-page {
+    --bd-frame: 100%;
+    overflow: hidden;
+    padding: 18px 20px 40px;
+    width: 100%;
+  }
+
+  .bd-grid {
+    height: calc(100% - 36px);
+    left: 20px;
+    top: 18px;
+    width: calc(100% - 40px);
+  }
+
+  .bd-frame {
+    gap: 0;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .bd-head {
+    max-width: none;
+    top: 18px;
+    width: calc(100% - 40px);
+  }
+
+  .bd-head::before {
+    inset: -18px -20px 0;
+  }
+
+  .bd-breadcrumb {
+    max-width: calc(100% - 72px);
+    width: auto;
+  }
+
+  .bd-date-line {
+    width: auto;
+  }
+
+  .bd-date-line time,
+  .bd-date-line span {
+    display: none;
+  }
+
+  .bd-proof {
+    right: calc(0px - var(--bd-proof-frame-x));
+    top: calc(48px - var(--bd-proof-frame-y));
+  }
+
+  .bd-main {
+    align-items: center;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 76px;
+    width: 100%;
+  }
+
+  .bd-main::before {
+    display: none;
+  }
+
+  .bd-cover-stage {
+    height: 420px;
+    left: auto;
+    position: relative;
+    top: auto;
+    width: 100%;
+  }
+
+  .bd-cover-stage .book-cover--model {
+    --model-scale: 0.72;
+  }
+
+  .bd-text,
+  .bd-text-content,
+  .bd-info {
+    width: 100%;
+  }
+
+  .bd-title-block h1,
+  .bd-title-block h1.bd-title--long {
+    font-size: clamp(42px, 12.3vw, 48px);
+    line-height: 1.08;
+    max-width: 100%;
+  }
+
+  .bd-series {
+    font-size: 28px;
+  }
+
+  .bd-subtitle {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .bd-author {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .bd-rule,
+  .bd-intro,
+  .bd-abstract,
+  .bd-outline,
+  .bd-errata-panel,
+  .bd-errata-form {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .bd-abstract .bd-body {
+    width: 35em;
+  }
+
+  .bd-outline-list {
+    max-width: 100%;
+    width: auto;
+  }
+
+  .bd-errata-content {
+    transform: none;
+  }
+
+  .bd-main:has(.bd-text--errata) {
+    justify-content: center;
+    margin-top: 0;
+    min-height: calc(100svh - 36px);
+  }
+
+  .bd-main:has(.bd-text--errata) .bd-cover-stage {
+    display: none;
+  }
+
+  .bd-text--errata,
+  .bd-text--errata .bd-errata-panel {
+    min-height: calc(100svh - 36px);
+  }
+
+  .bd-errata-form {
+    flex-basis: auto;
+  }
 }

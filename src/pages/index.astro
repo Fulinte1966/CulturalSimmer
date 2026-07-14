@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BookCover from "../components/BookCover.astro";
 import NewspaperLayout from "../components/NewspaperLayout.astro";
 import SiteUpdates from "../components/SiteUpdates.astro";
+import { frontPageQuote } from "../data/front-page-quote";
 import generatedUpdates from "../data/generated-updates.json";
 import siteUpdatePins from "../data/site-update-pins.json";
 import "../styles/home.css";
@@ -53,11 +54,44 @@ const siteUpdates = buildSiteUpdates(
 );
 const siteUpdateGroups = splitSiteUpdates(siteUpdates, siteUpdatePins);
 
-const quoteLines =
-  siteConfig.frontPageSlogan?.length > 0
-    ? siteConfig.frontPageSlogan
-    : ["你们要关心国家大事", "要把无产阶级文化大革命", "进行到底！"];
-const quoteLabelChars = Array.from("毛主席语录");
+const quoteLabelChars = Array.from(frontPageQuote.label);
+const quoteStyle = [
+  `--fm-quote-compact-max-width:${frontPageQuote.compactMaxWidthPx}px`,
+  `--fm-quote-max-width:${frontPageQuote.maxWidthPx}px`,
+  `--fm-quote-text-align:${frontPageQuote.textAlign}`,
+  `--fm-quote-regular-font-family:${frontPageQuote.typography.regular.fontFamily}`,
+  `--fm-quote-regular-font-size:${frontPageQuote.typography.regular.fontSizePx}px`,
+  `--fm-quote-regular-font-weight:${frontPageQuote.typography.regular.fontWeight}`,
+  `--fm-quote-regular-letter-spacing:${frontPageQuote.typography.regular.letterSpacingPx}px`,
+  `--fm-quote-regular-line-height:${frontPageQuote.typography.regular.lineHeightPx}px`,
+  `--fm-quote-regular-padding-block:${frontPageQuote.typography.regular.paddingBlockPx}px`,
+  `--fm-quote-regular-padding-inline:${frontPageQuote.typography.regular.paddingInlinePx}px`,
+  `--fm-quote-compact-font-family:${frontPageQuote.typography.compact.fontFamily}`,
+  `--fm-quote-compact-font-size:${frontPageQuote.typography.compact.fontSizePx}px`,
+  `--fm-quote-compact-font-weight:${frontPageQuote.typography.compact.fontWeight}`,
+  `--fm-quote-compact-letter-spacing:${frontPageQuote.typography.compact.letterSpacingPx}px`,
+  `--fm-quote-compact-line-height:${frontPageQuote.typography.compact.lineHeightPx}px`,
+  `--fm-quote-compact-padding-block:${frontPageQuote.typography.compact.paddingBlockPx}px`,
+  `--fm-quote-compact-padding-inline:${frontPageQuote.typography.compact.paddingInlinePx}px`,
+  `--fm-quote-regular-label-font-family:${frontPageQuote.labelTypography.regular.fontFamily}`,
+  `--fm-quote-regular-label-font-weight:${frontPageQuote.labelTypography.regular.fontWeight}`,
+  `--fm-quote-regular-label-max-font-size:${frontPageQuote.labelTypography.regular.maxFontSizePx}px`,
+  `--fm-quote-regular-label-max-height:${frontPageQuote.labelTypography.regular.maxBlockHeightPx}px`,
+  `--fm-quote-regular-label-width:${frontPageQuote.labelTypography.regular.widthPx}px`,
+  `--fm-quote-regular-label-gap:${frontPageQuote.labelTypography.regular.gapPx}px`,
+  `--fm-quote-regular-label-reserved:${frontPageQuote.labelTypography.regular.gapPx * 4}px`,
+  `--fm-quote-regular-label-inset:${frontPageQuote.labelTypography.regular.insetBlockPx}px`,
+  `--fm-quote-regular-label-offset-x:${frontPageQuote.labelTypography.regular.opticalOffsetXEm}em`,
+  `--fm-quote-compact-label-font-family:${frontPageQuote.labelTypography.compact.fontFamily}`,
+  `--fm-quote-compact-label-font-weight:${frontPageQuote.labelTypography.compact.fontWeight}`,
+  `--fm-quote-compact-label-max-font-size:${frontPageQuote.labelTypography.compact.maxFontSizePx}px`,
+  `--fm-quote-compact-label-max-height:${frontPageQuote.labelTypography.compact.maxBlockHeightPx}px`,
+  `--fm-quote-compact-label-width:${frontPageQuote.labelTypography.compact.widthPx}px`,
+  `--fm-quote-compact-label-gap:${frontPageQuote.labelTypography.compact.gapPx}px`,
+  `--fm-quote-compact-label-reserved:${frontPageQuote.labelTypography.compact.gapPx * 4}px`,
+  `--fm-quote-compact-label-inset:${frontPageQuote.labelTypography.compact.insetBlockPx}px`,
+  `--fm-quote-compact-label-offset-x:${frontPageQuote.labelTypography.compact.opticalOffsetXEm}em`,
+].join(";");
 
 const weatherDayParts = (date?: string) => {
   if (!date) return { number: "--", unit: "日" };
@@ -116,86 +150,98 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
           </div>
         </section>
 
-        <section class="fm-quote" aria-label="本期口号">
-          <div class="fm-quote-label">
-            {quoteLabelChars.map((char) => <span>{char}</span>)}
-          </div>
-          <div class="fm-quote-copy">
-            <p>
-              {quoteLines.map((line, index) => (
-                <>
-                  <span>{index === 0 ? `　　${line}` : line}</span>
-                  {index < quoteLines.length - 1 && <br />}
-                </>
+        <div class="fm-quote-frame">
+          <section class="fm-quote" aria-label="本期口号" style={quoteStyle}>
+            <div class="fm-quote-label">
+              {quoteLabelChars.map((char) => (
+                <span class="fm-quote-label-block"><span class="fm-quote-label-glyph">{char}</span></span>
               ))}
-            </p>
-          </div>
-        </section>
+            </div>
+            <div class="fm-quote-copy heti">
+              <p>
+                {frontPageQuote.lines.map((line) => (
+                  <span class="fm-quote-line">
+                    <span>{line.text}</span>
+                    {line.hangingPunctuation && (
+                      <span class="fm-quote-hanging-punctuation">{line.hangingPunctuation}</span>
+                    )}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </section>
+        </div>
       </header>
 
       <div class="fm-thick-divider" aria-hidden="true"></div>
 
       <section class="fm-newsletter" aria-label="新书速递">
-        <div class="fm-section-label" aria-hidden="true">
-          <span>新书速递</span>
-        </div>
+        <div class="fm-newsletter-viewport" tabindex="0" aria-label="横向浏览新书速递">
+          <div class="fm-newsletter-track">
+            <div class="fm-section-label" aria-hidden="true">
+              <span>新书速递</span>
+            </div>
 
-        {leadBook && bookHref && (
-        <div class="fm-detail">
-          {leadBook.coverUrl && (
-            <a class="fm-feature-cover" href={bookHref} aria-label={`查看《${leadBook.title}》`}>
-              <img src={leadBook.coverUrl} alt={`《${leadBook.title}》封面`} />
-            </a>
-          )}
+            {leadBook && bookHref && (
+            <div class="fm-detail">
+              {leadBook.coverUrl && (
+                <a class="fm-feature-cover" href={bookHref} aria-label={`查看《${leadBook.title}》`}>
+                  <img src={leadBook.coverUrl} alt={`《${leadBook.title}》封面`} />
+                </a>
+              )}
 
-          <div class="fm-vertical-rule" aria-hidden="true">
-            <span>＊</span>
-            <i></i>
-            <span>＊</span>
+              <div class="fm-vertical-rule" aria-hidden="true">
+                <span>＊</span>
+                <i></i>
+                <span>＊</span>
+              </div>
+
+              <article class="fm-intro">
+                <div class="fm-intro-head">
+                  {leadBook.series && <p class="fm-series">{leadBook.series}</p>}
+                  <h1 id="fm-lead-title">{leadBook.title}</h1>
+                  {leadBook.subtitle && <p class="fm-subtitle">{leadBook.subtitle}</p>}
+                </div>
+                <div class="fm-intro-body heti">
+                  {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+                </div>
+              </article>
+            </div>
+            )}
           </div>
-
-          <article class="fm-intro">
-            <div class="fm-intro-head">
-              {leadBook.series && <p class="fm-series">{leadBook.series}</p>}
-              <h1 id="fm-lead-title">{leadBook.title}</h1>
-              {leadBook.subtitle && <p class="fm-subtitle">{leadBook.subtitle}</p>}
-            </div>
-            <div class="fm-intro-body heti">
-              {summaryParagraphs.map((paragraph) => <p>{paragraph}</p>)}
-            </div>
-          </article>
-
-          <SiteUpdates
-            pinnedItems={siteUpdateGroups.pinnedItems}
-            recentItems={siteUpdateGroups.recentItems}
-            showDivider={siteUpdateGroups.showDivider}
-            announcements={announcements}
-          />
         </div>
-        )}
+
+        <SiteUpdates
+          pinnedItems={siteUpdateGroups.pinnedItems}
+          recentItems={siteUpdateGroups.recentItems}
+          showDivider={siteUpdateGroups.showDivider}
+          announcements={announcements}
+        />
       </section>
 
       <div class="fm-midline" aria-hidden="true"></div>
 
       <section class="fm-book-shelf" aria-labelledby="fm-shelf-title">
-        <div class="fm-shelf-panel">
-          <span class="fm-shelf-badge">上架书目</span>
-          <a class="fm-shelf-button" id="fm-shelf-title" href={joinBasePath(base, "categories/")} aria-label="进入索引">
-            <i aria-hidden="true">⁝</i>
-            <span class="fm-shelf-button-text">索引</span>
-            <i aria-hidden="true">⁝</i>
-          </a>
-        </div>
-        <div class="fm-book-list-frame">
-        <ol class="fm-book-list" aria-label="上架书目">
-          {shelfBooks.map((book) => (
-            <li>
-              <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                <BookCover book={book} mode="flat" />
-              </a>
-            </li>
-          ))}
-        </ol>
+        <div class="fm-book-shelf-track">
+          <div class="fm-shelf-panel">
+            <span class="fm-shelf-badge">上架书目</span>
+            <a class="fm-shelf-button" id="fm-shelf-title" href={joinBasePath(base, "categories/")} aria-label="进入索引">
+              <i aria-hidden="true">⁝</i>
+              <span class="fm-shelf-button-text">索引</span>
+              <i aria-hidden="true">⁝</i>
+            </a>
+          </div>
+          <div class="fm-book-list-frame">
+            <ol class="fm-book-list" aria-label="上架书目">
+              {shelfBooks.map((book) => (
+                <li>
+                  <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
+                    <BookCover book={book} mode="flat" />
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
@@ -203,10 +249,14 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
 
       <footer class="fm-contact">
         <div class="fm-address">
-          <span>本报地址：国内　霹雳放映站・</span>
-          <a href="https://space.bilibili.com/3494350898072545" target="_blank" rel="noreferrer">走火放映室</a>
-          <span class="fm-address-overseas">国外　优博放映站・</span>
-          <a href="https://www.youtube.com/@Fulinte1966" target="_blank" rel="noreferrer">弗林特放映室</a>
+          <span class="fm-address-line fm-address-domestic">
+            <span>本报地址：国内 霹雳放映站・</span>
+            <a href="https://space.bilibili.com/3494350898072545" target="_blank" rel="noreferrer">走火放映室</a>
+          </span>
+          <span class="fm-address-line fm-address-overseas">
+            <span>国外 优博放映站・</span>
+            <a href="https://www.youtube.com/@Fulinte1966" target="_blank" rel="noreferrer">弗林特放映室</a>
+          </span>
         </div>
         <span class="fm-footer-rule" aria-hidden="true"></span>
         <div class="fm-weather" data-weather-city={siteConfig.weatherCity}>
