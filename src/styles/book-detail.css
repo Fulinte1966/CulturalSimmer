@@ -646,6 +646,11 @@ html {
   width: 100%;
 }
 
+.bd-abstract .bd-body {
+  max-width: 100%;
+  width: 35em;
+}
+
 .bd-body p {
   margin: 0;
   text-indent: 24px;
