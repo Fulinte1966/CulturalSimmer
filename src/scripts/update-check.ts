@@ -139,11 +139,18 @@ page?.setAttribute("aria-busy", "false");
 const syncCoverStagePosition = () => {
   const frame = document.querySelector<HTMLElement>(".bd-frame");
   const coverStage = document.querySelector<HTMLElement>(".bd-cover-stage");
-  if (!frame || !coverStage || window.matchMedia("(max-width: 900px)").matches) {
+  const compactLayout = window.matchMedia(
+    "(max-width: 899px), (min-width: 900px) and (max-width: 1199px) and (orientation: portrait)",
+  );
+  if (!frame || !coverStage || compactLayout.matches) {
     coverStage?.style.removeProperty("left");
     return;
   }
-  coverStage.style.left = `${frame.getBoundingClientRect().left + 72}px`;
+  const tabletLayout = window.matchMedia(
+    "(min-width: 900px) and (max-width: 1199px) and (orientation: landscape)",
+  );
+  const frameOffset = tabletLayout.matches ? 12 : 72;
+  coverStage.style.left = `${frame.getBoundingClientRect().left + frameOffset}px`;
 };
 
 let positionFrame = 0;

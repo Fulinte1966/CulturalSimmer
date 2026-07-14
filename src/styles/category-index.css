@@ -324,6 +324,19 @@ html {
   color: var(--fm-faint);
 }
 
+.fm-call-row[data-multiline] .fm-call-code,
+.fm-call-row[data-multiline] .fm-call-label {
+  align-self: start;
+}
+
+.fm-call-row[data-multiline][data-level="0"] .fm-call-code {
+  padding-top: 12px;
+}
+
+.fm-call-row[data-multiline][data-level="1"] .fm-call-code {
+  padding-top: 11px;
+}
+
 .fm-call-row[data-level="1"] .fm-code-tail,
 .fm-call-row[data-level="2"] .fm-code-tail {
   color: #000;
@@ -367,6 +380,7 @@ html {
 
 .fm-book-results {
   align-items: center;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -374,21 +388,26 @@ html {
 }
 
 .fm-book-grid {
+  --fm-book-column-gap: clamp(6px, 4cqi, 36px);
+  --fm-book-columns: 2;
   display: grid;
-  gap: 36px;
-  grid-template-columns: repeat(5, 168px);
+  column-gap: var(--fm-book-column-gap);
+  grid-template-columns: repeat(var(--fm-book-columns), minmax(0, 168px));
+  justify-content: center;
   list-style: none;
   margin: 0;
   padding: 0;
-  width: 984px;
+  row-gap: 24px;
+  width: 100%;
 }
 
 .fm-book-grid li,
 .fm-book-grid a,
 .fm-book-grid .book-cover,
 .fm-book-grid img {
-  height: 238px;
-  width: 168px;
+  aspect-ratio: 84 / 119;
+  height: auto;
+  width: 100%;
 }
 
 .fm-book-grid a {
@@ -406,6 +425,18 @@ html {
 .fm-book-grid img {
   display: block;
   object-fit: cover;
+}
+
+@container (min-width: 550px) {
+  .fm-book-grid {
+    --fm-book-columns: 3;
+  }
+}
+
+@container (min-width: 768px) {
+  .fm-book-grid {
+    --fm-book-columns: 4;
+  }
 }
 
 .fm-pagination {
@@ -448,4 +479,84 @@ html {
 .fm-pagination button:disabled:hover,
 .fm-pagination button:disabled:focus-visible {
   color: rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 900px) and (max-width: 1199px) and (orientation: landscape) {
+  .figma-homepage {
+    padding-inline: 52px;
+    width: 100%;
+  }
+
+  .fm-frame,
+  .fm-index-head,
+  .fm-index-system,
+  .fm-book-results {
+    width: 100%;
+  }
+
+  .fm-index-system,
+  .fm-index-system[data-depth="root"],
+  .fm-index-system[data-depth="branch"],
+  .fm-index-system[data-mode="keyword"] {
+    gap: 12px;
+  }
+
+}
+
+@media (max-width: 899px),
+  (min-width: 900px) and (max-width: 1199px) and (orientation: portrait) {
+  .figma-homepage {
+    overflow: hidden;
+    padding: 18px 20px 40px;
+    width: 100%;
+  }
+
+  .fm-frame,
+  .fm-index-head,
+  .fm-index-system,
+  .fm-book-results {
+    width: 100%;
+  }
+
+  .fm-index-breadcrumb {
+    max-width: calc(100% - 72px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fm-index-date {
+    display: none;
+  }
+
+  .fm-index-system,
+  .fm-index-system[data-depth="root"],
+  .fm-index-system[data-depth="branch"],
+  .fm-index-system[data-mode="keyword"] {
+    align-items: center;
+    flex-direction: column;
+    /* The rule's ink begins 4px into its 12px tile. */
+    gap: 8px;
+  }
+
+  .fm-index-toggle {
+    flex: 0 0 62.5862px;
+  }
+
+  .fm-index-panel {
+    flex: none;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .fm-call-tree {
+    column-gap: 16px;
+    padding-left: 0;
+    width: 100%;
+  }
+
+  .fm-keyword-line {
+    padding-left: 0;
+  }
+
 }

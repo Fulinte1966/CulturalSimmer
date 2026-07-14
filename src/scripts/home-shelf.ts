@@ -1,4 +1,9 @@
 for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame")) {
+  const compactLayout = window.matchMedia(
+    "(max-width: 899px), (min-width: 900px) and (max-width: 1199px) and (orientation: portrait)",
+  );
+  if (compactLayout.matches) continue;
+
   let isDragging = false;
   let didDrag = false;
   let frame = 0;

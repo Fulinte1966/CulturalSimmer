@@ -153,7 +153,8 @@
   color: var(--bd-accent);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899px),
+  (min-width: 900px) and (max-width: 1199px) and (orientation: portrait) {
   .check-page {
     padding: 18px 20px 40px;
     width: 100%;
