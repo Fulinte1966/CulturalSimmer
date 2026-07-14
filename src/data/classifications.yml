@@ -114,13 +114,13 @@ classifications:
           - code: I209
             label: 文学史、文学思想史
           - code: I2104
-            label: 鲁迅著作·杂文、散文
+            label: 鲁迅著作・杂文、散文
           - code: I22
             label: 诗歌、韵文
           - code: I242
-            label: 小说·古代作品
+            label: 小说・古代作品
           - code: I262
-            label: 散文、杂著·古代作品
+            label: 散文、杂著・古代作品
           - code: I28
             label: 儿童文学、儿童读物
 
@@ -140,9 +140,9 @@ classifications:
           - code: J61
             label: 音乐技术理论与方法
           - code: J642
-            label: 中国音乐作品·歌曲
+            label: 中国音乐作品・歌曲
           - code: J643
-            label: 中国音乐作品·戏剧音乐、配乐音乐
+            label: 中国音乐作品・戏剧音乐、配乐音乐
 
   - code: K
     label: 历史、地理
@@ -153,19 +153,18 @@ classifications:
         label: 中国史
         children:
           - code: K207
-            label: 通史·研究、考订、评论
+            label: 通史・研究、考订、评论
           - code: K209
-            label: 通史·普及读物
+            label: 通史・普及读物
           - code: K25
             label: 半殖民地、半封建社会（1840-1949年）
       - code: K9
         label: 地理
         children:
           - code: K926
-            label: 中国地理·中南地区
-            children:
-              - code: K9263
-                label: 湖北省
+            label: 中国地理・中南地区
+          - code: K9263
+            label: 湖北省
 
   - code: T
     label: 课程教材
@@ -177,7 +176,7 @@ classifications:
         label: 百科全书、类书
         children:
           - code: Z228
-            label: 中国百科全书、类书·综合性普及读物
+            label: 中国百科全书、类书・综合性普及读物
       - code: Z3
         label: 辞典
       - code: Z6

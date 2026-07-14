@@ -24,7 +24,8 @@ test("stores only the local label at each classification level", () => {
     children: [],
   });
   assert.equal(getClassificationNode("K926.3")?.label, "湖北省");
-  assert.equal(getClassificationNode("K926.3")?.parentCode, "K926");
+  assert.equal(getClassificationNode("K926.3")?.parentCode, "K9");
+  assert.equal(getClassificationNode("K926.3")?.depth, 3);
 });
 
 test("adds call-number separators without storing them in YAML codes", () => {
