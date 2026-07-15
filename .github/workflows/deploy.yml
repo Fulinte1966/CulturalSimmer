@@ -19,6 +19,10 @@ concurrency:
 
 jobs:
   build:
+    environment:
+      name: netlify-mirror
+    env:
+      PUBLIC_ASSET_BASE_URL: ${{ vars.PUBLIC_ASSET_BASE_URL }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -42,13 +46,54 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: site-dist
+          path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy-netlify:
+    environment:
+      name: netlify-mirror
+      url: ${{ vars.PUBLIC_ASSET_BASE_URL }}/CulturalSimmer/
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v6
+        with:
+          name: site-dist
+          path: site-dist
+      - name: Prepare Netlify mirror
+        run: |
+          mkdir -p netlify-dist/CulturalSimmer
+          cp -R site-dist/. netlify-dist/CulturalSimmer/
+      - name: Deploy Netlify mirror
+        run: >-
+          npm exec netlify -- deploy
+          --prod
+          --no-build
+          --dir=netlify-dist
+          --site="${NETLIFY_SITE_ID}"
+          --message="GitHub Actions ${GITHUB_SHA}"
 
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - build
+      - deploy-netlify
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5

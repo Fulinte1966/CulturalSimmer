@@ -4,7 +4,7 @@ Guidance for Codex and other coding agents working in this repository.
 
 ## Project
 
-CulturalSimmer is an Astro static PDF ebook library. GitHub Pages hosts the site, GitHub Releases host PDF files, and GitHub Actions ingests PDFs into generated book data and public cover assets.
+CulturalSimmer is an Astro static PDF ebook library. GitHub Pages hosts the canonical site, Netlify mirrors the static build and serves accelerated public assets, GitHub Releases host PDF files, and GitHub Actions ingests PDFs into generated book data and public cover assets.
 
 ## Commands
 
@@ -57,7 +57,7 @@ Runtime site code lives in `src/`:
 
 Automation and tooling:
 
-- `.github/workflows/deploy.yml`: tests, validates, builds, and deploys GitHub Pages.
+- `.github/workflows/deploy.yml`: tests, validates, builds once, deploys the Netlify mirror, then deploys GitHub Pages.
 - `.github/workflows/ingest-pdf.yml`: release-triggered PDF ingestion.
 - `.github/workflows/sync-release-changelog.yml`: manual validation, statistics recalculation, and Release changelog synchronization.
 - `scripts/ebook_upload.py`: local preflight and temporary release creation.
@@ -95,7 +95,7 @@ Runtime decorative assets live under `public/assets/`:
 
 Use lowercase kebab-case for project-authored assets and prefer role-first names. See `docs/asset-conventions.md`.
 
-For public URLs in Astro components and pages, use `joinBasePath(import.meta.env.BASE_URL, "...")`. Reference `public/` assets in CSS from root paths such as `/assets/...` and `/fonts/...`; Vite rewrites them using the configured base path during production builds.
+For public URLs in Astro components and pages, use `joinBasePath(import.meta.env.BASE_URL, "...")`. Reference `public/` assets in CSS from root paths such as `/assets/...` and `/fonts/...`; Vite rewrites them using the configured base path during production builds. Use `resolvePublicAsset` only for the configured Netlify font and cover delivery path, and always preserve the GitHub Pages fallback.
 
 ## Repository Hygiene
 

@@ -5,6 +5,7 @@ import type { ParsedBookId } from "./bookId";
 import { getPdfFilename, getReleaseTag, parseBookId } from "./bookId";
 import { siteConfig } from "./site";
 import { getClassificationLabel } from "./classification";
+import { resolvePublicAsset } from "./publicAssets";
 
 const rootDir = process.cwd();
 
@@ -46,6 +47,7 @@ export interface BookMeta {
   tags: string[];
   cover?: string;
   coverUrl?: string;
+  coverFallbackUrl?: string;
   spineUrl?: string;
   coverKind: CoverKind;
   totalVolumes?: number;
@@ -77,14 +79,34 @@ function withBasePath(value: string): string {
   return `${base}/${normalized}`;
 }
 
+function resolveCoverAsset(localUrl: string): {
+  coverUrl: string;
+  coverFallbackUrl?: string;
+} {
+  const resolved = resolvePublicAsset(
+    localUrl,
+    import.meta.env.PUBLIC_ASSET_BASE_URL,
+  );
+  return {
+    coverUrl: resolved.primaryUrl,
+    coverFallbackUrl: resolved.fallbackUrl,
+  };
+}
+
 function resolveCover(
   id: string,
   edition: number,
   explicitCover?: string
-): { coverUrl?: string; spineUrl?: string; coverKind: CoverKind } {
+): {
+  coverUrl?: string;
+  coverFallbackUrl?: string;
+  spineUrl?: string;
+  coverKind: CoverKind;
+} {
   if (explicitCover) {
+    const localUrl = withBasePath(explicitCover);
     return {
-      coverUrl: withBasePath(explicitCover),
+      ...resolveCoverAsset(localUrl),
       coverKind: "explicit",
     };
   }
@@ -94,8 +116,9 @@ function resolveCover(
   const generatedPath = path.join(rootDir, "public", "covers", filename);
   const spinePath = path.join(rootDir, "public", "covers", spineFilename);
   if (fs.existsSync(generatedPath)) {
+    const localUrl = withBasePath(`covers/${filename}`);
     return {
-      coverUrl: withBasePath(`covers/${filename}`),
+      ...resolveCoverAsset(localUrl),
       spineUrl: fs.existsSync(spinePath)
         ? withBasePath(`covers/${spineFilename}`)
         : undefined,

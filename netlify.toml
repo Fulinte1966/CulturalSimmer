@@ -1,0 +1,31 @@
+[build]
+  publish = "netlify-dist"
+
+[build.processing.html]
+  pretty_urls = false
+
+[[redirects]]
+  from = "/"
+  to = "/CulturalSimmer/"
+  status = 301
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/CulturalSimmer/fonts/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Cross-Origin-Resource-Policy = "cross-origin"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/CulturalSimmer/covers/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Cross-Origin-Resource-Policy = "cross-origin"
+    Cache-Control = "public, max-age=86400"
