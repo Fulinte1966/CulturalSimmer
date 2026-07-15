@@ -186,7 +186,11 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
             <div class="fm-detail">
               {leadBook.coverUrl && (
                 <a class="fm-feature-cover" href={bookHref} aria-label={`查看《${leadBook.title}》`}>
-                  <img src={leadBook.coverUrl} alt={`《${leadBook.title}》封面`} />
+                  <img
+                    src={leadBook.coverUrl}
+                    data-public-asset-fallback={leadBook.coverFallbackUrl}
+                    alt={`《${leadBook.title}》封面`}
+                  />
                 </a>
               )}
 

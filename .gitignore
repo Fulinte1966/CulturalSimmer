@@ -12,6 +12,8 @@ reference/debug-archive/
 *.local
 .env
 .env.*
+.netlify/
+netlify-dist/
 mise.local.toml
 output/
 tmp/

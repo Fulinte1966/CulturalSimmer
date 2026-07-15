@@ -12,6 +12,7 @@ interface CheckBook {
   series?: string;
   edition: number;
   coverUrl?: string;
+  coverFallbackUrl?: string;
   spineUrl?: string;
   coverKind: "explicit" | "generated" | "placeholder";
   modelThickness: number;
@@ -104,6 +105,12 @@ const renderBook = (book: CheckBook) => {
   }
 
   if (book.coverUrl) {
+    if (book.coverFallbackUrl) {
+      image.dataset.publicAssetFallback = book.coverFallbackUrl;
+    } else {
+      delete image.dataset.publicAssetFallback;
+    }
+    delete image.dataset.publicAssetFallbackApplied;
     image.src = book.coverUrl;
     image.alt = `${book.title}封面`;
     image.hidden = false;

@@ -4,7 +4,7 @@
 
 ## 架构
 
-- **网页**：GitHub Pages 托管，使用 [Astro](https://astro.build) 生成静态网站。
+- **网页**：GitHub Pages 托管主站，Netlify 同步静态镜像并提供字体、封面资源源；使用 [Astro](https://astro.build) 生成。
 - **PDF**：GitHub Releases 托管，由 LaTeX 编译生成。
 - **搜索**：使用 [Pagefind](https://pagefind.app) 提供静态站内搜索。
 - **书目数据**：Markdown frontmatter，位于 `src/content/books/`。
@@ -170,6 +170,7 @@ classifications:
 - [Pagefind](https://pagefind.app) - 静态搜索
 - [PyMuPDF](https://pymupdf.readthedocs.io/) - PDF 封面、书签与阅读数据提取
 - GitHub Pages + GitHub Releases
+- Netlify 静态镜像
 
 ## 许可
 

@@ -1,6 +1,7 @@
 ---
 import { joinBasePath } from "../lib/basePath";
 import { formatPageTitle } from "../lib/pageTitle";
+import { siteConfig } from "../lib/site";
 
 interface Props {
   title: string;
@@ -10,12 +11,14 @@ interface Props {
 const { title, description } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const documentTitle = formatPageTitle(title);
+const canonicalUrl = new URL(Astro.url.pathname, siteConfig.publicBaseUrl);
 ---
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{documentTitle}</title>
 {description && <meta name="description" content={description} />}
+<link rel="canonical" href={canonicalUrl} />
 <link
   rel="icon"
   type="image/svg+xml"

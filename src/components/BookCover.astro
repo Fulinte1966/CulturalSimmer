@@ -52,6 +52,7 @@ const modelStyle =
         book.coverUrl ? (
           <img
             src={book.coverUrl}
+            data-public-asset-fallback={book.coverFallbackUrl}
             alt={`${book.title}封面`}
             loading={mode === "flat" ? "lazy" : "eager"}
             data-pagefind-meta={
