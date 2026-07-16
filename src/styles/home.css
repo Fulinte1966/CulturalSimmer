@@ -1217,10 +1217,13 @@
 
   .fm-newsletter > .fm-site-updates .fm-site-updates-content,
   .fm-newsletter > .fm-site-updates .fm-site-updates-list,
-  .fm-newsletter > .fm-site-updates .fm-site-update-detail,
+  .fm-newsletter > .fm-site-updates .fm-site-update-detail {
+    height: 342px;
+    width: 100%;
+  }
+
   .fm-newsletter > .fm-site-updates .fm-site-update-main,
   .fm-newsletter > .fm-site-updates .fm-site-update-body {
-    height: 342px;
     width: 100%;
   }
 
