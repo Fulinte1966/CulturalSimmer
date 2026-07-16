@@ -11,5 +11,11 @@
     "publishedAt": "2026-07-16T12:34:29Z",
     "bookId": "F0-1-1",
     "edition": 2
+  },
+  {
+    "id": "A93-1-listed",
+    "type": "book-added",
+    "publishedAt": "2026-07-16T20:15:23Z",
+    "bookId": "A93-1"
   }
 ]

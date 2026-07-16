@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 4,
+  "bookId": "A93-1",
+  "title": "狱中家书选",
+  "edition": 1,
+  "editionDate": "2026-07",
+  "editionDateSource": "xmp:CreateDate",
+  "pdfCreateDate": "2026-07-17T04:09:52+08:00",
+  "description": "本书选录张春桥狱中家书中的部分篇章，内容涉及读书、历史、文学及时事等议题，并保留原项目中的注释、原页码边注与人物索引。",
+  "creator": "张春桥",
+  "language": "zh-CN",
+  "releaseTag": "A93-1_v1",
+  "pdfFilename": "A93-1_v1.pdf",
+  "downloadUrl": "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v1/A93-1_v1.pdf",
+  "githubAssetDigest": "sha256:ab3fbf326f569c19eceb16f176bedea3629ceaac044146261f754b55adf4993c",
+  "bytes": 991468,
+  "pageCount": 82,
+  "wordCount": 35309,
+  "sourceReleaseId": 355336660,
+  "sourceAssetId": 479594619,
+  "sourceSha256": "ab3fbf326f569c19eceb16f176bedea3629ceaac044146261f754b55adf4993c",
+  "canonicalTag": "A93-1_v1",
+  "previousEdition": null,
+  "contentSnapshotFilename": "A93-1_v1.content.json.gz",
+  "changelogFilename": "A93-1_v1.changelog.json",
+  "changelogPath": "src/data/changelogs/A93-1_v1.changelog.json",
+  "changelogSummary": {
+    "total": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0
+  },
+  "generatedAt": "2026-07-16T20:14:34.434488+00:00",
+  "metadata": {
+    "title": "狱中家书选",
+    "author": "张春桥",
+    "language": "zh-CN",
+    "publisher": "CulturalSimmer",
+    "source": "用户提供的 A93.1 LaTeX 排版项目"
+  }
+}
