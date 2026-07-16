@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getCollection } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
+import { hasBookContentFiles } from "./bookContentFiles";
 import type { ParsedBookId } from "./bookId";
 import { getPdfFilename, getReleaseTag, parseBookId } from "./bookId";
 import { siteConfig } from "./site";
@@ -10,6 +11,10 @@ import { resolvePublicAsset } from "./publicAssets";
 const rootDir = process.cwd();
 
 export { getClassificationLabel } from "./classification";
+
+export async function getBookEntries(): Promise<CollectionEntry<"books">[]> {
+  return hasBookContentFiles() ? getCollection("books") : [];
+}
 
 export function getDownloadUrl(id: string, edition: number): string {
   const tag = getReleaseTag(id, edition);
@@ -208,7 +213,7 @@ function getLatestEdition(editions: EditionRecord[]): EditionRecord {
 }
 
 export async function getAllBooks(): Promise<BookMeta[]> {
-  const books = await getCollection("books");
+  const books = await getBookEntries();
 
   return books
     .map((entry) => {

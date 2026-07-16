@@ -1,5 +1,7 @@
 # 本站消息维护规范
 
+**适用对象：** 公告编辑者、通知系统维护者与网站维护者。
+
 主页“本站消息”统一显示电子书入库生成的自动消息和人工维护的公告。数据在 Astro 构建期完成校验、关联、排序和 Markdown 渲染；浏览器只负责列表与全文之间的状态切换，不请求 GitHub API，也不在客户端解析 Markdown。
 
 ## 数据来源
@@ -172,12 +174,7 @@ CI 使用 `npm run updates:archive:check` 拒绝过期归档。
 修改消息数据、脚本或界面后运行：
 
 ```bash
-npm run check
-npm run validate
-npm run test:ingest
-npm run test:updates
-npm run test:ui
-npm run build
+npm run verify
 ```
 
 Node 测试覆盖消息派生、正文判断、标签和数据校验、排序、置顶、最近五条、URL、状态资格与幂等性；Python 入库测试覆盖正式 Release 时间写入及原子追加。

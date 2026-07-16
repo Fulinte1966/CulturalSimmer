@@ -35,13 +35,7 @@ jobs:
           python-version-file: ".python-version"
       - run: npm ci
       - run: pip install -r scripts/requirements.txt
-      - run: npm run test:ui
-      - run: npm run test:updates
-      - run: npm run test:changelog
-      - run: npm run validate
-      - run: npm run check
-      - run: npm run updates:archive:check
-      - run: npm run fonts:refresh
+      - run: npm run verify
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

@@ -1,5 +1,7 @@
 # 电子书上传工作流
 
+**适用对象：** 电子书制作者与仓库维护者。
+
 本文档记录当前 PDF 上传、临时 Release、自动导入、正式发布和网页部署流程。
 
 ## 核心原则
@@ -24,6 +26,14 @@ npm run ebook:upload path/to/book.pdf
 npm run ebook:upload path/to/book.pdf -- --dry-run
 npm run ebook:upload path/to/book.pdf -- --draft
 npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
+```
+
+首次克隆后应通过 `mise` 使用仓库声明的运行时：
+
+```bash
+mise install
+mise run setup
+mise exec -- npm run ebook:upload path/to/book.pdf -- --dry-run
 ```
 
 `--dry-run` 只做 preflight，不创建 Release。输出会包含：
@@ -150,6 +160,10 @@ PDF 声明版次：2
 ```
 
 `Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
+
+入库前的统一验证入口为 `npm run verify`。该命令在测试和数据校验通过后执行
+“构建、字体子集化、再次构建”，确保构建期数据中的实际用字进入 WOFF2。
+Pull Request、正式入库与部署均执行同一入口。
 
 更新日志只比较最终 PDF 的规范化可见内容，不比较 Git、LaTeX 源码或 PDF 二进制。完整规则、JSON schema、Release Markdown 和本地重建命令见 [电子书版本更新日志规范](release-changelog-conventions.md)。差异生成失败时 workflow 会中止，不会发布看似正常的空日志。
 

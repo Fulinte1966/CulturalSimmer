@@ -1,5 +1,7 @@
 # Netlify 静态镜像与资源源
 
+**适用对象：** 网站部署维护者。本文只记录变量名称和公开地址，不记录任何 secret 实值。
+
 GitHub Pages 是网站的永久主站和 canonical。Netlify 部署同一份静态构建产物，提供完整备用镜像，并优先承载构建后的 WOFF2 字体和书籍封面。PDF、Tally、Z-Library、JavaScript、CSS 和其他装饰资源不经过 Netlify。
 
 ## 地址约定

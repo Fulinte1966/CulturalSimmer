@@ -7,19 +7,12 @@ run = "npm ci && python -m pip install -r scripts/requirements.txt"
 
 [tasks.test]
 description = "Run all Node and Python tests"
-run = """
-npm run test:ui
-npm run test:metadata
-npm run test:ingest
-npm run test:changelog
-npm run test:reading
-"""
+run = "npm run test"
 
 [tasks.check]
 description = "Run tests, data validation, type checks, and the production build"
-depends = ["test"]
-run = """
-npm run validate
-npm run check
-npm run build
-"""
+run = "npm run verify"
+
+[tasks.fonts]
+description = "Build, regenerate web-font subsets, and rebuild"
+run = "npm run fonts:refresh"
