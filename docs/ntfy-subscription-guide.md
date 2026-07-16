@@ -7,19 +7,27 @@
 - 显示名称：`文火广播站`
 - 服务器：`https://culturalsimmer-notify.duckdns.org`
 - Topic：`cultural-simmer-updates`
-- Topic 地址：<https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates>
+- Topic 地址：`https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates`
+
+<div align="center">
+  <a href="https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates"><img src="assets/ntfy/topic.svg" width="180" alt="打开文火广播站 Topic"></a><br>
+  <strong>文火广播站 Topic</strong>
+</div>
 
 请勿将本通道用于发布消息，也不要向他人发送账号、密码或访问令牌。
 
 ## Android 客户端
 
-1. 从 [Google Play、F-Droid 或 GitHub Releases](https://docs.ntfy.sh/subscribe/phone/) 安装 ntfy 官方 Android 客户端。
-2. 在 Android 设备上打开下面的一键订阅链接：
+1. 扫描或点击“Android 客户端”二维码，按照 ntfy 官方页面提供的 Google Play、F-Droid 或 GitHub Releases 渠道安装客户端。
 
-   [订阅文火广播站](ntfy://culturalsimmer-notify.duckdns.org/cultural-simmer-updates?display=%E6%96%87%E7%81%AB%E5%B9%BF%E6%92%AD%E7%AB%99)
+   <a href="https://docs.ntfy.sh/subscribe/phone/"><img src="assets/ntfy/android-client.svg" width="160" alt="打开 ntfy Android 客户端安装说明"></a>
+
+2. 扫描“Android 一键订阅”二维码。二维码包含 ntfy 官方 `ntfy://` 深层链接，会打开客户端并添加文火广播站。
+
+   <a href="https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates"><img src="assets/ntfy/android-subscribe.svg" width="160" alt="扫描后使用 Android ntfy 一键订阅文火广播站；点击打开 Topic 备用页"></a>
 
 3. 确认服务器和 Topic 后完成订阅，并允许 ntfy 发送系统通知。
-4. 若一键链接没有唤起客户端，请在 ntfy 中选择添加订阅，手动填写 Topic 地址：
+4. 若一键订阅没有唤起客户端，请扫描或点击上方“文火广播站 Topic”二维码，然后在 ntfy 中手动添加以下地址：
 
    ```text
    https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates
@@ -27,22 +35,34 @@
 
 5. 如需减少后台延迟，请根据客户端提示启用即时传递，并在 Android 系统设置中允许 ntfy 后台运行。
 
-Android 的 `ntfy://` 深层链接会直接打开客户端，并在尚未订阅时添加对应 Topic。具体格式见 [ntfy Android 深层链接文档](https://docs.ntfy.sh/subscribe/phone/#ntfy-links)。
+Android 深层链接的完整格式与兼容性说明：
+
+<a href="https://docs.ntfy.sh/subscribe/phone/#ntfy-links"><img src="assets/ntfy/android-deep-links.svg" width="160" alt="打开 ntfy Android 深层链接说明"></a>
 
 ## iOS Safari
 
 iOS Web Push 需要 iOS 16.4 或更高版本，并且 ntfy 必须作为 Web App 添加到主屏幕。
 
-1. 使用 Safari 打开 [文火广播站 Topic](https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates)。不要使用 Safari 以外的内置浏览器完成安装。
+ntfy 的 iOS PWA 安装说明：
+
+<a href="https://docs.ntfy.sh/subscribe/pwa/#safari-on-ios"><img src="assets/ntfy/ios-pwa.svg" width="160" alt="打开 ntfy iOS PWA 安装说明"></a>
+
+1. 使用 Safari 扫描或点击上方“文火广播站 Topic”二维码。不要使用 Safari 以外的内置浏览器完成安装。
+
+   <a href="https://culturalsimmer-notify.duckdns.org/cultural-simmer-updates"><img src="assets/ntfy/topic.svg" width="160" alt="使用 Safari 打开文火广播站 Topic"></a>
+
 2. 点击 Safari 的“分享”按钮，选择“添加到主屏幕”。
 3. 保持“作为 Web App 打开”开启，然后点击“添加”。
+
+   <a href="https://support.apple.com/guide/iphone/iphea86e5236/ios"><img src="assets/ntfy/ios-web-app.svg" width="160" alt="打开 Apple 主屏幕 Web App 指南"></a>
+
 4. 返回主屏幕，从新添加的 ntfy 图标打开 Web App。
 5. 在 ntfy 中订阅 `cultural-simmer-updates`。若 Topic 没有自动显示，请点击添加订阅并输入完整 Topic 地址。
 6. 点击订阅或启用后台通知，并在 iOS 的系统弹窗中选择“允许”。通知权限只能由已安装的 Web App 在用户操作后申请。
 
-安装完成后，无需保持 Safari 或 ntfy Web App 打开。为避免浏览器暂停长期未使用的后台订阅，建议至少每周打开一次 ntfy Web App。
+   <a href="https://docs.ntfy.sh/subscribe/web/#background-notifications"><img src="assets/ntfy/web-push.svg" width="160" alt="打开 ntfy Web Push 说明"></a>
 
-详细步骤参见 [ntfy PWA 安装说明](https://docs.ntfy.sh/subscribe/pwa/#safari-on-ios)、[ntfy Web Push 说明](https://docs.ntfy.sh/subscribe/web/#background-notifications)和 [Apple 的主屏幕 Web App 指南](https://support.apple.com/guide/iphone/iphea86e5236/ios)。
+安装完成后，无需保持 Safari 或 ntfy Web App 打开。为避免浏览器暂停长期未使用的后台订阅，建议至少每周打开一次 ntfy Web App。
 
 ## 故障检查
 
