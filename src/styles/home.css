@@ -636,6 +636,29 @@
   text-indent: 2em;
 }
 
+.fm-site-update-body p.fm-site-update-centered {
+  text-align: center;
+  text-align-last: center;
+  text-indent: 0;
+}
+
+.fm-site-update-centered + p {
+  margin-top: 18px;
+}
+
+.fm-site-update-body p.fm-site-update-fallback {
+  margin-top: 18px;
+}
+
+.fm-site-update-body strong {
+  font-family: var(--font-heiti);
+  font-weight: 500;
+}
+
+.fm-site-update-accent {
+  color: var(--accent);
+}
+
 .fm-site-update-body a {
   color: #000;
   text-decoration: underline;

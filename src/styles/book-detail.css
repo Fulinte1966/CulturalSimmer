@@ -298,12 +298,17 @@ html {
   display: flex;
   justify-content: center;
   min-height: calc(100vh - 170px);
+  overflow-anchor: none;
   text-align: center;
   width: 100%;
 }
 
 .bd-errata-panel[hidden] {
   display: none;
+}
+
+.bd-errata-panel:focus {
+  outline: none;
 }
 
 .bd-errata-content {
@@ -888,8 +893,8 @@ html {
 
   .bd-main:has(.bd-text--errata) {
     justify-content: center;
-    margin-top: 0;
-    min-height: calc(100svh - 36px);
+    margin-top: 36px;
+    min-height: calc(100svh - 72px);
   }
 
   .bd-main:has(.bd-text--errata) .bd-cover-stage {
@@ -898,10 +903,11 @@ html {
 
   .bd-text--errata,
   .bd-text--errata .bd-errata-panel {
-    min-height: calc(100svh - 36px);
+    min-height: calc(100svh - 72px);
   }
 
   .bd-errata-form {
     flex-basis: auto;
+    min-width: 0;
   }
 }

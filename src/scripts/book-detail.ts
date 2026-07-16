@@ -1,19 +1,3 @@
-const freezeModelTransform = () => {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const model = document.querySelector(
-        ".book-cover--model"
-      ) as HTMLElement | null;
-      if (model) {
-        const t = getComputedStyle(model).transform;
-        model.style.transform = t;
-      }
-    });
-  });
-};
-
-freezeModelTransform();
-
 const syncCoverStagePosition = () => {
   const frame = document.querySelector<HTMLElement>(".bd-frame");
   const coverStage = document.querySelector<HTMLElement>(".bd-cover-stage");
@@ -111,6 +95,7 @@ const errataPrompt = document.querySelector<HTMLElement>("[data-errata-prompt]")
 const form = document.querySelector<HTMLElement>("[data-errata-form]");
 const toggle = document.querySelector<HTMLElement>("[data-errata-toggle]");
 let errataMode: "prompt" | "form" = "prompt";
+let detailScrollPosition = window.scrollY;
 
 const setToggleState = (open: boolean) => {
   if (!toggle) return;
@@ -135,16 +120,18 @@ const setErrataMode = (mode: "prompt" | "form") => {
 
 const setErrataOpen = (open: boolean) => {
   if (!region || !content || !panel) return;
+  if (open) detailScrollPosition = window.scrollY;
   panel.hidden = !open;
   content.hidden = open;
   region.classList.toggle("bd-text--errata", open);
   setToggleState(open);
+  scheduleCoverStageSync();
   if (open) {
     if (errataMode === "form") loadTallyEmbed();
-    scheduleCoverStageSync();
     panel.focus({ preventScroll: true });
-  } else if (errataMode === "form") {
-    reloadTallyEmbed();
+  } else {
+    requestAnimationFrame(() => window.scrollTo(0, detailScrollPosition));
+    if (errataMode === "form") reloadTallyEmbed();
   }
 };
 
