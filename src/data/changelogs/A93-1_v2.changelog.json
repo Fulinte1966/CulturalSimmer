@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "bookId": "A93-1",
+  "normalizationProfile": "culturalsimmer-content-v3",
+  "fromEdition": {
+    "edition": 1,
+    "editionDate": "2026-07"
+  },
+  "toEdition": {
+    "edition": 2,
+    "editionDate": "2026-07"
+  },
+  "summary": {
+    "total": 1,
+    "added": 0,
+    "removed": 0,
+    "changed": 1
+  },
+  "comparison": {
+    "algorithm": "SequenceMatcher coarse-refine bounded",
+    "elapsedSeconds": 0.666,
+    "oldTokenCount": 42374,
+    "newTokenCount": 42374
+  },
+  "changes": [
+    {
+      "index": 1,
+      "type": "replace",
+      "old": {
+        "pages": [
+          53
+        ],
+        "pageLabels": [
+          "45"
+        ],
+        "prefix": "",
+        "changedText": "***",
+        "suffix": "100××（二外孙）又到期末考试了吧？",
+        "changedTokenCount": 3,
+        "changedTextTruncated": false,
+        "prefixTruncated": false,
+        "suffixTruncated": false
+      },
+      "new": {
+        "pages": [
+          53
+        ],
+        "pageLabels": [
+          "45"
+        ],
+        "prefix": "",
+        "changedText": "＊＊＊",
+        "suffix": "100××（二外孙）又到期末考试了吧？",
+        "changedTokenCount": 3,
+        "changedTextTruncated": false,
+        "prefixTruncated": false,
+        "suffixTruncated": false
+      }
+    }
+  ]
+}

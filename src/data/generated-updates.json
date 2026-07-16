@@ -17,5 +17,12 @@
     "type": "book-added",
     "publishedAt": "2026-07-16T20:15:23Z",
     "bookId": "A93-1"
+  },
+  {
+    "id": "A93-1-v2",
+    "type": "book-updated",
+    "publishedAt": "2026-07-16T20:57:51Z",
+    "bookId": "A93-1",
+    "edition": 2
   }
 ]
