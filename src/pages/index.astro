@@ -8,7 +8,7 @@ import generatedUpdates from "../data/generated-updates.json";
 import siteUpdatePins from "../data/site-update-pins.json";
 import "../styles/home.css";
 import { joinBasePath } from "../lib/basePath";
-import { getAllBooks } from "../lib/books";
+import { getAllBooks, getBookEntries } from "../lib/books";
 import { siteConfig } from "../lib/site";
 import {
   buildSiteUpdates,
@@ -19,7 +19,7 @@ import { getCalendarStatus, getWeatherStatus } from "../lib/uapis";
 
 const [books, entries, announcements, calendar, weather] = await Promise.all([
   getAllBooks(),
-  getCollection("books"),
+  getBookEntries(),
   getCollection("announcements"),
   getCalendarStatus(),
   getWeatherStatus(),

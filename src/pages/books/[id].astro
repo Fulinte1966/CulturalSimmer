@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import fs from "node:fs";
 import path from "node:path";
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
@@ -9,13 +9,13 @@ import {
   formatEditionDateString,
   formatShortVolume,
 } from "../../lib/bookId";
-import { getBookById } from "../../lib/books";
+import { getBookById, getBookEntries } from "../../lib/books";
 import { joinBasePath } from "../../lib/basePath";
 import { getCalendarStatus } from "../../lib/uapis";
 import "../../styles/book-detail.css";
 
 export async function getStaticPaths() {
-  const books = await getCollection("books");
+  const books = await getBookEntries();
   return books.map((book) => ({
     params: { id: book.data.id },
     props: { entry: book },

@@ -52,12 +52,7 @@ jobs:
 
       - name: Validate repository
         run: |
-          npm run test:ui
-          npm run test:changelog
-          npm run test:ingest
-          npm run validate
-          npm run check
-          npm run build
+          npm run verify
 
       - name: Commit derived statistics
         env:

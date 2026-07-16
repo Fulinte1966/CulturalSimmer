@@ -3,6 +3,14 @@ dist/
 .astro/
 .cache/
 __pycache__/
+.DS_Store
+.codex/
+.claude/
+AGENTS.md
+CLAUDE.md
+Work/
+Outputs/
+*.pdf
 reference/web/
 reference/debug-archive/
 *.log

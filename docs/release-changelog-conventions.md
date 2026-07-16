@@ -1,5 +1,7 @@
 # 电子书版本更新日志规范
 
+**适用对象：** 电子书制作者、内容校对者与仓库维护者。
+
 本文档规定同一书目相邻 PDF 版次的内容比较、结构化记录和 GitHub Release 正文格式。
 
 ## 目的与边界
@@ -214,6 +216,7 @@ python scripts/generate_release_changelog.py \
 ```bash
 npm run test:changelog
 npm run test:ingest
+npm run verify
 ```
 
 ## 参考文档

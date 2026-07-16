@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
 import {
   normalizePublicAssetOrigin,
@@ -70,5 +72,45 @@ test("adds a remote WOFF2 source before the local fallback", () => {
       "https://culturalsimmer-mirror.netlify.app",
     ).replacements,
     0,
+  );
+});
+
+test("keeps every public font URL under the configured site base", () => {
+  const css = fs.readFileSync(
+    path.join(process.cwd(), "src", "styles", "global.css"),
+    "utf8",
+  );
+  const fontUrls = [...css.matchAll(/url\("([^"]+\.woff2)"\)/g)].map(
+    (match) => match[1],
+  );
+
+  assert.ok(fontUrls.length > 0);
+  assert.equal(fontUrls.some((url) => url.startsWith("/fonts/")), false);
+  assert.equal(
+    fontUrls.every((url) => url.startsWith("/CulturalSimmer/fonts/")),
+    true,
+  );
+});
+
+test("keeps every CSS public asset URL under the configured site base", () => {
+  const stylesDirectory = path.join(process.cwd(), "src", "styles");
+  const assetUrls = fs
+    .readdirSync(stylesDirectory)
+    .filter((name) => name.endsWith(".css"))
+    .flatMap((name) => {
+      const css = fs.readFileSync(path.join(stylesDirectory, name), "utf8");
+      return [...css.matchAll(/url\(["']?([^"')]+)["']?\)/g)]
+        .map((match) => match[1])
+        .filter((url) => url.startsWith("/"));
+    });
+
+  assert.ok(assetUrls.length > 0);
+  assert.equal(
+    assetUrls.some((url) => /^(?:\/assets|\/fonts|\/covers)\//.test(url)),
+    false,
+  );
+  assert.equal(
+    assetUrls.every((url) => url.startsWith("/CulturalSimmer/")),
+    true,
   );
 });
