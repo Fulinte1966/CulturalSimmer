@@ -4,5 +4,12 @@
     "type": "book-added",
     "publishedAt": "2026-07-16T12:29:01Z",
     "bookId": "F0-1-1"
+  },
+  {
+    "id": "F0-1-1-v2",
+    "type": "book-updated",
+    "publishedAt": "2026-07-16T12:34:29Z",
+    "bookId": "F0-1-1",
+    "edition": 2
   }
 ]
