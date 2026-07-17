@@ -56,7 +56,7 @@ jobs:
   deploy-netlify:
     environment:
       name: netlify-mirror
-      url: ${{ vars.PUBLIC_ASSET_BASE_URL }}/CulturalSimmer/
+      url: https://culturalsimmer-mirror.netlify.app/CulturalSimmer/
     env:
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
