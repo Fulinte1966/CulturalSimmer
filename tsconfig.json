@@ -1,5 +1,5 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "netlify-dist"]
+  "exclude": ["dist", "cloudflare-dist", "netlify-dist"]
 }

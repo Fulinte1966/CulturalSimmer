@@ -22,6 +22,8 @@ reference/debug-archive/
 .env.*
 .netlify/
 netlify-dist/
+.wrangler/
+cloudflare-dist/
 mise.local.toml
 output/
 tmp/
