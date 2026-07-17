@@ -71,6 +71,19 @@ jobs:
           path: site-dist
       - name: Prepare Cloudflare Pages mirror
         run: npm run cloudflare:prepare -- site-dist cloudflare-dist
+      - name: Ensure Cloudflare Pages project exists
+        run: |
+          if npm exec wrangler -- pages project list --json > "$RUNNER_TEMP/cloudflare-pages-projects.json" &&
+            node -e '
+              const fs = require("node:fs");
+              const projects = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+              process.exit(projects.some(({ name }) => name === "culturalsimmer-mirror") ? 0 : 1);
+            ' "$RUNNER_TEMP/cloudflare-pages-projects.json"; then
+            echo "Cloudflare Pages project already exists."
+          else
+            npm exec wrangler -- pages project create culturalsimmer-mirror \
+              --production-branch=main
+          fi
       - name: Deploy Cloudflare Pages mirror
         run: >-
           npm exec wrangler -- pages deploy cloudflare-dist
