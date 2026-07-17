@@ -16,10 +16,12 @@ GitHub Pages 是网站的永久主站和 canonical。Cloudflare Pages 通过 Dir
 
 | 类型 | 名称 | 内容 |
 | --- | --- | --- |
-| Environment secret | `CLOUDFLARE_API_TOKEN` | 仅授予 Account / Cloudflare Pages / Edit 的自定义 API Token |
+| Environment secret | `CLOUDFLARE_API_TOKEN` | 当前账户的 Account API Token，仅授予 Pages Write |
 | Environment variable | `CLOUDFLARE_ACCOUNT_ID` | Pages 项目所属 Cloudflare Account ID |
 
-不要使用 Global API Key，也不要把 token、Account ID、本地 Wrangler 状态目录或环境文件提交到仓库。
+Account API Token 作为独立服务身份，不依赖某个用户令牌。不要使用
+Global API Key 或宽权限 Workers 模板；定期轮换长期有效的部署令牌。不要把
+token、Account ID、本地 Wrangler 状态目录或环境文件提交到仓库。
 
 ## 发布顺序
 
