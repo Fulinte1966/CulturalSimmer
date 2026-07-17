@@ -91,6 +91,7 @@ jobs:
           --branch=main
           --commit-hash="${GITHUB_SHA}"
           --commit-message="GitHub Actions ${GITHUB_SHA}"
+          --commit-dirty=true
 
   deploy:
     environment:
