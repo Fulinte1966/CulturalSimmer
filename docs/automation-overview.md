@@ -57,7 +57,7 @@ npm run verify
 
 触发：`main` push、每日定时刷新或手动运行。
 
-流程：运行完整验证并生成唯一 `dist` 产物；先将该产物发布到 Netlify 镜像，成功后再将同一产物发布到 GitHub Pages。Netlify 失败时 GitHub Pages 不切换到引用缺失镜像资源的新版本。PDF 入库以 `notify_updates=true` 手动触发部署；仅在两个站点发布成功后，Deploy 才请求私有通知仓库分别运行 QQ 与 ntfy live workflow。
+流程：运行完整验证并生成唯一 `dist` 产物；GitHub Pages 发布该产物作为永久主站，Cloudflare Pages 将同一产物包装到 `/CulturalSimmer/` 后作为完整镜像发布。两个部署任务相互独立，镜像失败不会阻止永久主站更新。PDF 入库以 `notify_updates=true` 手动触发部署；GitHub Pages 发布成功后，Deploy 请求私有通知仓库分别运行 QQ 与 ntfy live workflow。
 
 跨仓库触发使用公开仓库 secret `NOTIFIER_DISPATCH_TOKEN`。它必须是只授权 `Fulinte1966/CulturalSimmer-notifier`、仅含 Actions 读写权限且设有有效期的 fine-grained personal access token，不得复用项目管理 token。即时触发失败只产生部署注释，不回滚网站；私有通知仓库的每日定时轮询继续作为独立兜底。
 
@@ -79,7 +79,7 @@ npm run verify
 - 正式 Release 创建后若提交失败，入库清理逻辑删除本次正式 Release 与 tag，不影响历史版本。
 - 临时 ingest Release 在成功或失败后均由清理步骤处理；失败工作区只存在于 Actions 临时环境。
 - 部署使用并发组串行化，不取消正在发布的版本。
-- 读者通知只在入库请求的双站部署成功后触发；跨仓库调用失败不改变 Release 或部署结果，每日轮询仍会补发未发送事件。
+- 读者通知只依赖永久主站发布成功；Cloudflare 镜像或跨仓库调用失败不改变 Release 与 GitHub Pages 部署结果，每日轮询仍会补发未发送事件。
 - GitHub Actions secret 只通过对应 Environment 或 repository secret 注入，日志和公开文档不得包含实值。
 
 ## 本地入口

@@ -15,15 +15,15 @@ import {
 
 test("normalizes a public asset origin", () => {
   assert.equal(
-    normalizePublicAssetOrigin("https://culturalsimmer-mirror.netlify.app/"),
-    "https://culturalsimmer-mirror.netlify.app",
+    normalizePublicAssetOrigin("https://static.example.com/"),
+    "https://static.example.com",
   );
   assert.equal(normalizePublicAssetOrigin("  "), undefined);
   assert.throws(() => normalizePublicAssetOrigin("http://example.com"));
   assert.throws(() => normalizePublicAssetOrigin("https://example.com/assets"));
   assert.equal(
-    normalizeAssetOrigin("https://culturalsimmer-mirror.netlify.app/"),
-    "https://culturalsimmer-mirror.netlify.app",
+    normalizeAssetOrigin("https://static.example.com/"),
+    "https://static.example.com",
   );
 });
 
@@ -31,11 +31,11 @@ test("uses the mirror as primary and preserves the local fallback", () => {
   assert.deepEqual(
     resolvePublicAsset(
       "/CulturalSimmer/covers/F0-1-1_v2.png",
-      "https://culturalsimmer-mirror.netlify.app",
+      "https://static.example.com",
     ),
     {
       primaryUrl:
-        "https://culturalsimmer-mirror.netlify.app/CulturalSimmer/covers/F0-1-1_v2.png",
+        "https://static.example.com/CulturalSimmer/covers/F0-1-1_v2.png",
       fallbackUrl: "/CulturalSimmer/covers/F0-1-1_v2.png",
     },
   );
@@ -53,25 +53,25 @@ test("adds a remote WOFF2 source before the local fallback", () => {
     '@font-face{src:url(/CulturalSimmer/fonts/subset/example.woff2) format("woff2")}';
   const result = addFontFallbackSources(
     source,
-    "https://culturalsimmer-mirror.netlify.app",
+    "https://static.example.com",
   );
 
   assert.equal(result.replacements, 1);
   assert.match(
     result.css,
-    /url\("https:\/\/culturalsimmer-mirror\.netlify\.app\/CulturalSimmer\/fonts\/subset\/example\.woff2"\) format\("woff2"\),url\("\/CulturalSimmer\/fonts\/subset\/example\.woff2"\) format\("woff2"\)/,
+    /url\("https:\/\/static\.example\.com\/CulturalSimmer\/fonts\/subset\/example\.woff2"\) format\("woff2"\),url\("\/CulturalSimmer\/fonts\/subset\/example\.woff2"\) format\("woff2"\)/,
   );
   assert.equal(
     addFontFallbackSources(
       result.css,
-      "https://culturalsimmer-mirror.netlify.app",
+      "https://static.example.com",
     ).existingSources,
     1,
   );
   assert.equal(
     addFontFallbackSources(
       result.css,
-      "https://culturalsimmer-mirror.netlify.app",
+      "https://static.example.com",
     ).replacements,
     0,
   );

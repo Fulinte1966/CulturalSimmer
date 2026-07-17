@@ -20,7 +20,7 @@
 - [勘误与网站问题流程](errata-workflow.md)：检查更新、Tally、GitHub Issues 与 Projects 的公开接口契约。
 - [本站消息维护规范](site-updates-workflow.md)：人工公告、自动消息、置顶、公开 feed 和归档。
 - [字体子集化](font-subsetting.md)：双遍构建和 WOFF2 生成。
-- [Netlify 镜像](netlify-mirror.md)：双站部署、资源回退和配置变量。
+- [Cloudflare Pages 镜像](cloudflare-pages.md)：双站部署、缓存边界和凭据配置。
 - [静态资源规范](asset-conventions.md)：目录职责、文件命名和 URL 规则。
 
 ## 文档公开边界
@@ -30,7 +30,7 @@
 - 安装、测试、构建和发布命令；
 - PDF 元数据、更新 feed、书号和 URL 契约；
 - 生成文件的来源与维护规则；
-- 不含秘密值的 GitHub Actions、Netlify 和通知订阅说明。
+- 不含秘密值的 GitHub Actions、Cloudflare Pages 和通知订阅说明。
 
 以下内容只保留在本地，不得提交：
 
@@ -46,4 +46,4 @@
 - 修改脚本、workflow、字段或路径时，同一提交必须更新对应流程文档。
 - 修改公告后先运行 `npm run updates:archive`。
 - 所有提交在合并前运行 `npm run verify`；该命令会根据最终构建产物刷新字体。
-- 发布流程变更合并后检查 GitHub Pages、Netlify 和对应 GitHub Actions 运行。
+- 发布流程变更合并后检查 GitHub Pages、Cloudflare Pages 和对应 GitHub Actions 运行。

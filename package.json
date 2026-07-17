@@ -16,6 +16,7 @@
     "updates:pins": "python3 scripts/site_updates_admin.py pins",
     "updates:archive": "python3 scripts/build_site_updates_archive.py",
     "updates:archive:check": "python3 scripts/build_site_updates_archive.py --check",
+    "cloudflare:prepare": "node scripts/prepare-cloudflare-pages.mjs",
     "fonts:subset": "python3 scripts/subset_fonts.py",
     "fonts:refresh": "npm run build && npm run fonts:subset && npm run build",
     "changelogs:build": "python3 scripts/build_book_changelogs.py",
@@ -40,12 +41,13 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
-    "netlify-cli": "26.2.0",
-    "tsx": "^4.23.1"
+    "tsx": "^4.23.1",
+    "wrangler": "4.111.0"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
     "sharp@0.34.5": true,
-    "fsevents@2.3.3": true
+    "fsevents@2.3.3": true,
+    "workerd@1.20260710.1": true
   }
 }
