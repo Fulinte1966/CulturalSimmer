@@ -7,7 +7,9 @@ import {
   resolvePublicAsset,
 } from "../../src/lib/publicAssets";
 import {
+  addPublicAssetVersions,
   addFontFallbackSources,
+  buildPublicAssetVersions,
   normalizeAssetOrigin,
 } from "../../scripts/apply-public-asset-origin.mjs";
 
@@ -73,6 +75,57 @@ test("adds a remote WOFF2 source before the local fallback", () => {
     ).replacements,
     0,
   );
+});
+
+test("adds content versions to local and mirrored public asset URLs", () => {
+  const versions = new Map([
+    ["fonts/subset/example.woff2", "abc123def456"],
+    ["covers/example.png", "987654fedcba"],
+  ]);
+  const result = addPublicAssetVersions(
+    [
+      'url("/CulturalSimmer/fonts/subset/example.woff2")',
+      'src="https://mirror.example/CulturalSimmer/covers/example.png"',
+      'data-public-asset-fallback="/CulturalSimmer/covers/example.png?v=old"',
+    ].join("\n"),
+    versions,
+  );
+
+  assert.equal(result.replacements, 3);
+  assert.match(
+    result.source,
+    /\/CulturalSimmer\/fonts\/subset\/example\.woff2\?v=abc123def456/,
+  );
+  assert.match(
+    result.source,
+    /https:\/\/mirror\.example\/CulturalSimmer\/covers\/example\.png\?v=987654fedcba/,
+  );
+  assert.doesNotMatch(result.source, /\?v=old/);
+});
+
+test("derives stable public asset versions from file contents", () => {
+  const directory = fs.mkdtempSync(path.join(process.cwd(), ".tmp-assets-"));
+  try {
+    const fontDirectory = path.join(directory, "fonts", "subset");
+    fs.mkdirSync(fontDirectory, { recursive: true });
+    fs.writeFileSync(path.join(fontDirectory, "example.woff2"), "font data");
+
+    const first = buildPublicAssetVersions(directory);
+    const second = buildPublicAssetVersions(directory);
+    assert.equal(
+      first.get("fonts/subset/example.woff2"),
+      second.get("fonts/subset/example.woff2"),
+    );
+
+    fs.writeFileSync(path.join(fontDirectory, "example.woff2"), "new font data");
+    const changed = buildPublicAssetVersions(directory);
+    assert.notEqual(
+      first.get("fonts/subset/example.woff2"),
+      changed.get("fonts/subset/example.woff2"),
+    );
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("keeps every public font URL under the configured site base", () => {

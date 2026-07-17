@@ -1246,10 +1246,12 @@
   }
 
   .fm-book-shelf {
+    -webkit-overflow-scrolling: touch;
     flex-basis: 246px;
     overflow-x: auto;
     overflow-y: hidden;
     overscroll-behavior-inline: contain;
+    scroll-behavior: auto;
     scrollbar-width: none;
     touch-action: pan-x pan-y;
   }
@@ -1285,6 +1287,9 @@
     left: auto;
     overflow: visible;
     position: relative;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+    touch-action: auto;
     top: auto;
     width: max-content;
   }
