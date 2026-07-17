@@ -2,7 +2,6 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
   const compactLayout = window.matchMedia(
     "(max-width: 899px), (min-width: 900px) and (max-width: 1199px) and (orientation: portrait)",
   );
-  if (compactLayout.matches) continue;
 
   let isDragging = false;
   let didDrag = false;
@@ -219,6 +218,7 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
   };
 
   shelf.addEventListener("pointerdown", (event: PointerEvent) => {
+    if (compactLayout.matches) return;
     if (event.button !== 0) return;
     stopGlide();
     clearRebound();
@@ -237,6 +237,7 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
   });
 
   shelf.addEventListener("pointermove", (event: PointerEvent) => {
+    if (compactLayout.matches) return;
     if (!isDragging) return;
     const deltaX = event.clientX - startX;
     if (Math.abs(deltaX) > 3) didDrag = true;
@@ -273,7 +274,9 @@ for (const shelf of document.querySelectorAll<HTMLElement>(".fm-book-list-frame"
     pressedLink = null;
   };
 
-  shelf.addEventListener("dragstart", (event) => event.preventDefault());
+  shelf.addEventListener("dragstart", (event) => {
+    if (!compactLayout.matches) event.preventDefault();
+  });
   shelf.addEventListener("pointerup", (event) => endDrag(event, true));
   shelf.addEventListener("pointercancel", (event) => endDrag(event));
   shelf.addEventListener("pointerleave", (event) => endDrag(event));

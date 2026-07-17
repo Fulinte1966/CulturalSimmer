@@ -35,6 +35,8 @@ if (!book) {
 }
 
 const { title, subtitle, author } = book;
+const titleCharacters = Array.from(title);
+const fillsSixCharacterTitleWidth = titleCharacters.length < 6;
 
 let outline: OutlineItem[] = [];
 try {
@@ -156,9 +158,21 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
           <div class="bd-text-content" data-book-detail-content>
           <div class="bd-info">
             <div class="bd-title-block heti">
-              {book.series && <p class="bd-series">{book.series}</p>}
-              <h1 id="book-title" class:list={{ "bd-title--long": title.length > 12 }} data-pagefind-meta="title">
-                {title}
+              <p class:list={{ "bd-series": true, "bd-series--empty": !book.series }} aria-hidden={!book.series}>
+                {book.series || "\u00a0"}
+              </p>
+              <h1
+                id="book-title"
+                class:list={{
+                  "bd-title--long": titleCharacters.length > 12,
+                  "bd-title--fill-six": fillsSixCharacterTitleWidth,
+                  "bd-title--single": titleCharacters.length === 1,
+                }}
+                data-pagefind-meta="title"
+              >
+                {fillsSixCharacterTitleWidth
+                  ? titleCharacters.map((character) => <span>{character}</span>)
+                  : title}
               </h1>
               {subtitle && (
                 <p class="bd-subtitle" data-pagefind-meta="book_subtitle">

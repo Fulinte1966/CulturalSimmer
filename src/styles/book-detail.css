@@ -395,6 +395,10 @@ html {
   line-height: 1;
 }
 
+.bd-series--empty {
+  visibility: hidden;
+}
+
 .bd-title-block h1 {
   font-family: var(--font-display-compact);
   font-size: 84px;
@@ -408,6 +412,22 @@ html {
 .bd-title-block h1.bd-title--long {
   font-size: 72px;
   line-height: 1.04;
+}
+
+.bd-title-block h1.bd-title--fill-six {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  text-wrap: nowrap;
+  width: 4.5em;
+}
+
+.bd-title-block h1.bd-title--single {
+  justify-content: center;
+}
+
+.bd-title--fill-six > span {
+  flex: 0 0 auto;
 }
 
 .bd-subtitle {

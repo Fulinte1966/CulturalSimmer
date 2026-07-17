@@ -42,6 +42,11 @@ npm run fonts:subset
 
 CSS 的 `@font-face` 应继续指向 `public/fonts/subset/*.woff2` 并使用 `font-display: swap`。`npm run verify` 和生产部署都会执行双遍构建，因此构建产物以当次生成的字体为准。
 
+第二次构建完成后，`scripts/apply-public-asset-origin.mjs` 会根据实际 WOFF2
+内容生成 SHA-256 短指纹，并把它写入构建产物中的字体 URL 查询参数。字体内容
+变化时 URL 必然变化，因此浏览器和 CDN 可以长期缓存字体，而不会在发布新版后
+继续复用缺字的旧子集。不要手工填写或固定这个指纹。
+
 ## 验证
 
 1. 运行 `npm run fonts:refresh`；
