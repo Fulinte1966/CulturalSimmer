@@ -414,19 +414,19 @@ html {
   line-height: 1.04;
 }
 
-.bd-title-block h1.bd-title--fill-six {
+.bd-title-block h1.bd-title--fill-seven {
   align-items: center;
   display: flex;
   justify-content: space-between;
   text-wrap: nowrap;
-  width: 4.5em;
+  width: 5.25em;
 }
 
 .bd-title-block h1.bd-title--single {
   justify-content: center;
 }
 
-.bd-title--fill-six > span {
+.bd-title--fill-seven > span {
   flex: 0 0 auto;
 }
 

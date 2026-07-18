@@ -210,11 +210,11 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
                   <h1
                     id="fm-lead-title"
                     class:list={{
-                      "fm-title--fill-six": leadTitleLayout?.fillsSixCharacterWidth,
+                      "fm-title--fill-seven": leadTitleLayout?.fillsSevenCharacterWidth,
                       "fm-title--single": leadTitleLayout?.characters.length === 1,
                     }}
                   >
-                    {leadTitleLayout?.fillsSixCharacterWidth
+                    {leadTitleLayout?.fillsSevenCharacterWidth
                       ? leadTitleLayout.characters.map((character) => <span>{character}</span>)
                       : leadBook.title}
                   </h1>

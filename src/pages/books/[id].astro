@@ -39,7 +39,7 @@ if (!book) {
 const { title, subtitle, author } = book;
 const titleLayout = getBookTitleLayout(title);
 const titleCharacters = titleLayout.characters;
-const fillsSixCharacterTitleWidth = titleLayout.fillsSixCharacterWidth;
+const fillsSevenCharacterTitleWidth = titleLayout.fillsSevenCharacterWidth;
 
 let outline: OutlineItem[] = [];
 try {
@@ -169,12 +169,12 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                 id="book-title"
                 class:list={{
                   "bd-title--long": titleCharacters.length > 12,
-                  "bd-title--fill-six": fillsSixCharacterTitleWidth,
+                  "bd-title--fill-seven": fillsSevenCharacterTitleWidth,
                   "bd-title--single": titleCharacters.length === 1,
                 }}
                 data-pagefind-meta="title"
               >
-                {fillsSixCharacterTitleWidth
+                {fillsSevenCharacterTitleWidth
                   ? titleCharacters.map((character) => <span>{character}</span>)
                   : title}
               </h1>
