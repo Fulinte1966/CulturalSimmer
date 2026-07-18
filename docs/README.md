@@ -17,6 +17,7 @@
 ## 网站维护
 
 - [自动化与构建总览](automation-overview.md)：数据来源、工作流触发条件、权限、验证和失败边界。
+- [前端排版合同](frontend-layout.md)：七字宽书名、简讯分段符和响应式验收规则。
 - [勘误与网站问题流程](errata-workflow.md)：检查更新、Tally、GitHub Issues 与 Projects 的公开接口契约。
 - [本站消息维护规范](site-updates-workflow.md)：人工公告、自动消息、置顶、公开 feed 和归档。
 - [字体子集化](font-subsetting.md)：双遍构建和 WOFF2 生成。
