@@ -9,7 +9,7 @@
 电子书中的勘误二维码使用：
 
 ```text
-https://fulinte1966.github.io/CulturalSimmer/errata/?bookId={bookId}&edition={edition}
+https://fulinte.pages.dev/CulturalSimmer/errata/?bookId={bookId}&edition={edition}
 ```
 
 页面只接受仓库中存在的索书号和正整数版次：
