@@ -24,6 +24,7 @@ const books = allBooks.map((book) => ({
     : undefined,
   series: book.series,
   edition: book.edition,
+  editions: book.editions.map((edition) => edition.edition),
   coverUrl: book.coverUrl,
   coverFallbackUrl: book.coverFallbackUrl,
   spineUrl: book.spineUrl,

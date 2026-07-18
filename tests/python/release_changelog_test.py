@@ -25,6 +25,21 @@ class ReleaseChangelogTests(unittest.TestCase):
             "### 2026 年 6 月第 1 版\n\n初版发行\n",
         )
 
+    def test_earliest_surviving_edition_is_not_described_as_initial(self) -> None:
+        changelog = {
+            "bookId": "A93-1",
+            "baseline": "earliest-surviving",
+            "toEdition": {"edition": 2, "editionDate": "2026-07"},
+            "fromEdition": None,
+            "summary": {"total": 0, "added": 0, "removed": 0, "changed": 0},
+            "changes": [],
+        }
+        self.assertEqual(
+            render_release_changelog(changelog),
+            "### 2026 年 7 月第 2 版\n\n"
+            "现存最早版本（此前版次已撤回）\n",
+        )
+
     def test_replace_insert_delete_and_page_ranges_follow_template(self) -> None:
         side = {
             "pages": [12, 13],

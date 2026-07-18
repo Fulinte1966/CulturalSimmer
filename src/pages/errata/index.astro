@@ -8,6 +8,7 @@ const base = import.meta.env.BASE_URL;
 const books = allBooks.map((book) => ({
   id: book.id,
   edition: book.edition,
+  editions: book.editions.map((edition) => edition.edition),
   detailUrl: joinBasePath(base, `books/${book.id}/`),
 }));
 const routeData = JSON.stringify({

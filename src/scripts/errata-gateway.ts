@@ -3,6 +3,7 @@ import { resolveUpdateCheck } from "../lib/updateCheck";
 interface ErrataBook {
   id: string;
   edition: number;
+  editions: number[];
   detailUrl: string;
 }
 

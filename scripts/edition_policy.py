@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +15,7 @@ import yaml
 class EditionCheck:
     pdf_edition: int
     existing_editions: list[int]
+    reserved_editions: list[int]
     highest_existing_edition: int | None
     expected_edition: int
     ok: bool
@@ -53,6 +56,33 @@ def get_existing_editions(root: Path, book_id: str) -> list[int]:
     return sorted(editions)
 
 
+def get_reserved_editions(book_id: str, ledger_path: Path | None = None) -> list[int]:
+    """Return publicly used edition numbers recorded in the private ledger."""
+
+    configured = ledger_path or (
+        Path(value)
+        if (value := os.environ.get("CULTURALSIMMER_PUBLICATION_LEDGER"))
+        else None
+    )
+    if configured is None or not configured.is_file():
+        return []
+    value = json.loads(configured.read_text(encoding="utf-8"))
+    if not isinstance(value, dict) or value.get("schemaVersion") != 1:
+        raise ValueError("Publication ledger must use schemaVersion 1")
+    reserved: set[int] = set()
+    for record in value.get("removals", []):
+        if not isinstance(record, dict) or record.get("bookId") != book_id:
+            continue
+        editions = record.get("editions")
+        if not isinstance(editions, list):
+            raise ValueError("Publication ledger removal editions must be an array")
+        for edition in editions:
+            if not isinstance(edition, int) or isinstance(edition, bool) or edition < 1:
+                raise ValueError("Publication ledger editions must be positive integers")
+            reserved.add(edition)
+    return sorted(reserved)
+
+
 def find_previous_edition_record(
     root: Path, book_id: str, current_edition: int
 ) -> dict[str, Any] | None:
@@ -80,15 +110,19 @@ def check_expected_edition(
     pdf_edition: int,
     *,
     allow_edition_skip: bool = False,
+    ledger_path: Path | None = None,
 ) -> EditionCheck:
     existing = get_existing_editions(root, book_id)
-    highest = max(existing) if existing else None
+    reserved = get_reserved_editions(book_id, ledger_path)
+    used = sorted(set(existing) | set(reserved))
+    highest = max(used) if used else None
     expected = 1 if highest is None else highest + 1
 
-    if pdf_edition in existing:
+    if pdf_edition in used:
         return EditionCheck(
             pdf_edition=pdf_edition,
             existing_editions=existing,
+            reserved_editions=reserved,
             highest_existing_edition=highest,
             expected_edition=expected,
             ok=False,
@@ -99,6 +133,7 @@ def check_expected_edition(
         return EditionCheck(
             pdf_edition=pdf_edition,
             existing_editions=existing,
+            reserved_editions=reserved,
             highest_existing_edition=highest,
             expected_edition=expected,
             ok=True,
@@ -109,6 +144,7 @@ def check_expected_edition(
         return EditionCheck(
             pdf_edition=pdf_edition,
             existing_editions=existing,
+            reserved_editions=reserved,
             highest_existing_edition=highest,
             expected_edition=expected,
             ok=True,
@@ -120,6 +156,7 @@ def check_expected_edition(
         return EditionCheck(
             pdf_edition=pdf_edition,
             existing_editions=existing,
+            reserved_editions=reserved,
             highest_existing_edition=highest,
             expected_edition=expected,
             ok=False,
@@ -129,6 +166,7 @@ def check_expected_edition(
     return EditionCheck(
         pdf_edition=pdf_edition,
         existing_editions=existing,
+        reserved_editions=reserved,
         highest_existing_edition=highest,
         expected_edition=expected,
         ok=False,
@@ -145,7 +183,8 @@ def format_edition_check_lines(check: EditionCheck) -> list[str]:
     status = "通过" if check.ok else f"失败，{check.message}"
     return [
         f"PDF 声明版次：{check.pdf_edition}",
-        f"仓库已有最高版次：{highest}",
+        f"公开记录及私有台账中的历史最高版次：{highest}",
+        f"私有台账占用版次：{', '.join(map(str, check.reserved_editions)) or '无'}",
         f"脚本预期版次：{check.expected_edition}",
         f"版次校验：{status}",
     ]

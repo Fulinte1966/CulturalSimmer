@@ -1,6 +1,6 @@
 """PDF ingestion orchestration for GitHub Actions.
 
-Called by ``.github/workflows/ingest-pdf.yml``.  Subcommands:
+Called by ``.github/workflows/ebook-candidate.yml``.  Subcommands:
 
     validate   — download + extract + validate → JSON metadata
     changelog  — compare the previous PDF edition and prepare Release assets
@@ -222,6 +222,8 @@ def cmd_validate(args: list[str]):
     ap.add_argument("--release-tag", required=True)
     ap.add_argument("--output", required=True)
     ap.add_argument("--allow-edition-skip", action="store_true")
+    ap.add_argument("--allow-draft", action="store_true")
+    ap.add_argument("--source-commit")
     opts = ap.parse_args(args)
 
     if not opts.release_tag.startswith("ingest-"):
@@ -245,8 +247,11 @@ def cmd_validate(args: list[str]):
     if len(matching_assets) != 1:
         raise SystemExit("Unable to identify the source PDF asset")
     published_at = release.get("published_at")
-    if not published_at:
+    if not published_at and not opts.allow_draft:
         raise SystemExit("Intake Release has no publication timestamp")
+    source_timestamp = published_at or release.get("created_at")
+    if not source_timestamp:
+        raise SystemExit("Intake Release has no creation timestamp")
 
     # Extract metadata via shared extract_metadata module
     from extract_metadata import extract, MetadataError
@@ -326,7 +331,10 @@ def cmd_validate(args: list[str]):
         "tags": meta.tags,
         "language": meta.language,
         "date": _month_to_date(meta.edition_date),
-        "sourcePublishedAt": published_at,
+        "sourcePublishedAt": source_timestamp,
+        "sourceCommit": opts.source_commit,
+        "sourceWasDraft": bool(release.get("draft")),
+        "allowEditionSkip": allow_edition_skip,
         "series": meta.series,
         "volume": meta.volume,
         "totalVolumes": meta.total_volumes,

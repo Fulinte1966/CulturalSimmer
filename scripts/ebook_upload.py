@@ -93,7 +93,6 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("pdf")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--draft", action="store_true")
     parser.add_argument("--allow-edition-skip", action="store_true")
     args = parser.parse_args(argv)
 
@@ -166,13 +165,13 @@ def main(argv: list[str] | None = None) -> int:
             f"Allow-Edition-Skip: {str(args.allow_edition_skip).lower()}"
         ),
     ]
-    if args.draft:
-        release_args.append("--draft")
+    # Intake releases are always drafts. Publishing an ingest-* release would
+    # bypass candidate review and is intentionally not exposed by this CLI.
+    release_args.append("--draft")
 
     _gh(*release_args)
-    print(f"Temporary ingest Release created: {ingest_tag}")
-    if args.draft:
-        print("Draft mode enabled; publish the Release manually to trigger ingest.")
+    print(f"Draft intake Release created: {ingest_tag}")
+    print("Run the Ebook Candidate workflow to build and review the candidate site.")
     return 0
 
 

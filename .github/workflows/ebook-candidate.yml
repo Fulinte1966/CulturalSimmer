@@ -1,0 +1,274 @@
+name: Ebook Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Build a protected preview or promote an approved candidate
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - promote
+      draft_tag:
+        description: Draft ingest-* Release tag
+        required: true
+        type: string
+      candidate_sha256:
+        description: Approved PDF SHA-256 (required for promotion)
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ebook-candidate
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: inputs.mode == 'preview'
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PUBLICATION_LEDGER_TOKEN: ${{ secrets.PUBLICATION_LEDGER_TOKEN || secrets.NOTIFIER_DISPATCH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Load private publication ledger
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN"
+          GH_TOKEN="$PUBLICATION_LEDGER_TOKEN" gh api \
+            repos/Fulinte1966/CulturalSimmer-notifier/contents/state/publication-removals.json \
+            --jq .content | base64 --decode > _publication-ledger.json
+          echo "CULTURALSIMMER_PUBLICATION_LEDGER=$GITHUB_WORKSPACE/_publication-ledger.json" >> "$GITHUB_ENV"
+
+      - name: Download and identify Draft intake
+        id: intake
+        run: |
+          mkdir -p _candidate_workspace
+          gh release download "${{ inputs.draft_tag }}" --dir _candidate_workspace
+          release_id="$(gh release view "${{ inputs.draft_tag }}" --json databaseId,isDraft --jq 'select(.isDraft) | .databaseId')"
+          test -n "$release_id"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          allow_skip="$(gh release view "${{ inputs.draft_tag }}" --json body --jq '.body | contains("Allow-Edition-Skip: true")')"
+          echo "allow_edition_skip=$allow_skip" >> "$GITHUB_OUTPUT"
+
+      - name: Build candidate content
+        env:
+          ALLOW_EDITION_SKIP: ${{ steps.intake.outputs.allow_edition_skip }}
+        run: |
+          python scripts/ingest_pdf.py validate \
+            --workspace _candidate_workspace \
+            --release-id "${{ steps.intake.outputs.release_id }}" \
+            --release-tag "${{ inputs.draft_tag }}" \
+            --allow-draft \
+            --source-commit "${{ steps.intake.outputs.source_commit }}" \
+            --output _candidate.json
+          python scripts/ingest_pdf.py changelog \
+            --metadata _candidate.json \
+            --workspace _candidate_workspace
+          python scripts/ingest_pdf.py generate \
+            --metadata _candidate.json \
+            --workspace _candidate_workspace
+          python scripts/candidate_lock.py create \
+            --metadata _candidate.json \
+            --output _candidate_workspace/candidate-lock.json
+          npm run verify
+
+      - name: Package protected preview
+        env:
+          CLOUDFLARE_CANDIDATE_PDF_DIR: ${{ github.workspace }}/_candidate_workspace
+        run: npm run cloudflare:prepare -- dist cloudflare-candidate-dist
+
+      - name: Deploy candidate preview
+        run: >-
+          npm exec wrangler -- pages deploy cloudflare-candidate-dist
+          --project-name=fulinte
+          --branch=ebook-preview
+          --commit-hash="${{ steps.intake.outputs.source_commit }}"
+          --commit-message="Ebook candidate ${{ inputs.draft_tag }}"
+          --commit-dirty=true
+
+      - name: Attach immutable candidate lock
+        run: >-
+          gh release upload "${{ inputs.draft_tag }}"
+          _candidate_workspace/candidate-lock.json
+          --clobber
+
+      - name: Candidate summary
+        run: |
+          {
+            echo "## Ebook candidate"
+            echo
+            echo "Draft: \`${{ inputs.draft_tag }}\`"
+            echo "Source commit: \`${{ steps.intake.outputs.source_commit }}\`"
+            echo "PDF SHA-256: \`$(jq -r .pdfSha256 _candidate_workspace/candidate-lock.json)\`"
+            echo
+            echo "Promotion requires the same source commit, Draft Release, and PDF digest."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  approval:
+    if: inputs.mode == 'promote'
+    runs-on: ubuntu-latest
+    environment: ebook-production
+    steps:
+      - run: echo "Ebook candidate promotion approved."
+
+  promote:
+    if: inputs.mode == 'promote'
+    needs: approval
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PUBLICATION_LEDGER_TOKEN: ${{ secrets.PUBLICATION_LEDGER_TOKEN || secrets.NOTIFIER_DISPATCH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Load private publication ledger
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN"
+          GH_TOKEN="$PUBLICATION_LEDGER_TOKEN" gh api \
+            repos/Fulinte1966/CulturalSimmer-notifier/contents/state/publication-removals.json \
+            --jq .content | base64 --decode > _publication-ledger.json
+          echo "CULTURALSIMMER_PUBLICATION_LEDGER=$GITHUB_WORKSPACE/_publication-ledger.json" >> "$GITHUB_ENV"
+
+      - name: Download approved Draft intake
+        id: intake
+        run: |
+          test -n "${{ inputs.candidate_sha256 }}" || {
+            echo "::error::candidate_sha256 is required for promotion"
+            exit 1
+          }
+          mkdir -p _candidate_workspace
+          gh release download "${{ inputs.draft_tag }}" --dir _candidate_workspace
+          release_id="$(gh release view "${{ inputs.draft_tag }}" --json databaseId,isDraft --jq 'select(.isDraft) | .databaseId')"
+          test -n "$release_id"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+          echo "source_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          allow_skip="$(gh release view "${{ inputs.draft_tag }}" --json body --jq '.body | contains("Allow-Edition-Skip: true")')"
+          echo "allow_edition_skip=$allow_skip" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild and verify approval lock
+        env:
+          ALLOW_EDITION_SKIP: ${{ steps.intake.outputs.allow_edition_skip }}
+        run: |
+          python scripts/ingest_pdf.py validate \
+            --workspace _candidate_workspace \
+            --release-id "${{ steps.intake.outputs.release_id }}" \
+            --release-tag "${{ inputs.draft_tag }}" \
+            --allow-draft \
+            --source-commit "${{ steps.intake.outputs.source_commit }}" \
+            --output _candidate.json
+          jq -e --arg expected "${{ inputs.candidate_sha256 }}" \
+            '.pdfSha256 == $expected' _candidate_workspace/candidate-lock.json
+          python scripts/candidate_lock.py verify \
+            --metadata _candidate.json \
+            --lock _candidate_workspace/candidate-lock.json \
+            --source-commit "${{ steps.intake.outputs.source_commit }}"
+          python scripts/ingest_pdf.py changelog \
+            --metadata _candidate.json \
+            --workspace _candidate_workspace
+          python scripts/ingest_pdf.py generate \
+            --metadata _candidate.json \
+            --workspace _candidate_workspace
+          npm run verify
+
+      - name: Create canonical Release
+        id: release
+        run: |
+          python scripts/ingest_pdf.py publish \
+            --metadata _candidate.json \
+            --workspace _candidate_workspace
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit generated content
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/books/ src/data/ public/covers/ public/fonts/subset/ docs/site-updates-archive.md
+          git commit -m "$(python scripts/ingest_pdf.py commit-message --metadata _candidate.json)"
+          git pull --rebase origin main
+          git push origin main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Roll back an uncommitted canonical Release
+        if: >-
+          failure() &&
+          steps.release.outputs.published == 'true' &&
+          steps.commit.outputs.pushed != 'true'
+        run: |
+          python scripts/ingest_pdf.py cleanup \
+            --metadata _candidate.json \
+            --release-tag "${{ inputs.draft_tag }}" \
+            --push-success false
+
+      - name: Wait for production deployment
+        run: |
+          for _ in $(seq 1 60); do
+            conclusion="$(gh run list --workflow deploy.yml --commit "${{ steps.commit.outputs.sha }}" --json status,conclusion --limit 1 --jq '.[0] | if .status == "completed" then .conclusion else .status end' 2>/dev/null || true)"
+            case "$conclusion" in
+              success) exit 0 ;;
+              failure|cancelled|timed_out|action_required)
+                echo "::error::Production deployment ended with $conclusion"
+                exit 1
+                ;;
+            esac
+            sleep 15
+          done
+          echo "::error::Timed out waiting for production deployment"
+          exit 1
+
+      - name: Mark historical Releases as superseded
+        run: >-
+          python scripts/publication_lifecycle.py
+          mark-superseded-from-metadata
+          --metadata _candidate.json
+
+      - name: Remove Draft intake and preview
+        run: |
+          npm run cloudflare:prepare -- dist cloudflare-clean-dist
+          npm exec wrangler -- pages deploy cloudflare-clean-dist \
+            --project-name=fulinte \
+            --branch=ebook-preview \
+            --commit-hash="${{ steps.commit.outputs.sha }}" \
+            --commit-message="Clear ebook candidate preview" \
+            --commit-dirty=true
+          python scripts/ingest_pdf.py cleanup \
+            --metadata _candidate.json \
+            --release-tag "${{ inputs.draft_tag }}" \
+            --push-success true

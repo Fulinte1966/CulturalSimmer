@@ -25,6 +25,11 @@ def validate_changelog_metadata(changelog: dict[str, Any]) -> None:
         raise ValueError("changelog bookId must be a non-empty string")
     _validate_edition(changelog.get("fromEdition"), "fromEdition", optional=True)
     _validate_edition(changelog.get("toEdition"), "toEdition")
+    baseline = changelog.get("baseline")
+    if baseline not in {None, "earliest-surviving"}:
+        raise ValueError("changelog baseline must be earliest-surviving when set")
+    if baseline == "earliest-surviving" and changelog.get("fromEdition") is not None:
+        raise ValueError("earliest-surviving changelog must not define fromEdition")
 
 
 def _validate_side(side: Any, field: str) -> None:

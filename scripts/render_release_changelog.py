@@ -69,7 +69,11 @@ def render_release_changelog(
     lines = [f"### {_edition_label(current)}", ""]
     previous = changelog.get("fromEdition")
     if previous is None:
-        lines.append("初版发行")
+        lines.append(
+            "现存最早版本（此前版次已撤回）"
+            if changelog.get("baseline") == "earliest-surviving"
+            else "初版发行"
+        )
         return "\n".join(lines) + "\n"
 
     summary = calculate_changelog_summary(changelog)

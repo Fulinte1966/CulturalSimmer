@@ -11,6 +11,7 @@ interface CheckBook {
   author?: string;
   series?: string;
   edition: number;
+  editions: number[];
   coverUrl?: string;
   coverFallbackUrl?: string;
   spineUrl?: string;
@@ -24,7 +25,7 @@ const statusLabels: Record<UpdateCheckStatus, string> = {
   current: "已是最新",
   outdated: "已有新版",
   "invalid-edition": "版本有误",
-  "unknown-book": "书目未录",
+  unavailable: "资源不可用",
   "invalid-request": "链接有误",
 };
 
@@ -127,13 +128,13 @@ const renderBook = (book: CheckBook) => {
   cover.hidden = false;
 };
 
-if (result.book) {
+if (result.book && result.status !== "unavailable") {
   renderBook(result.book);
 } else {
   const coverStage = document.querySelector<HTMLElement>(".bd-cover-stage");
   if (coverStage) coverStage.hidden = true;
   setText("[data-check-title]", "检查更新");
-  setText("[data-check-author]", "未找到对应书目");
+  setText("[data-check-author]", "该资源当前无法访问");
 }
 renderStatus(result.status);
 

@@ -1,13 +1,14 @@
 export interface UpdateCheckBook {
   id: string;
   edition: number;
+  editions?: readonly number[];
 }
 
 export type UpdateCheckStatus =
   | "current"
   | "outdated"
   | "invalid-edition"
-  | "unknown-book"
+  | "unavailable"
   | "invalid-request";
 
 export interface UpdateCheckResult<T extends UpdateCheckBook> {
@@ -25,7 +26,7 @@ export function resolveUpdateCheck<T extends UpdateCheckBook>(
   if (!bookId) return { status: "invalid-request" };
 
   const book = books.find((candidate) => candidate.id === bookId);
-  if (!book) return { status: "unknown-book" };
+  if (!book) return { status: "unavailable" };
 
   if (!editionValue || !/^[1-9]\d*$/.test(editionValue)) {
     return { status: "invalid-edition", book };
@@ -39,7 +40,11 @@ export function resolveUpdateCheck<T extends UpdateCheckBook>(
     return { status: "current", book, requestedEdition };
   }
   if (requestedEdition < book.edition) {
-    return { status: "outdated", book, requestedEdition };
+    const availableEditions = book.editions ?? [book.edition];
+    if (availableEditions.includes(requestedEdition)) {
+      return { status: "outdated", book, requestedEdition };
+    }
+    return { status: "unavailable", requestedEdition };
   }
-  return { status: "invalid-edition", book, requestedEdition };
+  return { status: "unavailable", requestedEdition };
 }
