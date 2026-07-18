@@ -231,6 +231,40 @@ test("hosts only the latest PDF and rewrites only the Cloudflare copy", async ()
   fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
 });
 
+test("uses the local candidate PDF without requesting the canonical Release", async () => {
+  const fixture = createCloudflareFixture();
+  const candidateDirectory = path.join(fixture.temporaryDirectory, "candidate");
+  fs.mkdirSync(candidateDirectory);
+  fs.writeFileSync(
+    path.join(candidateDirectory, "A93-1_v2.pdf"),
+    fixture.latestPdf,
+  );
+
+  const result = await prepareCloudflareSite({
+    sourceDirectory: fixture.sourceDirectory,
+    destinationDirectory: fixture.destinationDirectory,
+    repositoryDirectory: fixture.repositoryDirectory,
+    localPdfDirectory: candidateDirectory,
+    downloadImpl: async () => {
+      throw new Error("The canonical Release must not be requested");
+    },
+  });
+
+  assert.equal(result.hostedPdfCount, 1);
+  assert.deepEqual(
+    fs.readFileSync(
+      path.join(
+        fixture.destinationDirectory,
+        "CulturalSimmer",
+        "downloads",
+        "A93-1_v2.pdf",
+      ),
+    ),
+    fixture.latestPdf,
+  );
+  fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
+});
+
 test("removes an incomplete Cloudflare site when PDF verification fails", async () => {
   const fixture = createCloudflareFixture();
 

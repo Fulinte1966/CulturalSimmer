@@ -1,0 +1,285 @@
+name: Remove Publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Build a protected preview or perform the approved removal
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - promote
+      operation:
+        description: Lifecycle operation
+        required: true
+        type: choice
+        options:
+          - withdraw-edition
+          - delist-book
+      book_id:
+        description: Book call number
+        required: true
+        type: string
+      edition:
+        description: Edition number for withdraw-edition; empty for delist-book
+        required: false
+        type: string
+      reason_sha256:
+        description: SHA-256 of the private ledger reason
+        required: true
+        type: string
+      inventory_sha256:
+        description: Digest printed by the local encrypted-backup plan
+        required: true
+        type: string
+      confirmation:
+        description: Exact WITHDRAW or DELIST confirmation phrase
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publication-removal
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    if: inputs.mode == 'preview'
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PUBLICATION_LEDGER_TOKEN: ${{ secrets.PUBLICATION_LEDGER_TOKEN || secrets.NOTIFIER_DISPATCH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Verify private ledger registration
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN"
+          GH_TOKEN="$PUBLICATION_LEDGER_TOKEN" gh api \
+            repos/Fulinte1966/CulturalSimmer-notifier/contents/state/publication-removals.json \
+            --jq .content | base64 --decode > _publication-ledger.json
+          jq -e \
+            --arg inventory "${{ inputs.inventory_sha256 }}" \
+            --arg operation "${{ inputs.operation }}" \
+            --arg book_id "${{ inputs.book_id }}" \
+            '.removals[] | select(
+              .inventorySha256 == $inventory and
+              .operation == $operation and
+              .bookId == $book_id and
+              (.status == "registered" or .status == "failed")
+            )' _publication-ledger.json >/dev/null
+
+      - name: Recreate and verify removal inventory
+        run: |
+          edition_args=()
+          if [[ -n "${{ inputs.edition }}" ]]; then
+            edition_args=(--edition "${{ inputs.edition }}")
+          fi
+          python scripts/publication_lifecycle.py plan \
+            --operation "${{ inputs.operation }}" \
+            --book-id "${{ inputs.book_id }}" \
+            "${edition_args[@]}" \
+            --reason-digest "${{ inputs.reason_sha256 }}" \
+            --output _removal-plan.json
+          test "$(jq -r .inventorySha256 _removal-plan.json)" = "${{ inputs.inventory_sha256 }}"
+          python scripts/publication_lifecycle.py verify \
+            --plan _removal-plan.json --remote
+
+      - name: Apply removal to candidate tree
+        run: |
+          python scripts/publication_lifecycle.py apply \
+            --plan _removal-plan.json \
+            --confirmation "${{ inputs.confirmation }}" \
+            --workspace _removal_workspace \
+            --output _removal-result.json
+          npm run verify
+
+      - name: Package and deploy protected preview
+        run: |
+          npm run cloudflare:prepare -- dist cloudflare-removal-dist
+          npm exec wrangler -- pages deploy cloudflare-removal-dist \
+            --project-name=fulinte \
+            --branch=removal-preview \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message="Removal candidate ${{ inputs.inventory_sha256 }}" \
+            --commit-dirty=true
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: removal-candidate-${{ inputs.inventory_sha256 }}
+          path: |
+            _removal-plan.json
+            _removal-result.json
+          if-no-files-found: error
+          retention-days: 7
+
+  approval:
+    if: inputs.mode == 'promote'
+    runs-on: ubuntu-latest
+    environment: ebook-production
+    steps:
+      - run: echo "Publication removal approved."
+
+  promote:
+    if: inputs.mode == 'promote'
+    needs: approval
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      PUBLICATION_LEDGER_TOKEN: ${{ secrets.PUBLICATION_LEDGER_TOKEN || secrets.NOTIFIER_DISPATCH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Verify private ledger registration
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN"
+          GH_TOKEN="$PUBLICATION_LEDGER_TOKEN" gh api \
+            repos/Fulinte1966/CulturalSimmer-notifier/contents/state/publication-removals.json \
+            --jq .content | base64 --decode > _publication-ledger.json
+          jq -e \
+            --arg inventory "${{ inputs.inventory_sha256 }}" \
+            --arg operation "${{ inputs.operation }}" \
+            --arg book_id "${{ inputs.book_id }}" \
+            '.removals[] | select(
+              .inventorySha256 == $inventory and
+              .operation == $operation and
+              .bookId == $book_id and
+              (.status == "registered" or .status == "failed")
+            )' _publication-ledger.json >/dev/null
+
+      - name: Recreate approved transaction
+        run: |
+          edition_args=()
+          if [[ -n "${{ inputs.edition }}" ]]; then
+            edition_args=(--edition "${{ inputs.edition }}")
+          fi
+          python scripts/publication_lifecycle.py plan \
+            --operation "${{ inputs.operation }}" \
+            --book-id "${{ inputs.book_id }}" \
+            "${edition_args[@]}" \
+            --reason-digest "${{ inputs.reason_sha256 }}" \
+            --output _removal-plan.json
+          test "$(jq -r .inventorySha256 _removal-plan.json)" = "${{ inputs.inventory_sha256 }}"
+          python scripts/publication_lifecycle.py verify \
+            --plan _removal-plan.json --remote
+          python scripts/publication_lifecycle.py apply \
+            --plan _removal-plan.json \
+            --confirmation "${{ inputs.confirmation }}" \
+            --workspace _removal_workspace \
+            --output _removal-result.json
+          npm run verify
+
+      - name: Publish clean repository state
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/ src/data/ public/covers/ public/fonts/subset/ docs/site-updates-archive.md
+          suffix=""
+          if [[ -n "${{ inputs.edition }}" ]]; then
+            suffix="_v${{ inputs.edition }}"
+          fi
+          git commit -m "content: ${{ inputs.operation }} ${{ inputs.book_id }}$suffix"
+          git pull --rebase origin main
+          git push origin main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for clean production deployment
+        run: |
+          for _ in $(seq 1 60); do
+            conclusion="$(gh run list --workflow deploy.yml --commit "${{ steps.commit.outputs.sha }}" --json status,conclusion --limit 1 --jq '.[0] | if .status == "completed" then .conclusion else .status end' 2>/dev/null || true)"
+            case "$conclusion" in
+              success) exit 0 ;;
+              failure|cancelled|timed_out|action_required) exit 1 ;;
+            esac
+            sleep 15
+          done
+          exit 1
+
+      - name: Replace persistent previews with clean content
+        run: |
+          npm run cloudflare:prepare -- dist cloudflare-clean-dist
+          for branch in ebook-preview removal-preview; do
+            npm exec wrangler -- pages deploy cloudflare-clean-dist \
+              --project-name=fulinte \
+              --branch="$branch" \
+              --commit-hash="${{ steps.commit.outputs.sha }}" \
+              --commit-message="Clean preview after publication removal" \
+              --commit-dirty=true
+          done
+
+      - name: Remove Releases, tags, and stale Cloudflare deployments
+        run: |
+          python scripts/publication_lifecycle.py finalize-remote \
+            --plan _removal-plan.json \
+            --result _removal-result.json
+          node scripts/cleanup-cloudflare-deployments.mjs
+
+      - name: Record private ledger result
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN"
+          payload="$(jq -n \
+            --arg ref main \
+            --arg operation "${{ inputs.operation }}" \
+            --arg book_id "${{ inputs.book_id }}" \
+            --arg edition "${{ inputs.edition }}" \
+            --arg inventory "${{ inputs.inventory_sha256 }}" \
+            '{ref:$ref, inputs:{phase:"completed", operation:$operation, book_id:$book_id, inventory_sha256:$inventory}}')"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $PUBLICATION_LEDGER_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$payload" \
+            "https://api.github.com/repos/Fulinte1966/CulturalSimmer-notifier/actions/workflows/record-publication-removal.yml/dispatches"
+
+      - name: Record an incomplete removal
+        if: failure()
+        run: |
+          test -n "$PUBLICATION_LEDGER_TOKEN" || exit 0
+          payload="$(jq -n \
+            --arg ref main \
+            --arg operation "${{ inputs.operation }}" \
+            --arg book_id "${{ inputs.book_id }}" \
+            --arg inventory "${{ inputs.inventory_sha256 }}" \
+            '{ref:$ref, inputs:{phase:"failed", operation:$operation, book_id:$book_id, inventory_sha256:$inventory}}')"
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $PUBLICATION_LEDGER_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$payload" \
+            "https://api.github.com/repos/Fulinte1966/CulturalSimmer-notifier/actions/workflows/record-publication-removal.yml/dispatches"

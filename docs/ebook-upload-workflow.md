@@ -2,7 +2,7 @@
 
 **适用对象：** 电子书制作者与仓库维护者。
 
-本文档记录当前 PDF 上传、临时 Release、自动导入、正式发布和网页部署流程。
+本文档记录当前 PDF Draft、候选预览、人工批准、正式发布和网页部署流程。撤回与下架见[发布生命周期](publication-lifecycle.md)。
 
 ## 核心原则
 
@@ -15,7 +15,7 @@
 
 ## 本地上传入口
 
-推荐使用本地命令创建临时 ingest Release：
+推荐使用本地命令创建 Draft ingest Release：
 
 ```bash
 npm run ebook:upload path/to/book.pdf
@@ -25,7 +25,6 @@ npm run ebook:upload path/to/book.pdf
 
 ```bash
 npm run ebook:upload path/to/book.pdf -- --dry-run
-npm run ebook:upload path/to/book.pdf -- --draft
 npm run ebook:upload path/to/book.pdf -- --allow-edition-skip
 ```
 
@@ -37,7 +36,7 @@ mise run setup
 mise exec -- npm run ebook:upload path/to/book.pdf -- --dry-run
 ```
 
-`--dry-run` 只做 preflight，不创建 Release。输出会包含：
+`--dry-run` 只做 preflight，不创建 Release。非 dry-run 上传始终创建 Draft，命令不提供绕过候选审批的正式发布开关。输出会包含：
 
 - 书名、索书号、PDF 声明版次；
 - 内容提要摘要；
@@ -113,10 +112,10 @@ docs/latex/culturalsimmer-ebook-metadata.sty
 
 ## 版次校验规则
 
-导入前会读取 `src/content/books/{bookId}.md` 中的 `editions[]`。
+导入前会同时读取 `src/content/books/{bookId}.md` 中的 `editions[]` 和私有删除台账。
 
 - 新书没有历史记录时，预期版次为 `1`。
-- 已有历史记录时，预期版次为已有最大 `edition + 1`。
+- 已有或已删除的历史记录存在时，预期版次为历史最大 `edition + 1`。
 - PDF 声明的 `prism:bookEdition` 等于预期版次才通过。
 - 重复版次永远失败。
 - 默认不允许跳版。
@@ -126,7 +125,7 @@ docs/latex/culturalsimmer-ebook-metadata.sty
 
 ```txt
 PDF 声明版次：2
-仓库已有最高版次：1
+公开记录及私有台账中的历史最高版次：1
 脚本预期版次：2
 版次校验：通过
 ```
@@ -135,32 +134,34 @@ PDF 声明版次：2
 
 ```txt
 PDF 声明版次：2
-仓库已有最高版次：2
+公开记录及私有台账中的历史最高版次：2
 脚本预期版次：3
 版次校验：失败，该版次已存在，应为第 3 版
 ```
 
-## 自动导入流程
+## 候选与正式导入流程
 
 ```text
-本地脚本创建 ingest-* Release
-  -> GitHub Actions 下载 Release 中唯一 PDF
+本地脚本创建 Draft ingest-* Release
+  -> Ebook Candidate preview 下载并锁定唯一 PDF
   -> 读取并校验 PDF XMP 元数据
   -> 校验 PDF 版次是否等于仓库预期版次
   -> 查找同一书目中小于当前版次的最大历史版次
   -> 下载旧版快照或 PDF，生成当前快照和结构化 changelog
   -> 生成 Markdown、manifest、封面、书脊、目录和阅读数据
   -> 合并该书各版更新日志并生成单书总更新日志
-  -> 运行检查、测试和生产构建
+  -> 运行检查、测试和生产构建并部署 Access 保护候选站
+  -> 人工核对候选站并在 ebook-production Environment 批准
+  -> 重新校验 PDF、Draft Release、源提交和候选锁
   -> 创建正式 Release 并上传 PDF、快照、changelog
   -> 读取 GitHub Release asset digest 写入 manifest
   -> 上传最终 manifest
   -> 提交生成文件到 main
-  -> 删除临时 Release 和临时 tag
+  -> 生产站部署成功后删除 Draft Release 和候选预览
   -> main push 触发 Cloudflare Pages 主站和 GitHub Pages 备份部署
 ```
 
-`Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
+`Ebook Candidate` workflow 使用全局并发锁，避免多个候选或晋级同时处理。正常发布后不会即时广播；QQ 与 ntfy 每日定时读取公开 feed。
 
 入库前的统一验证入口为 `npm run verify`。该命令在测试和数据校验通过后执行
 “构建、字体子集化、再次构建”，确保构建期数据中的实际用字进入 WOFF2。

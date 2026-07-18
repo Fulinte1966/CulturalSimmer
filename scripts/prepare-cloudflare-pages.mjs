@@ -273,7 +273,7 @@ async function sha256File(filePath) {
 export async function copyLatestPdfs(
   siteDirectory,
   releases,
-  { downloadImpl = downloadReleaseAsset } = {},
+  { downloadImpl = downloadReleaseAsset, localPdfDirectory } = {},
 ) {
   if (typeof downloadImpl !== "function") {
     throw new Error("A release asset downloader is required");
@@ -293,7 +293,14 @@ export async function copyLatestPdfs(
     const temporaryPath = `${targetPath}.part`;
 
     try {
-      await downloadImpl(release.downloadUrl, temporaryPath);
+      const localCandidate = localPdfDirectory
+        ? path.join(localPdfDirectory, release.pdfFilename)
+        : undefined;
+      if (localCandidate && fs.existsSync(localCandidate) && fs.statSync(localCandidate).isFile()) {
+        fs.copyFileSync(localCandidate, temporaryPath);
+      } else {
+        await downloadImpl(release.downloadUrl, temporaryPath);
+      }
       const bytes = fs.statSync(temporaryPath).size;
       if (bytes > CLOUDFLARE_PAGES_FILE_SIZE_LIMIT) {
         throw new Error(
@@ -401,11 +408,21 @@ export function rewriteCloudflareDownloadLinks(siteDirectory, releases) {
   );
 }
 
+/**
+ * @param {{
+ *   sourceDirectory: string,
+ *   destinationDirectory: string,
+ *   repositoryDirectory: string,
+ *   downloadImpl?: (downloadUrl: string, destinationPath: string) => Promise<void>,
+ *   localPdfDirectory?: string,
+ * }} options
+ */
 export async function prepareCloudflareSite({
   sourceDirectory,
   destinationDirectory,
   repositoryDirectory,
   downloadImpl = downloadReleaseAsset,
+  localPdfDirectory,
 }) {
   try {
     const result = prepareCloudflarePages(
@@ -415,6 +432,7 @@ export async function prepareCloudflareSite({
     const releases = loadLatestPdfReleases(repositoryDirectory);
     await copyLatestPdfs(result.siteDirectory, releases, {
       downloadImpl,
+      localPdfDirectory,
     });
     const rewrittenLinkCount = rewriteCloudflareDownloadLinks(
       result.siteDirectory,
@@ -443,10 +461,14 @@ if (isMainModule) {
     process.argv[3] ?? "cloudflare-dist",
   );
   const repositoryDirectory = path.resolve(process.argv[4] ?? ".");
+  const localPdfDirectory = process.env.CLOUDFLARE_CANDIDATE_PDF_DIR
+    ? path.resolve(process.env.CLOUDFLARE_CANDIDATE_PDF_DIR)
+    : undefined;
   const result = await prepareCloudflareSite({
     sourceDirectory,
     destinationDirectory,
     repositoryDirectory,
+    localPdfDirectory,
   });
   console.log(
     `Prepared ${result.fileCount} Cloudflare Pages file(s), hosted ${result.hostedPdfCount} latest PDF(s), and rewrote ${result.rewrittenLinkCount} download link(s).`,

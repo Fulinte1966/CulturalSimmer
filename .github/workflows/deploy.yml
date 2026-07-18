@@ -7,12 +7,6 @@ on:
   schedule:
     - cron: "0 16 * * *" # UTC 16:00 = Beijing 00:00, daily weather refresh
   workflow_dispatch:
-    inputs:
-      notify_updates:
-        description: Dispatch reader notifications after a successful deployment
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -122,48 +116,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-
-  notify:
-    if: github.event_name == 'workflow_dispatch' && inputs.notify_updates
-    continue-on-error: true
-    needs: deploy-cloudflare
-    permissions: {}
-    runs-on: ubuntu-latest
-    steps:
-      - id: dispatch
-        name: Dispatch reader notification workflows
-        env:
-          NOTIFIER_DISPATCH_TOKEN: ${{ secrets.NOTIFIER_DISPATCH_TOKEN }}
-        run: |
-          if [[ -z "$NOTIFIER_DISPATCH_TOKEN" ]]; then
-            echo "::warning::NOTIFIER_DISPATCH_TOKEN is not configured; scheduled notification polling remains available."
-            exit 1
-          fi
-
-          api_root="https://api.github.com/repos/Fulinte1966/CulturalSimmer-notifier/actions/workflows"
-          payload='{"ref":"main","inputs":{"mode":"live"}}'
-          status=0
-          for workflow in notify.yml notify-ntfy.yml; do
-            if ! curl --fail --silent --show-error \
-              --request POST \
-              --header "Accept: application/vnd.github+json" \
-              --header "Authorization: Bearer $NOTIFIER_DISPATCH_TOKEN" \
-              --header "X-GitHub-Api-Version: 2022-11-28" \
-              --data "$payload" \
-              "$api_root/$workflow/dispatches"; then
-              status=1
-            fi
-          done
-          exit "$status"
-
-      - name: Record notification dispatch status
-        if: always()
-        env:
-          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
-        run: |
-          {
-            echo "## Reader notification dispatch"
-            echo
-            echo "Dispatch outcome: \`$DISPATCH_OUTCOME\`."
-            echo "Daily notifier polling remains the independent fallback."
-          } >> "$GITHUB_STEP_SUMMARY"

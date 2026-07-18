@@ -152,7 +152,7 @@ Release 中的 `{releaseTag}.content.json.gz` 使用以下字段：
 
 ## Release 与失败处理
 
-当前项目沿用自动正式发布，不改为 Draft Release。正式 Release 创建前必须完成快照、差异和 Markdown 生成。Release 资产包括：
+当前项目先创建 Draft intake，并在受保护候选站完成验收。正式 Release 创建前必须重新验证候选锁，并完成快照、差异和 Markdown 生成。Release 资产包括：
 
 ```text
 F0-1-1_v2.pdf
