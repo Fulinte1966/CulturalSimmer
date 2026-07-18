@@ -8,10 +8,14 @@ import test from "node:test";
 import {
   CLOUDFLARE_PAGES_FILE_SIZE_LIMIT,
   prepareCloudflarePages,
-  prepareCloudflareMirror,
+  prepareCloudflareSite,
 } from "../../scripts/prepare-cloudflare-pages.mjs";
+import {
+  PRIMARY_ORIGIN,
+  prepareLegacyRedirect,
+} from "../../scripts/prepare-cloudflare-legacy-redirect.mjs";
 
-function createMirrorFixture() {
+function createCloudflareFixture() {
   const temporaryDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), "culturalsimmer-cloudflare-"),
   );
@@ -93,7 +97,7 @@ Fixture
   );
   fs.writeFileSync(
     path.join(sourceDirectory, "books", "A93-1", "index.html"),
-    `<!doctype html><html><head><link rel="canonical" href="https://fulinte1966.github.io/CulturalSimmer/books/A93-1/"></head><body><a class="bd-download" href="https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf" data-cloudflare-download="A93-1_v2.pdf">Download</a></body></html>`,
+    `<!doctype html><html><head><link rel="canonical" href="https://fulinte.pages.dev/CulturalSimmer/books/A93-1/"></head><body><a class="bd-download" href="https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf" data-cloudflare-download="A93-1_v2.pdf">Download</a></body></html>`,
   );
 
   return {
@@ -135,7 +139,7 @@ test("wraps the existing build under the public base path", () => {
     fs.readFileSync(path.join(destinationDirectory, "_redirects"), "utf8"),
     /^\/ \/CulturalSimmer\/ 301/m,
   );
-  assert.match(
+  assert.doesNotMatch(
     fs.readFileSync(path.join(destinationDirectory, "_headers"), "utf8"),
     /X-Robots-Tag: noindex/,
   );
@@ -143,11 +147,11 @@ test("wraps the existing build under the public base path", () => {
   fs.rmSync(temporaryDirectory, { recursive: true, force: true });
 });
 
-test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async () => {
-  const fixture = createMirrorFixture();
+test("hosts only the latest PDF and rewrites only the Cloudflare copy", async () => {
+  const fixture = createCloudflareFixture();
   const requestedUrls: string[] = [];
 
-  const result = await prepareCloudflareMirror({
+  const result = await prepareCloudflareSite({
     sourceDirectory: fixture.sourceDirectory,
     destinationDirectory: fixture.destinationDirectory,
     repositoryDirectory: fixture.repositoryDirectory,
@@ -157,7 +161,7 @@ test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async 
     },
   });
 
-  assert.equal(result.mirroredPdfCount, 1);
+  assert.equal(result.hostedPdfCount, 1);
   assert.equal(result.rewrittenLinkCount, 1);
   assert.deepEqual(requestedUrls, [
     "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf",
@@ -185,7 +189,7 @@ test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async 
     false,
   );
 
-  const mirrorHtml = fs.readFileSync(
+  const cloudflareHtml = fs.readFileSync(
     path.join(
       fixture.destinationDirectory,
       "CulturalSimmer",
@@ -196,14 +200,14 @@ test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async 
     "utf8",
   );
   assert.match(
-    mirrorHtml,
+    cloudflareHtml,
     /href="\/CulturalSimmer\/downloads\/A93-1_v2\.pdf"/,
   );
-  assert.match(mirrorHtml, /download="A93-1_v2\.pdf"/);
-  assert.doesNotMatch(mirrorHtml, /data-cloudflare-download/);
+  assert.match(cloudflareHtml, /download="A93-1_v2\.pdf"/);
+  assert.doesNotMatch(cloudflareHtml, /data-cloudflare-download/);
   assert.match(
-    mirrorHtml,
-    /rel="canonical" href="https:\/\/fulinte1966\.github\.io\/CulturalSimmer\/books\/A93-1\/"/,
+    cloudflareHtml,
+    /rel="canonical" href="https:\/\/fulinte\.pages\.dev\/CulturalSimmer\/books\/A93-1\/"/,
   );
 
   const githubHtml = fs.readFileSync(
@@ -213,25 +217,25 @@ test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async 
   assert.match(githubHtml, /github\.com\/Fulinte1966\/CulturalSimmer\/releases/);
   assert.match(githubHtml, /data-cloudflare-download="A93-1_v2\.pdf"/);
 
-  const mirrorHeaders = fs.readFileSync(
+  const cloudflareHeaders = fs.readFileSync(
     path.join(fixture.destinationDirectory, "_headers"),
     "utf8",
   );
-  assert.match(mirrorHeaders, /X-Robots-Tag: noindex/);
+  assert.doesNotMatch(cloudflareHeaders, /X-Robots-Tag: noindex/);
   assert.match(
-    mirrorHeaders,
+    cloudflareHeaders,
     /\/CulturalSimmer\/downloads\/\*[\s\S]*Cache-Control: public, max-age=31536000, immutable/,
   );
-  assert.match(mirrorHeaders, /Content-Disposition: attachment/);
+  assert.match(cloudflareHeaders, /Content-Disposition: attachment/);
 
   fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
 });
 
-test("removes an incomplete mirror when PDF verification fails", async () => {
-  const fixture = createMirrorFixture();
+test("removes an incomplete Cloudflare site when PDF verification fails", async () => {
+  const fixture = createCloudflareFixture();
 
   await assert.rejects(
-    prepareCloudflareMirror({
+    prepareCloudflareSite({
       sourceDirectory: fixture.sourceDirectory,
       destinationDirectory: fixture.destinationDirectory,
       repositoryDirectory: fixture.repositoryDirectory,
@@ -247,7 +251,7 @@ test("removes an incomplete mirror when PDF verification fails", async () => {
 });
 
 test("rejects a PDF whose SHA-256 does not match the manifest", async () => {
-  const fixture = createMirrorFixture();
+  const fixture = createCloudflareFixture();
   const manifest = JSON.parse(
     fs.readFileSync(fixture.latestManifestPath, "utf8"),
   );
@@ -256,7 +260,7 @@ test("rejects a PDF whose SHA-256 does not match the manifest", async () => {
   fs.writeFileSync(fixture.latestManifestPath, JSON.stringify(manifest));
 
   await assert.rejects(
-    prepareCloudflareMirror({
+    prepareCloudflareSite({
       sourceDirectory: fixture.sourceDirectory,
       destinationDirectory: fixture.destinationDirectory,
       repositoryDirectory: fixture.repositoryDirectory,
@@ -272,7 +276,7 @@ test("rejects a PDF whose SHA-256 does not match the manifest", async () => {
 });
 
 test("rejects a manifest above the Pages limit before downloading", async () => {
-  const fixture = createMirrorFixture();
+  const fixture = createCloudflareFixture();
   const manifest = JSON.parse(
     fs.readFileSync(fixture.latestManifestPath, "utf8"),
   );
@@ -281,7 +285,7 @@ test("rejects a manifest above the Pages limit before downloading", async () => 
   let requested = false;
 
   await assert.rejects(
-    prepareCloudflareMirror({
+    prepareCloudflareSite({
       sourceDirectory: fixture.sourceDirectory,
       destinationDirectory: fixture.destinationDirectory,
       repositoryDirectory: fixture.repositoryDirectory,
@@ -317,6 +321,33 @@ test("rejects assets above the Cloudflare Pages file size limit", () => {
     () => prepareCloudflarePages(sourceDirectory, destinationDirectory),
     /25 MiB file limit exceeded/,
   );
+
+  fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+});
+
+test("prepares a noindex redirect from the former Cloudflare project", () => {
+  const temporaryDirectory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "culturalsimmer-cloudflare-legacy-"),
+  );
+
+  prepareLegacyRedirect(temporaryDirectory);
+
+  const redirects = fs.readFileSync(
+    path.join(temporaryDirectory, "_redirects"),
+    "utf8",
+  );
+  const headers = fs.readFileSync(
+    path.join(temporaryDirectory, "_headers"),
+    "utf8",
+  );
+  assert.match(
+    redirects,
+    new RegExp(
+      `^/CulturalSimmer/\\* ${PRIMARY_ORIGIN.replaceAll(".", "\\.")}/CulturalSimmer/:splat 301$`,
+      "m",
+    ),
+  );
+  assert.match(headers, /X-Robots-Tag: noindex/);
 
   fs.rmSync(temporaryDirectory, { recursive: true, force: true });
 });

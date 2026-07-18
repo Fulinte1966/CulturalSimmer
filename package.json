@@ -17,6 +17,7 @@
     "updates:archive": "python3 scripts/build_site_updates_archive.py",
     "updates:archive:check": "python3 scripts/build_site_updates_archive.py --check",
     "cloudflare:prepare": "node scripts/prepare-cloudflare-pages.mjs",
+    "cloudflare:legacy": "node scripts/prepare-cloudflare-legacy-redirect.mjs",
     "fonts:subset": "python3 scripts/subset_fonts.py",
     "fonts:refresh": "npm run build && npm run fonts:subset && npm run build",
     "changelogs:build": "python3 scripts/build_book_changelogs.py",

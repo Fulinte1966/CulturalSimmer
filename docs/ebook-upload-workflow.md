@@ -156,7 +156,7 @@ PDF 声明版次：2
   -> 上传最终 manifest
   -> 提交生成文件到 main
   -> 删除临时 Release 和临时 tag
-  -> main push 触发 GitHub Pages 部署
+  -> main push 触发 Cloudflare Pages 主站和 GitHub Pages 备份部署
 ```
 
 `Ingest PDF` workflow 使用全局并发锁 `ebook-ingest`，避免多个 ingest Release 同时处理。
@@ -167,9 +167,9 @@ Pull Request、正式入库与部署均执行同一入口。
 
 更新日志只比较最终 PDF 的规范化可见内容，不比较 Git、LaTeX 源码或 PDF 二进制。完整规则、JSON schema、Release Markdown 和本地重建命令见 [电子书版本更新日志规范](release-changelog-conventions.md)。差异生成失败时 workflow 会中止，不会发布看似正常的空日志。
 
-生产构建会生成 `src/data/changelogs/{bookId}.md`。书末检查更新二维码应指向 `/check/?bookId={bookId}&edition={edition}`；页面用仓库中的书目数据判断是否存在新版，并链接到最新版详情页和该书总更新日志。
+生产构建会生成 `src/data/changelogs/{bookId}.md`。书末检查更新二维码应指向 `https://fulinte.pages.dev/CulturalSimmer/check/?bookId={bookId}&edition={edition}`；页面用仓库中的书目数据判断是否存在新版，并链接到最新版详情页和该书总更新日志。
 
-书籍勘误二维码应指向 `/errata/?bookId={bookId}&edition={edition}`，不得直接链接外部表单。网站仅对最新版打开详情页中的 Tally 表单，旧版统一转到检查更新页面。详情页用一次性 `errata=1` 查询参数打开表单，并在渲染时立即从地址栏删除；因此整页刷新不会重复打开表单。
+书籍勘误二维码应指向 `https://fulinte.pages.dev/CulturalSimmer/errata/?bookId={bookId}&edition={edition}`，不得直接链接外部表单。网站仅对最新版打开详情页中的 Tally 表单，旧版统一转到检查更新页面。详情页用一次性 `errata=1` 查询参数打开表单，并在渲染时立即从地址栏删除；因此整页刷新不会重复打开表单。
 
 ## Markdown 书目记录
 

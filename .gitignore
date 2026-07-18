@@ -24,6 +24,7 @@ reference/debug-archive/
 netlify-dist/
 .wrangler/
 cloudflare-dist/
+cloudflare-legacy-dist/
 mise.local.toml
 output/
 tmp/

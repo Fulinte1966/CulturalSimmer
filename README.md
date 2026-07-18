@@ -1,9 +1,9 @@
 # CulturalSimmer（文火）
 
-面向读者的静态 PDF 电子书馆。GitHub Pages 是永久主站，Cloudflare Pages 提供同一构建产物的备用镜像，GitHub Releases 保存正式 PDF。
+面向读者的静态 PDF 电子书馆。Cloudflare Pages 是读者主站，GitHub 保存源码、自动化、书目数据和正式 PDF，并通过 GitHub Pages 提供独立备份站。
 
-- 主站：<https://fulinte1966.github.io/CulturalSimmer/>
-- Cloudflare 镜像：<https://culturalsimmer-mirror.pages.dev/CulturalSimmer/>
+- 主站：<https://fulinte.pages.dev/CulturalSimmer/>
+- GitHub Pages 备份：<https://fulinte1966.github.io/CulturalSimmer/>
 - 文档索引：[docs/README.md](docs/README.md)
 - 本站更新归档：[docs/site-updates-archive.md](docs/site-updates-archive.md)
 - ntfy 备用信号源：[docs/ntfy-subscription-guide.md](docs/ntfy-subscription-guide.md)
@@ -16,8 +16,8 @@
   -> GitHub Actions 校验、生成资产和更新日志
   -> 正式 GitHub Release
   -> 生成书目、封面、目录、阅读数据和更新事件
-  -> GitHub Pages 主站
-  -> Cloudflare Pages 镜像
+  -> Cloudflare Pages 主站与最新版 PDF
+  -> GitHub Pages 独立备份
 ```
 
 主要技术：Astro、TypeScript、Pagefind、PyMuPDF、GitHub Actions、GitHub Pages、GitHub Releases 和 Cloudflare Pages。

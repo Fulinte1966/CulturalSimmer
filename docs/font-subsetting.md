@@ -53,6 +53,6 @@ CSS 的 `@font-face` 应继续指向 `public/fonts/subset/*.woff2` 并使用 `fo
 2. 在 Chromium 中等待 `document.fonts.ready`；
 3. 用 `document.fonts.check()` 检查目标字族、字号和实际文案；
 4. 检查控制台、横向溢出和字体请求的 `font/woff2` MIME；
-5. 同时验证 GitHub Pages 与 Cloudflare Pages 的同源字体响应。
+5. 同时验证 Cloudflare Pages 主站与 GitHub Pages 备份的同源字体响应。
 
 字体源文件、授权信息或文件名变化时，应同步修改 `scripts/subset_fonts.py` 和本文件。不要把临时子集文本、浏览器缓存或本地字体安装目录提交到仓库。

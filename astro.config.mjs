@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://fulinte1966.github.io",
+  site: "https://fulinte.pages.dev",
   base: "/CulturalSimmer",
   output: "static",
   redirects: {

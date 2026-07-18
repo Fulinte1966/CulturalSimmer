@@ -20,7 +20,7 @@
 - [勘误与网站问题流程](errata-workflow.md)：检查更新、Tally、GitHub Issues 与 Projects 的公开接口契约。
 - [本站消息维护规范](site-updates-workflow.md)：人工公告、自动消息、置顶、公开 feed 和归档。
 - [字体子集化](font-subsetting.md)：双遍构建和 WOFF2 生成。
-- [Cloudflare Pages 镜像](cloudflare-pages.md)：双站部署、缓存边界和凭据配置。
+- [Cloudflare Pages 主站](cloudflare-pages.md)：双站职责、缓存边界和凭据配置。
 - [静态资源规范](asset-conventions.md)：目录职责、文件命名和 URL 规则。
 
 ## 文档公开边界
@@ -46,4 +46,4 @@
 - 修改脚本、workflow、字段或路径时，同一提交必须更新对应流程文档。
 - 修改公告后先运行 `npm run updates:archive`。
 - 所有提交在合并前运行 `npm run verify`；该命令会根据最终构建产物刷新字体。
-- 发布流程变更合并后检查 GitHub Pages、Cloudflare Pages 和对应 GitHub Actions 运行。
+- 发布流程变更合并后检查 Cloudflare Pages 主站、GitHub Pages 备份和对应 GitHub Actions 运行。

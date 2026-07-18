@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fulinte1966.github.io/CulturalSimmer/updates/feed.schema.json",
+  "$id": "https://fulinte.pages.dev/CulturalSimmer/updates/feed.schema.json",
   "title": "CulturalSimmer public update feed",
   "type": "object",
   "additionalProperties": false,

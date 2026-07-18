@@ -18,7 +18,6 @@ const redirects = `\
 
 const headers = `\
 /*
-  X-Robots-Tag: noindex
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
@@ -271,7 +270,7 @@ async function sha256File(filePath) {
   return hash.digest("hex");
 }
 
-export async function mirrorLatestPdfs(
+export async function copyLatestPdfs(
   siteDirectory,
   releases,
   { downloadImpl = downloadReleaseAsset } = {},
@@ -343,7 +342,7 @@ function visitHtmlNodes(node, visitor) {
   }
 }
 
-export function rewriteMirrorDownloadLinks(siteDirectory, releases) {
+export function rewriteCloudflareDownloadLinks(siteDirectory, releases) {
   const releaseByFilename = new Map(
     releases.map((release) => [release.pdfFilename, release]),
   );
@@ -366,7 +365,7 @@ export function rewriteMirrorDownloadLinks(siteDirectory, releases) {
       const release = releaseByFilename.get(marker.value);
       if (!release) {
         throw new Error(
-          `Download link references a PDF that is not mirrored: ${marker.value}`,
+          `Download link references a PDF that is not hosted: ${marker.value}`,
         );
       }
 
@@ -402,7 +401,7 @@ export function rewriteMirrorDownloadLinks(siteDirectory, releases) {
   );
 }
 
-export async function prepareCloudflareMirror({
+export async function prepareCloudflareSite({
   sourceDirectory,
   destinationDirectory,
   repositoryDirectory,
@@ -414,10 +413,10 @@ export async function prepareCloudflareMirror({
       destinationDirectory,
     );
     const releases = loadLatestPdfReleases(repositoryDirectory);
-    await mirrorLatestPdfs(result.siteDirectory, releases, {
+    await copyLatestPdfs(result.siteDirectory, releases, {
       downloadImpl,
     });
-    const rewrittenLinkCount = rewriteMirrorDownloadLinks(
+    const rewrittenLinkCount = rewriteCloudflareDownloadLinks(
       result.siteDirectory,
       releases,
     );
@@ -425,7 +424,7 @@ export async function prepareCloudflareMirror({
     return {
       ...result,
       fileCount: validateCloudflarePagesOutput(destinationDirectory),
-      mirroredPdfCount: releases.length,
+      hostedPdfCount: releases.length,
       rewrittenLinkCount,
     };
   } catch (error) {
@@ -444,12 +443,12 @@ if (isMainModule) {
     process.argv[3] ?? "cloudflare-dist",
   );
   const repositoryDirectory = path.resolve(process.argv[4] ?? ".");
-  const result = await prepareCloudflareMirror({
+  const result = await prepareCloudflareSite({
     sourceDirectory,
     destinationDirectory,
     repositoryDirectory,
   });
   console.log(
-    `Prepared ${result.fileCount} Cloudflare Pages file(s), mirrored ${result.mirroredPdfCount} latest PDF(s), and rewrote ${result.rewrittenLinkCount} download link(s).`,
+    `Prepared ${result.fileCount} Cloudflare Pages file(s), hosted ${result.hostedPdfCount} latest PDF(s), and rewrote ${result.rewrittenLinkCount} download link(s).`,
   );
 }

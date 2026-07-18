@@ -187,7 +187,7 @@ src/data/changelogs/{bookId}.md
 检查更新 URL 契约为：
 
 ```text
-https://fulinte1966.github.io/CulturalSimmer/check/?bookId=F0-1-1&edition=1
+https://fulinte.pages.dev/CulturalSimmer/check/?bookId=F0-1-1&edition=1
 ```
 
 `bookId` 必须与书目内部书号完全一致，`edition` 必须为正整数。页面只把参数作为查询键，不接受 URL 覆盖书名、封面、下载地址或最新版信息。
