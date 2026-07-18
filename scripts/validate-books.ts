@@ -32,6 +32,7 @@ interface BookEntry {
   tags: string[];
   cover?: string;
   totalVolumes?: number;
+  notifyUpdates?: boolean;
   author?: string;
   filename: string;
 }
@@ -109,6 +110,8 @@ function parseFrontmatter(raw: string): Record<string, unknown> {
         result[key] = value;
       } else if (/^\d+$/.test(value)) {
         result[key] = parseInt(value, 10);
+      } else if (/^(true|false)$/.test(value)) {
+        result[key] = value === "true";
       } else {
         result[key] = value.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1");
       }
@@ -136,6 +139,7 @@ function loadBooks(): BookEntry[] {
       tags: (fm.tags as string[]) || [],
       cover: fm.cover as string | undefined,
       totalVolumes: fm.totalVolumes as number | undefined,
+      notifyUpdates: fm.notifyUpdates as boolean | undefined,
       author: fm.author as string | undefined,
       filename: file,
     };
@@ -206,6 +210,14 @@ function main() {
     // 4. title
     if (!book.title || book.title.trim() === "") {
       console.error(`${prefix} ERROR: title is required and must not be empty`);
+      errors++;
+    }
+
+    if (
+      book.notifyUpdates !== undefined &&
+      typeof book.notifyUpdates !== "boolean"
+    ) {
+      console.error(`${prefix} ERROR: notifyUpdates must be true or false`);
       errors++;
     }
 

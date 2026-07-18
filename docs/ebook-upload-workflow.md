@@ -11,6 +11,7 @@
 - 不手写 `downloadUrl`、`releaseTag`、`pdfFilename`、`classification`、`volume` 等派生字段。
 - 正式发布键为 `{bookId}_v{edition}`，例如 `F0-1-1_v1`；正式 Release 的 tag 和标题均使用该唯一发行号。
 - `prism:bookEdition` 必须由 PDF 声明；脚本只校验，不替 PDF 决定版次。
+- `notifyUpdates` 是仓库维护策略，不属于 PDF XMP；已有书目显式设置后，后续入库会原样保留。
 
 ## 本地上传入口
 

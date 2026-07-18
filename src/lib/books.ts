@@ -44,6 +44,7 @@ export interface BookMeta {
   rights?: string;
   licenseUrl?: string;
   zlibraryUrl?: string;
+  notifyUpdates: boolean;
   edition: number;
   editionDate: string;
   date: Date;
@@ -234,6 +235,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         rights,
         licenseUrl,
         zlibraryUrl,
+        notifyUpdates,
       } = entry.data;
       const editions = resolveEditions(rawEditions);
       const latestEdition = getLatestEdition(editions);
@@ -255,6 +257,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         rights,
         licenseUrl,
         zlibraryUrl,
+        notifyUpdates,
         edition: latestEdition.edition,
         editionDate: latestEdition.editionDate,
         date,

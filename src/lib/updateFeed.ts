@@ -35,6 +35,7 @@ export interface FeedBook {
   id: string;
   title: string;
   subtitle?: string;
+  notifyUpdates?: boolean;
   editions: Array<{ edition: number; editionDate: string }>;
 }
 
@@ -164,7 +165,15 @@ export function validatePublicUpdateFeed(feed: unknown): asserts feed is PublicU
 
 export function buildPublicUpdateFeed(options: BuildFeedOptions): PublicUpdateFeed {
   const updates = [
-    ...options.generatedUpdates.map((update) => automaticUpdate(update, options.books, options.siteUrl)),
+    ...options.generatedUpdates
+      .filter((update) => {
+        const book = options.books.find((candidate) => candidate.id === update.bookId);
+        if (!book) {
+          throw new Error(`Update ${update.id} references missing book ${update.bookId}`);
+        }
+        return update.type === "book-added" || book.notifyUpdates !== false;
+      })
+      .map((update) => automaticUpdate(update, options.books, options.siteUrl)),
     ...options.announcements.map((announcement) => manualUpdate(announcement, options.books, options.siteUrl, options.updatesPageUrl)),
   ]
     .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || a.id.localeCompare(b.id))

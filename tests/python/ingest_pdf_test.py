@@ -221,6 +221,20 @@ class IngestPdfTests(unittest.TestCase):
                 "changelogPath": str(changelog_path),
             }
             (root / "fixture.pdf").write_bytes(b"fixture")
+            book_path = root / "src/content/books/F0-9.md"
+            book_path.parent.mkdir(parents=True)
+            book_path.write_text(
+                "---\n"
+                "id: F0-9\n"
+                'title: "标题: [测试] # 一"\n'
+                "description: 简介。\n"
+                "notifyUpdates: false\n"
+                "editions:\n"
+                "  - edition: 1\n"
+                "    editionDate: 2026-05\n"
+                "---\n\n简介。\n",
+                encoding="utf-8",
+            )
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False), encoding="utf-8"
             )
@@ -255,8 +269,9 @@ class IngestPdfTests(unittest.TestCase):
             frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
             self.assertEqual(frontmatter["title"], metadata["title"])
             self.assertEqual(frontmatter["zlibraryUrl"], metadata["zlibraryUrl"])
-            self.assertEqual(frontmatter["editions"][0]["edition"], 2)
-            self.assertIn("editions:\n  - edition: 2", markdown)
+            self.assertFalse(frontmatter["notifyUpdates"])
+            self.assertEqual(frontmatter["editions"][-1]["edition"], 2)
+            self.assertIn("  - edition: 2", markdown)
             self.assertNotIn("edition", frontmatter)
             self.assertNotIn("date", frontmatter)
             manifest = json.loads(

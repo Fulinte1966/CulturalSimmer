@@ -46,6 +46,56 @@ test("builds stable IDs from existing book and edition data", () => {
   ]);
 });
 
+test("keeps silent books on the site while omitting automatic reader notifications", () => {
+  const feed = buildPublicUpdateFeed({
+    generatedUpdates: [
+      { id: "F0-1-1-v2", type: "book-updated", publishedAt: "2026-08-01T00:00:00Z", bookId: "F0-1-1", edition: 2 },
+    ],
+    announcements: [],
+    books: [{ ...book, notifyUpdates: false }],
+    generatedAt: new Date("2026-08-03T00:00:00Z"),
+    siteUrl: "https://example.com/CulturalSimmer/",
+    updatesPageUrl: archiveUrl,
+  });
+  assert.deepEqual(feed.updates, []);
+});
+
+test("still announces the first listing before a book opts out of later updates", () => {
+  const feed = buildPublicUpdateFeed({
+    generatedUpdates: [
+      { id: "F0-1-1-listed", type: "book-added", publishedAt: "2026-07-08T18:01:03Z", bookId: "F0-1-1" },
+    ],
+    announcements: [],
+    books: [{ ...book, notifyUpdates: false }],
+    generatedAt: new Date("2026-08-03T00:00:00Z"),
+    siteUrl: "https://example.com/CulturalSimmer/",
+    updatesPageUrl: archiveUrl,
+  });
+  assert.equal(feed.updates[0]?.type, "new_book");
+});
+
+test("does not suppress manual important errata for a silent book", () => {
+  const feed = buildPublicUpdateFeed({
+    generatedUpdates: [],
+    announcements: [{
+      id: "2026-08-04-f0-1-1-v2-01",
+      data: {
+        title: "重要勘误",
+        publishedAt: "2026-08-04T00:00:00Z",
+        kind: "important-erratum",
+        bookId: "F0-1-1",
+        edition: 2,
+        summary: ["修正正文"],
+      },
+    }],
+    books: [{ ...book, notifyUpdates: false }],
+    generatedAt: new Date("2026-08-04T01:00:00Z"),
+    siteUrl: "https://example.com/CulturalSimmer/",
+    updatesPageUrl: archiveUrl,
+  });
+  assert.equal(feed.updates[0]?.type, "important_erratum");
+});
+
 test("builds an important erratum linked to an existing edition", () => {
   const feed = buildPublicUpdateFeed({
     generatedUpdates: [],
