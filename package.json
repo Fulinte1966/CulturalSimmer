@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
+    "parse5": "^8.0.1",
     "tsx": "^4.23.1",
     "wrangler": "4.111.0"
   },
