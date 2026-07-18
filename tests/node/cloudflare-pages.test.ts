@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -7,7 +8,103 @@ import test from "node:test";
 import {
   CLOUDFLARE_PAGES_FILE_SIZE_LIMIT,
   prepareCloudflarePages,
+  prepareCloudflareMirror,
 } from "../../scripts/prepare-cloudflare-pages.mjs";
+
+function createMirrorFixture() {
+  const temporaryDirectory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "culturalsimmer-cloudflare-"),
+  );
+  const sourceDirectory = path.join(temporaryDirectory, "dist");
+  const destinationDirectory = path.join(
+    temporaryDirectory,
+    "cloudflare-dist",
+  );
+  const repositoryDirectory = path.join(temporaryDirectory, "repository");
+  const booksDirectory = path.join(
+    repositoryDirectory,
+    "src",
+    "content",
+    "books",
+  );
+  const manifestsDirectory = path.join(
+    repositoryDirectory,
+    "src",
+    "data",
+    "manifests",
+  );
+  fs.mkdirSync(path.join(sourceDirectory, "books", "A93-1"), {
+    recursive: true,
+  });
+  fs.mkdirSync(booksDirectory, { recursive: true });
+  fs.mkdirSync(manifestsDirectory, { recursive: true });
+
+  const latestPdf = Buffer.from("%PDF-1.7 latest fixture");
+  const latestSha256 = createHash("sha256").update(latestPdf).digest("hex");
+  fs.writeFileSync(
+    path.join(booksDirectory, "A93-1.md"),
+    `---
+id: A93-1
+title: Fixture
+description: Fixture
+editions:
+  - edition: 1
+    editionDate: 2026-06
+    releaseTag: A93-1_v1
+    manifest: src/data/manifests/A93-1_v1.json
+  - edition: 2
+    editionDate: 2026-07
+    releaseTag: A93-1_v2
+    manifest: src/data/manifests/A93-1_v2.json
+---
+Fixture
+`,
+  );
+  fs.writeFileSync(
+    path.join(manifestsDirectory, "A93-1_v1.json"),
+    JSON.stringify({
+      bookId: "A93-1",
+      edition: 1,
+      releaseTag: "A93-1_v1",
+      pdfFilename: "A93-1_v1.pdf",
+      downloadUrl:
+        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v1/A93-1_v1.pdf",
+      bytes: 1,
+      sourceSha256: "0".repeat(64),
+    }),
+  );
+  const latestManifestPath = path.join(
+    manifestsDirectory,
+    "A93-1_v2.json",
+  );
+  fs.writeFileSync(
+    latestManifestPath,
+    JSON.stringify({
+      bookId: "A93-1",
+      edition: 2,
+      releaseTag: "A93-1_v2",
+      pdfFilename: "A93-1_v2.pdf",
+      downloadUrl:
+        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf",
+      bytes: latestPdf.length,
+      sourceSha256: latestSha256,
+      githubAssetDigest: `sha256:${latestSha256}`,
+    }),
+  );
+  fs.writeFileSync(
+    path.join(sourceDirectory, "books", "A93-1", "index.html"),
+    `<!doctype html><html><head><link rel="canonical" href="https://fulinte1966.github.io/CulturalSimmer/books/A93-1/"></head><body><a class="bd-download" href="https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf" data-cloudflare-download="A93-1_v2.pdf">Download</a></body></html>`,
+  );
+
+  return {
+    destinationDirectory,
+    latestManifestPath,
+    latestPdf,
+    repositoryDirectory,
+    sourceDirectory,
+    temporaryDirectory,
+  };
+}
 
 test("wraps the existing build under the public base path", () => {
   const temporaryDirectory = fs.mkdtempSync(
@@ -44,6 +141,161 @@ test("wraps the existing build under the public base path", () => {
   );
 
   fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+});
+
+test("mirrors only the latest PDF and rewrites only the Cloudflare copy", async () => {
+  const fixture = createMirrorFixture();
+  const requestedUrls: string[] = [];
+
+  const result = await prepareCloudflareMirror({
+    sourceDirectory: fixture.sourceDirectory,
+    destinationDirectory: fixture.destinationDirectory,
+    repositoryDirectory: fixture.repositoryDirectory,
+    downloadImpl: async (url, destinationPath) => {
+      requestedUrls.push(String(url));
+      fs.writeFileSync(destinationPath, fixture.latestPdf);
+    },
+  });
+
+  assert.equal(result.mirroredPdfCount, 1);
+  assert.equal(result.rewrittenLinkCount, 1);
+  assert.deepEqual(requestedUrls, [
+    "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf",
+  ]);
+  assert.deepEqual(
+    fs.readFileSync(
+      path.join(
+        fixture.destinationDirectory,
+        "CulturalSimmer",
+        "downloads",
+        "A93-1_v2.pdf",
+      ),
+    ),
+    fixture.latestPdf,
+  );
+  assert.equal(
+    fs.existsSync(
+      path.join(
+        fixture.destinationDirectory,
+        "CulturalSimmer",
+        "downloads",
+        "A93-1_v1.pdf",
+      ),
+    ),
+    false,
+  );
+
+  const mirrorHtml = fs.readFileSync(
+    path.join(
+      fixture.destinationDirectory,
+      "CulturalSimmer",
+      "books",
+      "A93-1",
+      "index.html",
+    ),
+    "utf8",
+  );
+  assert.match(
+    mirrorHtml,
+    /href="\/CulturalSimmer\/downloads\/A93-1_v2\.pdf"/,
+  );
+  assert.match(mirrorHtml, /download="A93-1_v2\.pdf"/);
+  assert.doesNotMatch(mirrorHtml, /data-cloudflare-download/);
+  assert.match(
+    mirrorHtml,
+    /rel="canonical" href="https:\/\/fulinte1966\.github\.io\/CulturalSimmer\/books\/A93-1\/"/,
+  );
+
+  const githubHtml = fs.readFileSync(
+    path.join(fixture.sourceDirectory, "books", "A93-1", "index.html"),
+    "utf8",
+  );
+  assert.match(githubHtml, /github\.com\/Fulinte1966\/CulturalSimmer\/releases/);
+  assert.match(githubHtml, /data-cloudflare-download="A93-1_v2\.pdf"/);
+
+  const mirrorHeaders = fs.readFileSync(
+    path.join(fixture.destinationDirectory, "_headers"),
+    "utf8",
+  );
+  assert.match(mirrorHeaders, /X-Robots-Tag: noindex/);
+  assert.match(
+    mirrorHeaders,
+    /\/CulturalSimmer\/downloads\/\*[\s\S]*Cache-Control: public, max-age=31536000, immutable/,
+  );
+  assert.match(mirrorHeaders, /Content-Disposition: attachment/);
+
+  fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
+});
+
+test("removes an incomplete mirror when PDF verification fails", async () => {
+  const fixture = createMirrorFixture();
+
+  await assert.rejects(
+    prepareCloudflareMirror({
+      sourceDirectory: fixture.sourceDirectory,
+      destinationDirectory: fixture.destinationDirectory,
+      repositoryDirectory: fixture.repositoryDirectory,
+      downloadImpl: async (_url, destinationPath) => {
+        fs.writeFileSync(destinationPath, Buffer.from("wrong content"));
+      },
+    }),
+    /byte count mismatch/,
+  );
+  assert.equal(fs.existsSync(fixture.destinationDirectory), false);
+
+  fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
+});
+
+test("rejects a PDF whose SHA-256 does not match the manifest", async () => {
+  const fixture = createMirrorFixture();
+  const manifest = JSON.parse(
+    fs.readFileSync(fixture.latestManifestPath, "utf8"),
+  );
+  manifest.sourceSha256 = "f".repeat(64);
+  manifest.githubAssetDigest = `sha256:${"f".repeat(64)}`;
+  fs.writeFileSync(fixture.latestManifestPath, JSON.stringify(manifest));
+
+  await assert.rejects(
+    prepareCloudflareMirror({
+      sourceDirectory: fixture.sourceDirectory,
+      destinationDirectory: fixture.destinationDirectory,
+      repositoryDirectory: fixture.repositoryDirectory,
+      downloadImpl: async (_url, destinationPath) => {
+        fs.writeFileSync(destinationPath, fixture.latestPdf);
+      },
+    }),
+    /SHA-256 mismatch/,
+  );
+  assert.equal(fs.existsSync(fixture.destinationDirectory), false);
+
+  fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
+});
+
+test("rejects a manifest above the Pages limit before downloading", async () => {
+  const fixture = createMirrorFixture();
+  const manifest = JSON.parse(
+    fs.readFileSync(fixture.latestManifestPath, "utf8"),
+  );
+  manifest.bytes = CLOUDFLARE_PAGES_FILE_SIZE_LIMIT + 1;
+  fs.writeFileSync(fixture.latestManifestPath, JSON.stringify(manifest));
+  let requested = false;
+
+  await assert.rejects(
+    prepareCloudflareMirror({
+      sourceDirectory: fixture.sourceDirectory,
+      destinationDirectory: fixture.destinationDirectory,
+      repositoryDirectory: fixture.repositoryDirectory,
+      downloadImpl: async (_url, destinationPath) => {
+        requested = true;
+        fs.writeFileSync(destinationPath, fixture.latestPdf);
+      },
+    }),
+    /25 MiB file limit exceeded/,
+  );
+  assert.equal(requested, false);
+  assert.equal(fs.existsSync(fixture.destinationDirectory), false);
+
+  fs.rmSync(fixture.temporaryDirectory, { recursive: true, force: true });
 });
 
 test("rejects assets above the Cloudflare Pages file size limit", () => {
