@@ -8,6 +8,7 @@ import generatedUpdates from "../data/generated-updates.json";
 import siteUpdatePins from "../data/site-update-pins.json";
 import "../styles/home.css";
 import { joinBasePath } from "../lib/basePath";
+import { getBookTitleLayout } from "../lib/bookTitleLayout";
 import { getAllBooks, getBookEntries } from "../lib/books";
 import { siteConfig } from "../lib/site";
 import {
@@ -35,6 +36,9 @@ const bookHref = leadBook
   ? joinBasePath(base, `books/${leadBook.id}/`)
   : undefined;
 const shelfBooks = books.slice(0, 10);
+const leadTitleLayout = leadBook
+  ? getBookTitleLayout(leadBook.title)
+  : undefined;
 
 const rawSummary =
   leadBook?.description ||
@@ -203,7 +207,17 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
               <article class="fm-intro">
                 <div class="fm-intro-head">
                   {leadBook.series && <p class="fm-series">{leadBook.series}</p>}
-                  <h1 id="fm-lead-title">{leadBook.title}</h1>
+                  <h1
+                    id="fm-lead-title"
+                    class:list={{
+                      "fm-title--fill-six": leadTitleLayout?.fillsSixCharacterWidth,
+                      "fm-title--single": leadTitleLayout?.characters.length === 1,
+                    }}
+                  >
+                    {leadTitleLayout?.fillsSixCharacterWidth
+                      ? leadTitleLayout.characters.map((character) => <span>{character}</span>)
+                      : leadBook.title}
+                  </h1>
                   {leadBook.subtitle && <p class="fm-subtitle">{leadBook.subtitle}</p>}
                 </div>
                 <div class="fm-intro-body heti">

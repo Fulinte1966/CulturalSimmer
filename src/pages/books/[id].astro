@@ -12,6 +12,7 @@ import {
 } from "../../lib/bookId";
 import { getBookById, getBookEntries } from "../../lib/books";
 import { joinBasePath } from "../../lib/basePath";
+import { getBookTitleLayout } from "../../lib/bookTitleLayout";
 import { getCalendarStatus } from "../../lib/uapis";
 import "../../styles/book-detail.css";
 
@@ -36,8 +37,9 @@ if (!book) {
 }
 
 const { title, subtitle, author } = book;
-const titleCharacters = Array.from(title);
-const fillsSixCharacterTitleWidth = titleCharacters.length < 6;
+const titleLayout = getBookTitleLayout(title);
+const titleCharacters = titleLayout.characters;
+const fillsSixCharacterTitleWidth = titleLayout.fillsSixCharacterWidth;
 
 let outline: OutlineItem[] = [];
 try {

@@ -32,6 +32,18 @@
 
 同一 ID 与相同内容再次写入时不产生重复记录；同一 ID 对应不同内容时入库失败并报告冲突。自动流程不会读取或改写置顶配置。
 
+需要让某本已上架书籍停止向 QQ 与 ntfy 广播后续版次时，在该书
+`src/content/books/{bookId}.md` 的 frontmatter 中设置：
+
+```yaml
+notifyUpdates: false
+```
+
+该字段默认值为 `true`，入库新版本时会保留，不会被 PDF XMP 覆盖。它只从公开
+通知 feed 中排除该书的 `book_version` 事件：首次上架消息、首页简讯、仓库更新归档、
+Release、部署、检查更新、勘误、人工公告和重要勘误均保持正常。重新启用时删除该字段
+或改为 `true`；通知器只会处理当时仍在最近 100 条 feed 中且尚未发送的事件。
+
 ### 人工消息
 
 人工消息位于 `src/content/announcements/`，每个 Markdown 文件对应一条消息。
@@ -97,7 +109,7 @@ summary:
 
 自动消息的标签固定为 `新书` 或 `更新`，标题使用对应的 Release tag；正文分别为“《书名》已上架。”或“《书名》已更新第 n 版。”。人工公告使用源文件中的 `label`、`title` 和 Markdown 正文；正文为空时使用 `summary` 作为回退内容。
 
-自动消息映射为 `new_book` 和 `book_version`，人工消息映射为 `site_announcement` 或 `important_erratum`。稳定 ID 格式为：
+自动消息映射为 `new_book` 和 `book_version`，人工消息映射为 `site_announcement` 或 `important_erratum`。设置 `notifyUpdates: false` 的书籍仍保留站内自动消息和归档，但其后续 `book_version` 不进入公开通知 feed。稳定 ID 格式为：
 
 ```text
 new-book-F0-1-1-v1
@@ -157,7 +169,7 @@ npm run updates:pins
 
 ## 页面排序与交互
 
-置顶消息严格按配置顺序显示。其后只显示最新五条非置顶消息，排序规则为 `publishedAt` 降序、来源、全局 ID；置顶消息不占五条额度，也不会在普通区重复。只有置顶区与普通区同时存在时才显示星号分隔线。
+置顶消息严格按配置顺序显示。其后只显示最新五条非置顶消息，排序规则为 `publishedAt` 降序、来源、全局 ID；置顶消息不占五条额度，也不会在普通区重复。只有置顶区与普通区同时存在时才显示星号分隔线。三个全角星号使用三列等分网格，各自在分段符 frame 的三分之一处居中，因此会随栏宽自动调整，不使用固定像素内边距。
 
 人工全文在 Astro 构建期通过 `render()` 转为静态 HTML，并且只嵌入首页当前可见消息对应的正文。打开全文会保存列表滚动位置和触发按钮；`〔返回〕` 或 `Escape` 恢复列表、滚动位置和焦点。全文区域使用浏览器原生滚动，支持鼠标滚轮、触控板、触屏和键盘，滚动不会改变主页布局。
 

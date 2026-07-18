@@ -552,6 +552,8 @@ def cmd_generate(args: list[str]):
     ):
         if meta.get(opt) is not None:
             frontmatter[opt] = meta[opt]
+    if "notifyUpdates" in existing_frontmatter:
+        frontmatter["notifyUpdates"] = existing_frontmatter["notifyUpdates"]
     frontmatter["editions"] = _merge_edition_record(existing_frontmatter, meta)
 
     yaml_text = _dump_frontmatter(frontmatter)

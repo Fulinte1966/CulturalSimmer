@@ -14,6 +14,7 @@
 | 自动本站消息 | 正式 Release | `src/data/generated-updates.json` |
 | 人工公告 | `src/content/announcements/*.md` | 构建期渲染并写入公开归档 |
 | 公告置顶顺序 | `src/data/site-update-pins.json` | 首页置顶区 |
+| 单书更新广播策略 | 书目中的 `notifyUpdates` | 公开通知 feed 是否包含后续 `book_version` |
 | 分类树 | `src/data/classifications.yml` | 索引页与书号校验 |
 
 派生文件不得作为第二个人工数据源。需要修订书目信息时应修正 PDF 元数据并重新发布；只有更新日志的人工复核项允许按对应规范编辑结构化 changelog。
@@ -59,7 +60,7 @@ npm run verify
 
 流程：运行完整验证并生成唯一 `dist` 产物。Cloudflare job 复制该产物，根据书目最新版 manifest 从 GitHub Releases 下载并校验每本书的最新版 PDF，只在 Cloudflare 副本中把下载按钮改为同源地址，然后发布主站 `/CulturalSimmer/`。GitHub Pages 独立发布原始产物作为备份，下载仍指向 GitHub Release。PDF 入库以 `notify_updates=true` 手动触发部署；Cloudflare 主站发布成功后，Deploy 请求私有通知仓库分别运行 QQ 与 ntfy live workflow。
 
-跨仓库触发使用公开仓库 secret `NOTIFIER_DISPATCH_TOKEN`。它必须是只授权 `Fulinte1966/CulturalSimmer-notifier`、仅含 Actions 读写权限且设有有效期的 fine-grained personal access token，不得复用项目管理 token。即时触发失败只产生部署注释，不回滚网站；私有通知仓库的每日定时轮询继续作为独立兜底。
+跨仓库触发使用公开仓库 secret `NOTIFIER_DISPATCH_TOKEN`。它必须是只授权 `Fulinte1966/CulturalSimmer-notifier`、仅含 Actions 读写权限且设有有效期的 fine-grained personal access token，不得复用项目管理 token。即时触发失败只产生部署注释，不回滚网站；私有通知仓库的每日定时轮询继续作为独立兜底。即使某书设置 `notifyUpdates: false`，部署仍会照常触发通知器；通知器读取到不含该书后续版次事件的 feed 后不会发送该项。
 
 ### Sync Release Changelog
 
