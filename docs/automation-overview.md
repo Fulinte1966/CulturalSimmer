@@ -71,7 +71,7 @@ Release 和 tag。
 
 `preview` 校验唯一 PDF、读取 XMP、检查公开书目和私有删除台账中的历史版次、生成差异与资产、运行完整验证，并部署受 Cloudflare Access 保护的完整候选站。候选锁绑定 Draft Release ID、PDF 摘要、字节数、源提交、书号、版次和跳版策略。
 
-`promote` 需要 `ebook-production` Environment 人工批准，并重新下载 Draft、重建全部派生数据和验证候选锁。通过后才创建正式 Release、提交派生文件并等待生产部署；成功后更新旧 Release 的取代提示，再清理 Draft 和候选站。工作流使用全局并发锁，不允许两个候选同时修改书目。
+`promote` 需要 `ebook-production` Environment 人工批准，并重新下载 Draft、重建全部派生数据和验证候选锁。通过后才创建正式 Release、提交派生文件，并显式触发带 `notify_updates=true` 的生产部署；成功后更新旧 Release 的取代提示，再清理 Draft 和候选站。工作流使用全局并发锁，不允许两个候选同时修改书目。
 
 权限：只授予完成正式 Release、提交派生文件和触发部署所需的仓库权限。PDF 只保存在 Release，不进入 Git 历史。
 
@@ -85,9 +85,11 @@ Release 和 tag。
 
 触发：`main` push、每日定时刷新或手动运行。
 
-流程：运行完整验证并生成唯一 `dist` 产物。Cloudflare job 复制该产物，根据书目最新版 manifest 从 GitHub Releases 下载并校验每本书的最新版 PDF，只在 Cloudflare 副本中把下载按钮改为同源地址，然后发布主站 `/CulturalSimmer/`。GitHub Pages 独立发布原始产物作为备份，下载仍指向 GitHub Release。部署不再触发读者广播，QQ 与 ntfy 在每日固定窗口独立读取已公开 feed。
+流程：运行完整验证并生成唯一 `dist` 产物。Cloudflare job 复制该产物，根据书目最新版 manifest 从 GitHub Releases 下载并校验每本书的最新版 PDF，只在 Cloudflare 副本中把下载按钮改为同源地址，然后发布主站 `/CulturalSimmer/`。GitHub Pages 独立发布原始产物作为备份，下载仍指向 GitHub Release。
 
-跨仓库凭据只用于读取私有删除台账和记录撤回/下架结果，不再用于普通发布后的即时广播。`PUBLICATION_LEDGER_TOKEN` 必须限制到 `Fulinte1966/CulturalSimmer-notifier` 所需的最小 Contents/Actions 权限并设置有效期，不得复用其他管理 token。某书设置 `notifyUpdates: false` 时，通知 feed 不包含该书后续版次事件，网站、Release 和部署仍保持正常。
+只有入库候选显式触发且传入 `notify_updates=true` 的部署，才在两个公开站点均成功后即时 dispatch QQ 与 ntfy。普通 push、样式修改、定时天气刷新和未带参数的手动部署不通知读者；通知器自身的定时轮询继续作为独立兜底，稳定事件 ID 防止重复发送。
+
+`NOTIFIER_DISPATCH_TOKEN` 只用于向 `Fulinte1966/CulturalSimmer-notifier` 的两个通知工作流发送 dispatch，使用仅含目标仓库 `Actions: write` 的细粒度 token。私有删除台账凭据与通知 dispatch 分离，不得复用其他管理 token。某书设置 `notifyUpdates: false` 时，通知 feed 不包含该书后续版次事件，网站、Release 和部署仍保持正常。
 
 ### Sync Release Changelog
 
@@ -108,7 +110,7 @@ Release 和 tag。
 - Draft ingest Release 只在正式站部署和候选清理都成功后删除；候选失败时保留 Draft 供重新预览。
 - 撤回与下架只有在生产清洁版本部署成功后才删除 Release/tag；后续清理失败写入私有检查点并通过同一 inventory 幂等重试。
 - 部署使用并发组串行化，不取消正在发布的版本。
-- 读者通知只读取已经公开的 feed；最新版 PDF 下载或跨仓库台账调用失败不改变已创建的 GitHub Release。GitHub Pages 备份可独立发布，每日 06:00 主运行和 08:00 补跑都会依靠稳定 ID 防重。
+- 读者通知只读取已经公开的 feed；即时 dispatch 失败不回滚有效 Release 或网站，定时轮询会补发。重复 dispatch 与定时补跑都依靠稳定 ID 防重。
 - GitHub Actions secret 只通过对应 Environment 或 repository secret 注入，日志和公开文档不得包含实值。
 
 ## 本地入口
