@@ -38,6 +38,25 @@ npm run verify
 
 空书库是受支持的初始化状态。此时首页、索引、检查更新与勘误入口仍可构建，书目详情页和 Pagefind 书目索引为空；构建后断言会拒绝内容缓存遗留的“幽灵”详情页。
 
+测试目录需要整体初始化时，先生成带 SHA-256 的清单并完成本地备份：
+
+```bash
+npm run catalog:initialize -- plan \
+  --output Work/Backups/catalog-initialize-plan.json
+```
+
+复核清单后，用精确确认短语执行清理：
+
+```bash
+npm run catalog:initialize -- apply \
+  --plan Work/Backups/catalog-initialize-plan.json \
+  --confirmation "INITIALIZE TEST CATALOG"
+```
+
+该命令只清理派生书目数据，拒绝删除人工公告、公告资源和置顶配置，也不会调用
+GitHub API。必须先将空书库合并并成功部署，之后才能依据清单另行删除旧
+Release 和 tag。
+
 ## GitHub Actions
 
 ### CI

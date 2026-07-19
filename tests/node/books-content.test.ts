@@ -20,7 +20,7 @@ test("treats an empty book collection as a supported state", () => {
 
 test("detects a real Markdown book entry", () => {
   const root = fixtureRoot();
-  writeFileSync(path.join(root, "src", "content", "books", "F0-1-1.md"), "---\n---\n");
+  writeFileSync(path.join(root, "src", "content", "books", "F-1-1.md"), "---\n---\n");
   assert.equal(hasBookContentFiles(root), true);
 });
 

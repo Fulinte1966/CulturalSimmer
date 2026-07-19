@@ -10,22 +10,23 @@ import {
 test("loads the ordered classification tree from structured YAML", () => {
   assert.deepEqual(
     getClassificationNodes().map((node) => node.code),
-    ["A", "B", "D", "F", "H", "I", "J", "K", "T", "Z", "P"],
+    ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
   );
-  assert.equal(getFlatClassificationMap().size, 75);
+  assert.equal(getFlatClassificationMap().size, 18);
 });
 
 test("stores only the local label at each classification level", () => {
-  assert.deepEqual(getClassificationNode("A11"), {
-    code: "A11",
-    label: "选集、文集、选读",
-    parentCode: "A1",
-    depth: 3,
+  assert.deepEqual(getClassificationNode("A9"), {
+    code: "A9",
+    label: "张春桥、姚文元著作",
+    parentCode: "A",
+    depth: 2,
     children: [],
   });
-  assert.equal(getClassificationNode("K926.3")?.label, "湖北省");
-  assert.equal(getClassificationNode("K926.3")?.parentCode, "K9");
-  assert.equal(getClassificationNode("K926.3")?.depth, 3);
+  assert.equal(getClassificationNode("B")?.label, "哲学、宗教");
+  assert.equal(getClassificationNode("B")?.parentCode, undefined);
+  assert.equal(getClassificationNode("B")?.depth, 1);
+  assert.equal(getClassificationNode("A93"), undefined);
 });
 
 test("adds call-number separators without storing them in YAML codes", () => {

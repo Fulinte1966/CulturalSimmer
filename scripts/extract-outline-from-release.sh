@@ -3,11 +3,11 @@ set -euo pipefail
 
 # Extract PDF outline from a GitHub Release and save as JSON.
 # Usage: ./scripts/extract-outline-from-release.sh <id> <edition>
-# Example: ./scripts/extract-outline-from-release.sh A12-8-2 1
+# Example: ./scripts/extract-outline-from-release.sh A9-1 1
 
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <id> <edition>"
-  echo "Example: $0 A12-8-2 1"
+  echo "Example: $0 A9-1 1"
   exit 1
 fi
 

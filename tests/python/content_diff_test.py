@@ -15,7 +15,7 @@ def snapshot(text: str, edition: int, page: int = 1) -> dict:
     return {
         "schemaVersion": 1,
         "normalizationProfile": NORMALIZATION_PROFILE,
-        "bookId": "F0-9",
+        "bookId": "F-9",
         "edition": edition,
         "editionDate": f"2026-0{edition}",
         "pageCount": page,

@@ -27,7 +27,7 @@ class ReleaseChangelogTests(unittest.TestCase):
 
     def test_earliest_surviving_edition_is_not_described_as_initial(self) -> None:
         changelog = {
-            "bookId": "A93-1",
+            "bookId": "A9-1",
             "baseline": "earliest-surviving",
             "toEdition": {"edition": 2, "editionDate": "2026-07"},
             "fromEdition": None,
@@ -208,8 +208,8 @@ class ReleaseChangelogTests(unittest.TestCase):
     def test_manual_changes_recalculate_repository_and_release_statistics(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            changelog_path = root / "src/data/changelogs/F0-9_v2.changelog.json"
-            manifest_path = root / "src/data/manifests/F0-9_v2.json"
+            changelog_path = root / "src/data/changelogs/F-9_v2.changelog.json"
+            manifest_path = root / "src/data/manifests/F-9_v2.json"
             notes_path = root / "release-notes.md"
             changelog_path.parent.mkdir(parents=True)
             manifest_path.parent.mkdir(parents=True)
@@ -217,7 +217,7 @@ class ReleaseChangelogTests(unittest.TestCase):
                 json.dumps(
                     {
                         "schemaVersion": 1,
-                        "bookId": "F0-9",
+                        "bookId": "F-9",
                         "fromEdition": {"edition": 1, "editionDate": "2026-06"},
                         "toEdition": {"edition": 2, "editionDate": "2026-07"},
                         "summary": {
@@ -258,7 +258,7 @@ class ReleaseChangelogTests(unittest.TestCase):
             manifest_path.write_text(
                 json.dumps(
                     {
-                        "releaseTag": "F0-9_v2",
+                        "releaseTag": "F-9_v2",
                         "changelogSummary": {
                             "total": 1,
                             "added": 1,
@@ -271,7 +271,7 @@ class ReleaseChangelogTests(unittest.TestCase):
             )
 
             synchronized = synchronize_changelog(
-                "F0-9_v2", root=root, notes_output=notes_path
+                "F-9_v2", root=root, notes_output=notes_path
             )
 
             expected = {"total": 2, "added": 1, "removed": 1, "changed": 0}

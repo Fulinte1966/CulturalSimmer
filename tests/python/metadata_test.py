@@ -125,11 +125,10 @@ def _make_test_pdf(
 # ---------------------------------------------------------------------------
 
 SAMPLE_CLASSIFICATIONS = {
-    "F0": "马克思主义政治经济学",
-    "A8": "马克思主义、列宁主义、毛泽东思想的学习、研究和参考资料",
-    "I210": "中国文学·鲁迅著作",
-    "Z228": "中国百科全书、类书·综合性普及读物",
-    "K926": "中国地理·中南地区",
+    "F": "经济",
+    "A8": "马列毛主义研究和参考资料",
+    "I": "文学",
+    "K": "历史、地理",
 }
 
 
@@ -143,9 +142,9 @@ class XmpTextHelperTests(unittest.TestCase):
         el = ET.fromstring("<rdf:Description "
                            'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" '
                            'xmlns:dc="http://purl.org/dc/elements/1.1/">'
-                           "<dc:identifier>F0-1-1</dc:identifier>"
+                           "<dc:identifier>F-1-1</dc:identifier>"
                            "</rdf:Description>")
-        self.assertEqual(_xmp_text(el, "dc:identifier"), "F0-1-1")
+        self.assertEqual(_xmp_text(el, "dc:identifier"), "F-1-1")
 
     def test_reads_alt_element(self) -> None:
         el = ET.fromstring(
@@ -206,7 +205,7 @@ class XmpTextHelperTests(unittest.TestCase):
 
 class CallNumberTests(unittest.TestCase):
     def test_regex_accepts_valid_ids(self) -> None:
-        for id_ in ("F0-1-1", "A8-3", "I210.4-1", "T-1", "Z228-1", "A12-8-2"):
+        for id_ in ("F-1-1", "A8-3", "I-1", "K-1", "A1-8-2", "B-1"):
             with self.subTest(id=id_):
                 self.assertIsNotNone(_ID_REGEX.match(id_))
 
@@ -216,10 +215,10 @@ class CallNumberTests(unittest.TestCase):
                 self.assertIsNone(_ID_REGEX.match(id_))
 
     def test_parse_classification(self) -> None:
-        self.assertEqual(parse_classification_simple("F0-1-1"), "F0")
+        self.assertEqual(parse_classification_simple("F-1-1"), "F")
         self.assertEqual(parse_classification_simple("A8-3"), "A8")
-        self.assertEqual(parse_classification_simple("I210.4-1"), "I210.4")
-        self.assertEqual(parse_classification_simple("A12-8-2"), "A12")
+        self.assertEqual(parse_classification_simple("I-1"), "I")
+        self.assertEqual(parse_classification_simple("A1-8-2"), "A1")
 
 
 # ---------------------------------------------------------------------------
@@ -231,7 +230,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_extracts_required_fields(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "dc:creator": _seq("《政治经济学基础知识》编写组"),
                 "prism:bookEdition": "1",
@@ -244,7 +243,7 @@ class ExtractMetadataTests(unittest.TestCase):
             pdf = _make_test_pdf(root, "test.pdf", xmp=xmp)
             meta = extract(pdf, SAMPLE_CLASSIFICATIONS)
 
-            self.assertEqual(meta.id, "F0-1-1")
+            self.assertEqual(meta.id, "F-1-1")
             self.assertEqual(meta.title, "政治经济学基础知识")
             self.assertEqual(meta.author, "《政治经济学基础知识》编写组")
             self.assertEqual(meta.edition, 1)
@@ -257,7 +256,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_missing_creator_and_language_are_allowed(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "prism:bookEdition": "1",
                 "dc:description": _alt("系统介绍资本主义政治经济学。"),
@@ -273,7 +272,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_extracts_optional_fields(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "dc:creator": _seq("《政治经济学基础知识》编写组"),
                 "prism:bookEdition": "1",
@@ -306,7 +305,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_extracts_external_url_from_dc_relation_fallback(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "prism:bookEdition": "1",
                 "dc:description": _alt("系统介绍资本主义政治经济学。"),
@@ -322,7 +321,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_rejects_invalid_external_url(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "prism:bookEdition": "1",
                 "dc:description": _alt("系统介绍资本主义政治经济学。"),
@@ -339,7 +338,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_missing_subtitle_is_not_an_error(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("政治经济学基础知识"),
                 "dc:creator": _seq("佚名"),
                 "prism:bookEdition": "1",
@@ -356,7 +355,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_missing_required_field_fails(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 # missing dc:title
                 "dc:creator": _seq("佚名"),
                 "prism:bookEdition": "1",
@@ -374,7 +373,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_missing_create_date_fails(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -449,7 +448,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_non_a5_aspect_fails(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -469,7 +468,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_volume_id_conflict_fails(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-2",  # volume 2 from ID
+                "dc:identifier": "F-1-2",  # volume 2 from ID
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -488,7 +487,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_custom_info_total_volumes_less_than_volume_fails(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-3",
+                "dc:identifier": "F-1-3",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -518,7 +517,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_custom_info_survives_pdf_round_trip(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-3",
+                "dc:identifier": "F-1-3",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -548,7 +547,7 @@ class ExtractMetadataTests(unittest.TestCase):
 
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -571,7 +570,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_tags_are_deduplicated_in_source_order(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-1",
+                "dc:identifier": "F-1-1",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",
@@ -590,7 +589,7 @@ class ExtractMetadataTests(unittest.TestCase):
     def test_volume_derived_from_id(self) -> None:
         xmp = _make_xmp(
             **{
-                "dc:identifier": "F0-1-3",
+                "dc:identifier": "F-1-3",
                 "dc:title": _alt("标题"),
                 "dc:creator": _seq("作者"),
                 "prism:bookEdition": "1",

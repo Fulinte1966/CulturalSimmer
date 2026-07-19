@@ -7,7 +7,7 @@ const bookIdRegex = /^[A-Z](?:\d+(?:\.\d+)?)?-\d+(?:-\d+)?$/;
 const books = defineCollection({
   loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/books" }),
   schema: z.object({
-    id: z.string().regex(bookIdRegex, "id must be a valid call number like A8-3 or A12-8-2"),
+    id: z.string().regex(bookIdRegex, "id must be a valid call number like A9-1 or F-1-1"),
     title: z.string().min(1),
     description: z.string().min(1),
     author: z.string().optional(),

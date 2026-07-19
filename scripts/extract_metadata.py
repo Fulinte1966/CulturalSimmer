@@ -451,10 +451,10 @@ def _extract_volume_from_id(book_id: str) -> Optional[int]:
 def parse_classification_simple(book_id: str) -> str:
     """Extract classification code from a call number.
 
-    >>> parse_classification_simple("F0-1-1")
-    'F0'
-    >>> parse_classification_simple("I210.4-1")
-    'I210.4'
+    >>> parse_classification_simple("F-1-1")
+    'F'
+    >>> parse_classification_simple("A9-1")
+    'A9'
     """
     m = _ID_REGEX.match(book_id)
     if m is None:
