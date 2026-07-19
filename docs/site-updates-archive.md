@@ -1,3 +1,9 @@
+### `2026-7-19` `新书` A9-1_v1
+
+《狱中家书选》已上架。
+
+<!-- update-id: new-book-A9-1-v1 -->
+
 ### `2026-7-16` `功能` 接收本站更新消息
 
 <p class="fm-site-update-centered">
