@@ -22,7 +22,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
 
 concurrency:
   group: ebook-candidate
@@ -142,6 +142,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       PUBLICATION_LEDGER_TOKEN: ${{ secrets.PUBLICATION_LEDGER_TOKEN || secrets.NOTIFIER_DISPATCH_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -225,6 +227,12 @@ jobs:
           git push origin main
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger production deployment
+        run: >-
+          gh workflow run deploy.yml
+          --ref main
+          -f notify_updates=true
 
       - name: Roll back an uncommitted canonical Release
         if: >-

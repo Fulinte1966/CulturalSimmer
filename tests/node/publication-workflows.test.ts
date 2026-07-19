@@ -20,6 +20,17 @@ test("candidate publication keeps preview and production approval boundaries", (
   assert.match(source, /candidate_lock\.py verify/);
   assert.match(source, /Roll back an uncommitted canonical Release/);
   assert.match(source, /cloudflare-clean-dist/);
+  assert.equal(value.permissions.actions, "write");
+  assert.match(source, /gh workflow run deploy\.yml/);
+  assert.match(source, /notify_updates=true/);
+  assert.equal(
+    value.jobs.promote.env.CLOUDFLARE_API_TOKEN,
+    "${{ secrets.CLOUDFLARE_API_TOKEN }}",
+  );
+  assert.equal(
+    value.jobs.promote.env.CLOUDFLARE_ACCOUNT_ID,
+    "${{ vars.CLOUDFLARE_ACCOUNT_ID }}",
+  );
 });
 
 test("publication removal requires a registered ledger and records failures", () => {
@@ -33,7 +44,12 @@ test("publication removal requires a registered ledger and records failures", ()
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
 });
 
-test("ordinary deployment does not dispatch reader notifications", () => {
-  const { source } = workflow("deploy.yml");
-  assert.doesNotMatch(source, /notify_updates|notify\.yml|notify-ntfy\.yml/);
+test("only an explicit ingest deployment dispatches notifications after both hosts", () => {
+  const { source, value } = workflow("deploy.yml");
+  assert.equal(value.on.workflow_dispatch.inputs.notify_updates.default, false);
+  assert.match(value.jobs.notify.if, /workflow_dispatch/);
+  assert.match(value.jobs.notify.if, /notify_updates/);
+  assert.deepEqual(value.jobs.notify.needs, ["deploy-cloudflare", "deploy"]);
+  assert.match(source, /notify\.yml/);
+  assert.match(source, /notify-ntfy\.yml/);
 });
