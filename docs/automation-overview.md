@@ -89,6 +89,8 @@ Release 和 tag。
 
 只有入库候选显式触发且传入 `notify_updates=true` 的部署，才在两个公开站点均成功后即时 dispatch QQ 与 ntfy。普通 push、样式修改、定时天气刷新和未带参数的手动部署不通知读者；通知器自身的定时轮询继续作为独立兜底，稳定事件 ID 防止重复发送。
 
+非定时生产部署会另行向私有 ntfy ops 主题实时报告开始和最终结果。Cloudflare Pages 与 GitHub Pages 都成功才记为完成，构建或任一部署失败则升级为失败状态；相同状态由 ops 状态机去重，后续成功会关闭失败状态。ops dispatch 失败只降低可观测性，不回滚已验证的网站或阻塞读者通知。每日天气刷新不发送例行开始/完成消息，避免固定噪声。
+
 `NOTIFIER_DISPATCH_TOKEN` 只用于向 `Fulinte1966/CulturalSimmer-notifier` 的两个通知工作流发送 dispatch，使用仅含目标仓库 `Actions: write` 的细粒度 token。私有删除台账凭据与通知 dispatch 分离，不得复用其他管理 token。某书设置 `notifyUpdates: false` 时，通知 feed 不包含该书后续版次事件，网站、Release 和部署仍保持正常。
 
 ### Sync Release Changelog
