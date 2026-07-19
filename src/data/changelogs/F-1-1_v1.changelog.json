@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "bookId": "F-1-1",
+  "normalizationProfile": "culturalsimmer-content-v3",
+  "fromEdition": null,
+  "toEdition": {
+    "edition": 1,
+    "editionDate": "2026-07"
+  },
+  "summary": {
+    "total": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0
+  },
+  "changes": []
+}
