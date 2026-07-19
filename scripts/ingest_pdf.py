@@ -39,6 +39,7 @@ from extract_content_snapshot import (
 )
 from render_release_changelog import render_release_changelog
 from site_updates_data import append_generated_update
+from publication_policy import assert_publishable
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -259,6 +260,7 @@ def cmd_validate(args: list[str]):
         meta = extract(pdf_path, _load_classifications())
     except (ValueError, MetadataError) as exc:
         raise SystemExit(f"Metadata validation failed: {exc}")
+    assert_publishable(ROOT, meta.id)
 
     tag = f"{meta.id}_v{meta.edition}"
     filename = f"{tag}.pdf"

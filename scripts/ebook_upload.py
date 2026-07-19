@@ -11,6 +11,7 @@ from pathlib import Path
 from edition_policy import check_expected_edition, format_edition_check_lines
 from extract_metadata import MetadataError, extract
 from ingest_pdf import ROOT, _load_classifications
+from publication_policy import assert_publishable
 
 
 def _run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -106,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
         meta = extract(pdf_path, _load_classifications())
     except (ValueError, MetadataError) as exc:
         raise SystemExit(f"Metadata validation failed: {exc}") from exc
+    assert_publishable(ROOT, meta.id)
 
     _ensure_gh_auth()
 
