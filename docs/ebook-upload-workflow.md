@@ -12,6 +12,7 @@
 - 正式发布键为 `{bookId}_v{edition}`，例如 `F-1-1_v1`；正式 Release 的 tag 和标题均使用该唯一发行号。
 - `prism:bookEdition` 必须由 PDF 声明；脚本只校验，不替 PDF 决定版次。
 - `notifyUpdates` 是仓库维护策略，不属于 PDF XMP；已有书目显式设置后，后续入库会原样保留。
+- `config/publication-policy.yml` 是最终入库边界；列入 `blockedBooks` 的书目只允许本地编译和校对。
 
 ## 本地上传入口
 
@@ -46,6 +47,9 @@ mise exec -- npm run ebook:upload path/to/book.pdf -- --dry-run
 - 本地和远程重复检查结果。
 
 `--allow-edition-skip` 默认不要使用。确需跳版时，本地脚本会把 `Allow-Edition-Skip: true` 写入临时 Release notes，ingest workflow 再据此放行；没有该标记时 CI 仍按不跳版规则失败。
+
+本地上传命令与 GitHub 候选入库验证都会读取发行策略，并在创建正式 Release
+或网站内容前拒绝“不上架”书目。不要仅依靠操作约定维护本地专用书目。
 
 ## 必填 PDF XMP 字段
 

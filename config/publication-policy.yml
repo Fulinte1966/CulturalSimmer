@@ -1,0 +1,7 @@
+schemaVersion: 1
+
+# 此清单是网站入库的最终安全边界。列出的书目可在本地编译和校对，
+# 但不得创建候选版本、正式 Release 或网站书目。
+blockedBooks:
+  - id: B-1
+    reason: 仅供本地校对，不上架

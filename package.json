@@ -27,7 +27,7 @@
     "validate": "tsx scripts/validate-books.ts",
     "test:reading": "python3 tests/python/reading_metrics_test.py",
     "test:metadata": "python3 tests/python/metadata_test.py",
-    "test:ingest": "python3 -m unittest tests/python/ingest_pdf_test.py tests/python/publication_lifecycle_test.py tests/python/catalog_initialize_test.py",
+    "test:ingest": "python3 -m unittest tests/python/ingest_pdf_test.py tests/python/publication_policy_test.py tests/python/publication_lifecycle_test.py tests/python/catalog_initialize_test.py",
     "test:updates": "python3 -m unittest tests/python/site_updates_archive_test.py",
     "test:changelog": "python3 -m unittest tests/python/content_snapshot_test.py tests/python/content_diff_test.py tests/python/release_changelog_test.py tests/python/book_changelog_test.py",
     "test:ui": "tsx --test tests/node/**/*.test.ts"
