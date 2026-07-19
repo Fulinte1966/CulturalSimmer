@@ -37,7 +37,7 @@ function createCloudflareFixture() {
     "data",
     "manifests",
   );
-  fs.mkdirSync(path.join(sourceDirectory, "books", "A93-1"), {
+  fs.mkdirSync(path.join(sourceDirectory, "books", "A9-1"), {
     recursive: true,
   });
   fs.mkdirSync(booksDirectory, { recursive: true });
@@ -46,58 +46,58 @@ function createCloudflareFixture() {
   const latestPdf = Buffer.from("%PDF-1.7 latest fixture");
   const latestSha256 = createHash("sha256").update(latestPdf).digest("hex");
   fs.writeFileSync(
-    path.join(booksDirectory, "A93-1.md"),
+    path.join(booksDirectory, "A9-1.md"),
     `---
-id: A93-1
+id: A9-1
 title: Fixture
 description: Fixture
 editions:
   - edition: 1
     editionDate: 2026-06
-    releaseTag: A93-1_v1
-    manifest: src/data/manifests/A93-1_v1.json
+    releaseTag: A9-1_v1
+    manifest: src/data/manifests/A9-1_v1.json
   - edition: 2
     editionDate: 2026-07
-    releaseTag: A93-1_v2
-    manifest: src/data/manifests/A93-1_v2.json
+    releaseTag: A9-1_v2
+    manifest: src/data/manifests/A9-1_v2.json
 ---
 Fixture
 `,
   );
   fs.writeFileSync(
-    path.join(manifestsDirectory, "A93-1_v1.json"),
+    path.join(manifestsDirectory, "A9-1_v1.json"),
     JSON.stringify({
-      bookId: "A93-1",
+      bookId: "A9-1",
       edition: 1,
-      releaseTag: "A93-1_v1",
-      pdfFilename: "A93-1_v1.pdf",
+      releaseTag: "A9-1_v1",
+      pdfFilename: "A9-1_v1.pdf",
       downloadUrl:
-        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v1/A93-1_v1.pdf",
+        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A9-1_v1/A9-1_v1.pdf",
       bytes: 1,
       sourceSha256: "0".repeat(64),
     }),
   );
   const latestManifestPath = path.join(
     manifestsDirectory,
-    "A93-1_v2.json",
+    "A9-1_v2.json",
   );
   fs.writeFileSync(
     latestManifestPath,
     JSON.stringify({
-      bookId: "A93-1",
+      bookId: "A9-1",
       edition: 2,
-      releaseTag: "A93-1_v2",
-      pdfFilename: "A93-1_v2.pdf",
+      releaseTag: "A9-1_v2",
+      pdfFilename: "A9-1_v2.pdf",
       downloadUrl:
-        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf",
+        "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A9-1_v2/A9-1_v2.pdf",
       bytes: latestPdf.length,
       sourceSha256: latestSha256,
       githubAssetDigest: `sha256:${latestSha256}`,
     }),
   );
   fs.writeFileSync(
-    path.join(sourceDirectory, "books", "A93-1", "index.html"),
-    `<!doctype html><html><head><link rel="canonical" href="https://fulinte.pages.dev/CulturalSimmer/books/A93-1/"></head><body><a class="bd-download" href="https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf" data-cloudflare-download="A93-1_v2.pdf">Download</a></body></html>`,
+    path.join(sourceDirectory, "books", "A9-1", "index.html"),
+    `<!doctype html><html><head><link rel="canonical" href="https://fulinte.pages.dev/CulturalSimmer/books/A9-1/"></head><body><a class="bd-download" href="https://github.com/Fulinte1966/CulturalSimmer/releases/download/A9-1_v2/A9-1_v2.pdf" data-cloudflare-download="A9-1_v2.pdf">Download</a></body></html>`,
   );
 
   return {
@@ -164,7 +164,7 @@ test("hosts only the latest PDF and rewrites only the Cloudflare copy", async ()
   assert.equal(result.hostedPdfCount, 1);
   assert.equal(result.rewrittenLinkCount, 1);
   assert.deepEqual(requestedUrls, [
-    "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A93-1_v2/A93-1_v2.pdf",
+    "https://github.com/Fulinte1966/CulturalSimmer/releases/download/A9-1_v2/A9-1_v2.pdf",
   ]);
   assert.deepEqual(
     fs.readFileSync(
@@ -172,7 +172,7 @@ test("hosts only the latest PDF and rewrites only the Cloudflare copy", async ()
         fixture.destinationDirectory,
         "CulturalSimmer",
         "downloads",
-        "A93-1_v2.pdf",
+        "A9-1_v2.pdf",
       ),
     ),
     fixture.latestPdf,
@@ -183,7 +183,7 @@ test("hosts only the latest PDF and rewrites only the Cloudflare copy", async ()
         fixture.destinationDirectory,
         "CulturalSimmer",
         "downloads",
-        "A93-1_v1.pdf",
+        "A9-1_v1.pdf",
       ),
     ),
     false,
@@ -194,28 +194,28 @@ test("hosts only the latest PDF and rewrites only the Cloudflare copy", async ()
       fixture.destinationDirectory,
       "CulturalSimmer",
       "books",
-      "A93-1",
+      "A9-1",
       "index.html",
     ),
     "utf8",
   );
   assert.match(
     cloudflareHtml,
-    /href="\/CulturalSimmer\/downloads\/A93-1_v2\.pdf"/,
+    /href="\/CulturalSimmer\/downloads\/A9-1_v2\.pdf"/,
   );
-  assert.match(cloudflareHtml, /download="A93-1_v2\.pdf"/);
+  assert.match(cloudflareHtml, /download="A9-1_v2\.pdf"/);
   assert.doesNotMatch(cloudflareHtml, /data-cloudflare-download/);
   assert.match(
     cloudflareHtml,
-    /rel="canonical" href="https:\/\/fulinte\.pages\.dev\/CulturalSimmer\/books\/A93-1\/"/,
+    /rel="canonical" href="https:\/\/fulinte\.pages\.dev\/CulturalSimmer\/books\/A9-1\/"/,
   );
 
   const githubHtml = fs.readFileSync(
-    path.join(fixture.sourceDirectory, "books", "A93-1", "index.html"),
+    path.join(fixture.sourceDirectory, "books", "A9-1", "index.html"),
     "utf8",
   );
   assert.match(githubHtml, /github\.com\/Fulinte1966\/CulturalSimmer\/releases/);
-  assert.match(githubHtml, /data-cloudflare-download="A93-1_v2\.pdf"/);
+  assert.match(githubHtml, /data-cloudflare-download="A9-1_v2\.pdf"/);
 
   const cloudflareHeaders = fs.readFileSync(
     path.join(fixture.destinationDirectory, "_headers"),
@@ -236,7 +236,7 @@ test("uses the local candidate PDF without requesting the canonical Release", as
   const candidateDirectory = path.join(fixture.temporaryDirectory, "candidate");
   fs.mkdirSync(candidateDirectory);
   fs.writeFileSync(
-    path.join(candidateDirectory, "A93-1_v2.pdf"),
+    path.join(candidateDirectory, "A9-1_v2.pdf"),
     fixture.latestPdf,
   );
 
@@ -257,7 +257,7 @@ test("uses the local candidate PDF without requesting the canonical Release", as
         fixture.destinationDirectory,
         "CulturalSimmer",
         "downloads",
-        "A93-1_v2.pdf",
+        "A9-1_v2.pdf",
       ),
     ),
     fixture.latestPdf,

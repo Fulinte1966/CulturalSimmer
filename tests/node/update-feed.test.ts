@@ -8,7 +8,7 @@ import {
 } from "../../src/lib/updateFeed.ts";
 
 const book = {
-  id: "F0-1-1",
+  id: "F-1-1",
   title: "政治经济学基础知识",
   subtitle: "（资本主义部分）",
   editions: [
@@ -21,8 +21,8 @@ const archiveUrl = "https://github.com/example/library/blob/main/docs/site-updat
 function build() {
   return buildPublicUpdateFeed({
     generatedUpdates: [
-      { id: "F0-1-1-listed", type: "book-added", publishedAt: "2026-07-08T18:01:03Z", bookId: "F0-1-1" },
-      { id: "F0-1-1-v2", type: "book-updated", publishedAt: "2026-08-01T00:00:00Z", bookId: "F0-1-1", edition: 2 },
+      { id: "F-1-1-listed", type: "book-added", publishedAt: "2026-07-08T18:01:03Z", bookId: "F-1-1" },
+      { id: "F-1-1-v2", type: "book-updated", publishedAt: "2026-08-01T00:00:00Z", bookId: "F-1-1", edition: 2 },
     ],
     announcements: [{
       id: "2026-08-02-maintenance",
@@ -41,15 +41,15 @@ test("builds stable IDs from existing book and edition data", () => {
   assert.deepEqual(first, second);
   assert.deepEqual(first.updates.map((item) => item.id), [
     "announcement-2026-08-02-maintenance",
-    "book-version-F0-1-1-v2",
-    "new-book-F0-1-1-v1",
+    "book-version-F-1-1-v2",
+    "new-book-F-1-1-v1",
   ]);
 });
 
 test("keeps silent books on the site while omitting automatic reader notifications", () => {
   const feed = buildPublicUpdateFeed({
     generatedUpdates: [
-      { id: "F0-1-1-v2", type: "book-updated", publishedAt: "2026-08-01T00:00:00Z", bookId: "F0-1-1", edition: 2 },
+      { id: "F-1-1-v2", type: "book-updated", publishedAt: "2026-08-01T00:00:00Z", bookId: "F-1-1", edition: 2 },
     ],
     announcements: [],
     books: [{ ...book, notifyUpdates: false }],
@@ -63,7 +63,7 @@ test("keeps silent books on the site while omitting automatic reader notificatio
 test("still announces the first listing before a book opts out of later updates", () => {
   const feed = buildPublicUpdateFeed({
     generatedUpdates: [
-      { id: "F0-1-1-listed", type: "book-added", publishedAt: "2026-07-08T18:01:03Z", bookId: "F0-1-1" },
+      { id: "F-1-1-listed", type: "book-added", publishedAt: "2026-07-08T18:01:03Z", bookId: "F-1-1" },
     ],
     announcements: [],
     books: [{ ...book, notifyUpdates: false }],
@@ -83,7 +83,7 @@ test("does not suppress manual important errata for a silent book", () => {
         title: "重要勘误",
         publishedAt: "2026-08-04T00:00:00Z",
         kind: "important-erratum",
-        bookId: "F0-1-1",
+        bookId: "F-1-1",
         edition: 2,
         summary: ["修正正文"],
       },
@@ -105,7 +105,7 @@ test("builds an important erratum linked to an existing edition", () => {
         title: "第 12 页重要勘误",
         publishedAt: "2026-08-04T00:00:00Z",
         kind: "important-erratum",
-        bookId: "F0-1-1",
+        bookId: "F-1-1",
         edition: 2,
         summary: ["修正正文错字"],
       },

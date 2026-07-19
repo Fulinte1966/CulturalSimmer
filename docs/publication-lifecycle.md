@@ -38,10 +38,10 @@
    ```bash
    npm run publication:remove -- plan \
      --operation withdraw-edition \
-     --book-id A93-1 \
+     --book-id A9-1 \
      --edition 2 \
      --reason "private operational reason" \
-     --output Outputs/removals/A93-1-v2.json
+     --output Outputs/removals/A9-1-v2.json
    ```
 
    整书下架改用 `--operation delist-book` 并省略 `--edition`。
@@ -51,7 +51,7 @@
    ```bash
    export AGE_RECIPIENT="$(age-keygen -y "$HOME/.config/age/keys.txt")"
    npm run publication:remove -- backup \
-     --plan Outputs/removals/A93-1-v2.json \
+     --plan Outputs/removals/A9-1-v2.json \
      --age-recipient "$AGE_RECIPIENT"
    ```
 
@@ -62,7 +62,7 @@
 
    ```bash
    npm run publication:remove -- register-private \
-     --plan Outputs/removals/A93-1-v2.json \
+     --plan Outputs/removals/A9-1-v2.json \
      --reason "private operational reason"
    ```
 

@@ -17,9 +17,9 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
         (root / "src/content/books").mkdir(parents=True)
         (root / "src/content/announcements").mkdir(parents=True)
         (root / "src/data").mkdir(parents=True)
-        (root / "src/content/books/F0-9.md").write_text(
+        (root / "src/content/books/F-9.md").write_text(
             "---\n"
-            "id: F0-9\n"
+            "id: F-9\n"
             "title: 测试书\n"
             "subtitle: （上册）\n"
             "editions:\n"
@@ -34,16 +34,16 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             json.dumps(
                 [
                     {
-                        "id": "F0-9-listed",
+                        "id": "F-9-listed",
                         "type": "book-added",
                         "publishedAt": "2026-07-01T16:00:00Z",
-                        "bookId": "F0-9",
+                        "bookId": "F-9",
                     },
                     {
-                        "id": "F0-9-v2",
+                        "id": "F-9-v2",
                         "type": "book-updated",
                         "publishedAt": "2026-08-02T16:00:00Z",
-                        "bookId": "F0-9",
+                        "bookId": "F-9",
                         "edition": 2,
                     },
                 ],
@@ -74,15 +74,15 @@ class SiteUpdatesArchiveTests(unittest.TestCase):
             self.assertTrue(markdown.startswith("### `2026-8-4` `维护` 维护完成\n"))
             self.assertNotIn("# 本站更新归档", markdown)
             self.assertNotIn("请勿手动编辑", markdown)
-            self.assertLess(markdown.index("维护完成"), markdown.index("F0-9_v2"))
-            self.assertLess(markdown.index("F0-9_v2"), markdown.index("F0-9_v1"))
+            self.assertLess(markdown.index("维护完成"), markdown.index("F-9_v2"))
+            self.assertLess(markdown.index("F-9_v2"), markdown.index("F-9_v1"))
             self.assertIn("### `2026-8-4` `维护` 维护完成", markdown)
             self.assertIn("系统维护已经完成。", markdown)
-            self.assertIn("### `2026-8-3` `更新` F0-9_v2", markdown)
+            self.assertIn("### `2026-8-3` `更新` F-9_v2", markdown)
             self.assertIn("《测试书（上册）》已更新第 2 版。", markdown)
-            self.assertIn("### `2026-7-2` `新书` F0-9_v1", markdown)
+            self.assertIn("### `2026-7-2` `新书` F-9_v1", markdown)
             self.assertIn("《测试书（上册）》已上架。", markdown)
-            self.assertIn("<!-- update-id: book-version-F0-9-v2 -->", markdown)
+            self.assertIn("<!-- update-id: book-version-F-9-v2 -->", markdown)
             self.assertNotIn("\n---\n", markdown)
             self.assertNotIn("generatedAt", markdown)
             build_site_updates_archive(root, check=True)

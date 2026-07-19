@@ -30,21 +30,21 @@ test("normalizes a public asset origin", () => {
 test("uses the mirror as primary and preserves the local fallback", () => {
   assert.deepEqual(
     resolvePublicAsset(
-      "/CulturalSimmer/covers/F0-1-1_v2.png",
+      "/CulturalSimmer/covers/F-1-1_v2.png",
       "https://static.example.com",
     ),
     {
       primaryUrl:
-        "https://static.example.com/CulturalSimmer/covers/F0-1-1_v2.png",
-      fallbackUrl: "/CulturalSimmer/covers/F0-1-1_v2.png",
+        "https://static.example.com/CulturalSimmer/covers/F-1-1_v2.png",
+      fallbackUrl: "/CulturalSimmer/covers/F-1-1_v2.png",
     },
   );
 });
 
 test("keeps same-origin assets when the mirror is disabled", () => {
   assert.deepEqual(
-    resolvePublicAsset("/CulturalSimmer/covers/F0-1-1_v2.png"),
-    { primaryUrl: "/CulturalSimmer/covers/F0-1-1_v2.png" },
+    resolvePublicAsset("/CulturalSimmer/covers/F-1-1_v2.png"),
+    { primaryUrl: "/CulturalSimmer/covers/F-1-1_v2.png" },
   );
 });
 

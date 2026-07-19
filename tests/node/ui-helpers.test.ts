@@ -10,5 +10,5 @@ test("joins a GitHub Pages base path without duplicate slashes", () => {
 });
 
 test("joins the root base path", () => {
-  assert.equal(joinBasePath("/", "books/F0-1-1/"), "/books/F0-1-1/");
+  assert.equal(joinBasePath("/", "books/F-1-1/"), "/books/F-1-1/");
 });

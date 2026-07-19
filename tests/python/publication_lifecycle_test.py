@@ -19,19 +19,19 @@ from extract_content_snapshot import NORMALIZATION_PROFILE, tokenize_text, write
 
 
 def write_book(root: Path, editions: list[int]) -> None:
-    book = root / "src/content/books/A93-1.md"
+    book = root / "src/content/books/A9-1.md"
     book.parent.mkdir(parents=True)
     records = "".join(
         "  - edition: {edition}\n"
         "    editionDate: 2026-07\n"
-        "    releaseTag: A93-1_v{edition}\n"
-        "    manifest: src/data/manifests/A93-1_v{edition}.json\n".format(
+        "    releaseTag: A9-1_v{edition}\n"
+        "    manifest: src/data/manifests/A9-1_v{edition}.json\n".format(
             edition=edition
         )
         for edition in editions
     )
     book.write_text(
-        "---\nid: A93-1\ntitle: 测试书\ndescription: 测试。\ntags: []\n"
+        "---\nid: A9-1\ntitle: 测试书\ndescription: 测试。\ntags: []\n"
         f"editions:\n{records}---\n\n测试。\n",
         encoding="utf-8",
     )
@@ -40,17 +40,17 @@ def write_book(root: Path, editions: list[int]) -> None:
         json.dumps(
             [
                 {
-                    "id": "A93-1-listed",
+                    "id": "A9-1-listed",
                     "type": "book-added",
                     "publishedAt": "2026-07-01T00:00:00Z",
-                    "bookId": "A93-1",
+                    "bookId": "A9-1",
                 },
                 *[
                     {
-                        "id": f"A93-1-v{edition}",
+                        "id": f"A9-1-v{edition}",
                         "type": "book-updated",
                         "publishedAt": f"2026-07-0{edition}T00:00:00Z",
-                        "bookId": "A93-1",
+                        "bookId": "A9-1",
                         "edition": edition,
                     }
                     for edition in editions
@@ -69,10 +69,10 @@ def write_book(root: Path, editions: list[int]) -> None:
     (root / "src/content/announcements").mkdir(parents=True)
 
     for edition in editions:
-        tag = f"A93-1_v{edition}"
+        tag = f"A9-1_v{edition}"
         changelog = {
             "schemaVersion": 1,
-            "bookId": "A93-1",
+            "bookId": "A9-1",
             "fromEdition": (
                 None
                 if edition == min(editions)
@@ -92,11 +92,11 @@ def write_book(root: Path, editions: list[int]) -> None:
 def write_content_snapshot(workspace: Path, edition: int, text: str) -> None:
     tokens = tokenize_text(text)
     write_snapshot(
-        workspace / f"A93-1_v{edition}.content.json.gz",
+        workspace / f"A9-1_v{edition}.content.json.gz",
         {
             "schemaVersion": 1,
             "normalizationProfile": NORMALIZATION_PROFILE,
-            "bookId": "A93-1",
+            "bookId": "A9-1",
             "edition": edition,
             "editionDate": "2026-07",
             "pageCount": 1,
@@ -117,17 +117,17 @@ class PublicationLifecycleTests(unittest.TestCase):
     def test_candidate_lock_rejects_pdf_or_source_commit_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            pdf = root / "A93-1_v3.pdf"
+            pdf = root / "A9-1_v3.pdf"
             metadata = root / "candidate.json"
             lock = root / "candidate-lock.json"
             pdf.write_bytes(b"candidate-pdf")
             metadata.write_text(
                 json.dumps(
                     {
-                        "id": "A93-1",
+                        "id": "A9-1",
                         "edition": 3,
-                        "canonicalTag": "A93-1_v3",
-                        "sourceReleaseTag": "ingest-A93-1-v3",
+                        "canonicalTag": "A9-1_v3",
+                        "sourceReleaseTag": "ingest-A9-1-v3",
                         "sourceReleaseId": 42,
                         "sourceCommit": "source-commit",
                         "allowEditionSkip": False,
@@ -161,7 +161,7 @@ class PublicationLifecycleTests(unittest.TestCase):
                         "schemaVersion": 1,
                         "removals": [
                             {
-                                "bookId": "A93-1",
+                                "bookId": "A9-1",
                                 "editions": [1, 2],
                             }
                         ],
@@ -170,12 +170,12 @@ class PublicationLifecycleTests(unittest.TestCase):
                 encoding="utf-8",
             )
             reused = check_expected_edition(
-                root, "A93-1", 2, ledger_path=ledger
+                root, "A9-1", 2, ledger_path=ledger
             )
             self.assertFalse(reused.ok)
             self.assertEqual(reused.expected_edition, 3)
             next_edition = check_expected_edition(
-                root, "A93-1", 3, ledger_path=ledger
+                root, "A9-1", 3, ledger_path=ledger
             )
             self.assertTrue(next_edition.ok)
 
@@ -183,10 +183,10 @@ class PublicationLifecycleTests(unittest.TestCase):
         reason = "Private rights review"
         plan = {
             "operation": "withdraw-edition",
-            "bookId": "A93-1",
+            "bookId": "A9-1",
             "bookTitle": "测试书",
-            "releaseTags": ["A93-1_v2"],
-            "originalUpdateIds": ["book-version-A93-1-v2"],
+            "releaseTags": ["A9-1_v2"],
+            "originalUpdateIds": ["book-version-A9-1-v2"],
             "reasonSha256": hashlib.sha256(reason.encode("utf-8")).hexdigest(),
             "inventorySha256": "a" * 64,
         }
@@ -204,7 +204,7 @@ class PublicationLifecycleTests(unittest.TestCase):
             plan = create_plan(
                 root,
                 operation="withdraw-edition",
-                book_id="A93-1",
+                book_id="A9-1",
                 edition=2,
                 reason="Administrative correction",
                 remote_inventory=[],
@@ -212,18 +212,18 @@ class PublicationLifecycleTests(unittest.TestCase):
             result = apply_plan(
                 root,
                 plan,
-                confirmation="WITHDRAW A93-1_v2",
+                confirmation="WITHDRAW A9-1_v2",
                 workspace=root / "workspace",
             )
             self.assertIsNone(result["successorReleaseTag"])
-            source = (root / "src/content/books/A93-1.md").read_text("utf-8")
+            source = (root / "src/content/books/A9-1.md").read_text("utf-8")
             self.assertIn("edition: 1", source)
             self.assertNotIn("edition: 2", source)
-            self.assertFalse((root / "src/data/manifests/A93-1_v2.json").exists())
+            self.assertFalse((root / "src/data/manifests/A9-1_v2.json").exists())
             updates = json.loads(
                 (root / "src/data/generated-updates.json").read_text("utf-8")
             )
-            self.assertEqual([item["id"] for item in updates], ["A93-1-listed"])
+            self.assertEqual([item["id"] for item in updates], ["A9-1-listed"])
 
     def test_withdraw_middle_rebases_successor_against_nearest_predecessor(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -235,7 +235,7 @@ class PublicationLifecycleTests(unittest.TestCase):
             plan = create_plan(
                 root,
                 operation="withdraw-edition",
-                book_id="A93-1",
+                book_id="A9-1",
                 edition=2,
                 reason="Administrative correction",
                 remote_inventory=[],
@@ -244,18 +244,18 @@ class PublicationLifecycleTests(unittest.TestCase):
             result = apply_plan(
                 root,
                 plan,
-                confirmation="WITHDRAW A93-1_v2",
+                confirmation="WITHDRAW A9-1_v2",
                 workspace=workspace,
             )
 
-            self.assertEqual(result["successorReleaseTag"], "A93-1_v3")
+            self.assertEqual(result["successorReleaseTag"], "A9-1_v3")
             changelog = json.loads(
-                (root / "src/data/changelogs/A93-1_v3.changelog.json").read_text(
+                (root / "src/data/changelogs/A9-1_v3.changelog.json").read_text(
                     encoding="utf-8"
                 )
             )
             manifest = json.loads(
-                (root / "src/data/manifests/A93-1_v3.json").read_text(
+                (root / "src/data/manifests/A9-1_v3.json").read_text(
                     encoding="utf-8"
                 )
             )
@@ -272,7 +272,7 @@ class PublicationLifecycleTests(unittest.TestCase):
             plan = create_plan(
                 root,
                 operation="withdraw-edition",
-                book_id="A93-1",
+                book_id="A9-1",
                 edition=1,
                 reason="Administrative correction",
                 remote_inventory=[],
@@ -281,18 +281,18 @@ class PublicationLifecycleTests(unittest.TestCase):
             result = apply_plan(
                 root,
                 plan,
-                confirmation="WITHDRAW A93-1_v1",
+                confirmation="WITHDRAW A9-1_v1",
                 workspace=workspace,
             )
 
-            self.assertEqual(result["successorReleaseTag"], "A93-1_v2")
+            self.assertEqual(result["successorReleaseTag"], "A9-1_v2")
             changelog = json.loads(
-                (root / "src/data/changelogs/A93-1_v2.changelog.json").read_text(
+                (root / "src/data/changelogs/A9-1_v2.changelog.json").read_text(
                     encoding="utf-8"
                 )
             )
             manifest = json.loads(
-                (root / "src/data/manifests/A93-1_v2.json").read_text(
+                (root / "src/data/manifests/A9-1_v2.json").read_text(
                     encoding="utf-8"
                 )
             )
@@ -308,7 +308,7 @@ class PublicationLifecycleTests(unittest.TestCase):
                 create_plan(
                     root,
                     operation="withdraw-edition",
-                    book_id="A93-1",
+                    book_id="A9-1",
                     edition=1,
                     reason="Administrative correction",
                     remote_inventory=[],
@@ -321,7 +321,7 @@ class PublicationLifecycleTests(unittest.TestCase):
             plan = create_plan(
                 root,
                 operation="delist-book",
-                book_id="A93-1",
+                book_id="A9-1",
                 edition=None,
                 reason="Rights review",
                 remote_inventory=[],
@@ -329,10 +329,10 @@ class PublicationLifecycleTests(unittest.TestCase):
             apply_plan(
                 root,
                 plan,
-                confirmation="DELIST A93-1",
+                confirmation="DELIST A9-1",
                 workspace=root / "workspace",
             )
-            self.assertFalse((root / "src/content/books/A93-1.md").exists())
+            self.assertFalse((root / "src/content/books/A9-1.md").exists())
             self.assertEqual(
                 json.loads(
                     (root / "src/data/generated-updates.json").read_text("utf-8")
@@ -350,7 +350,7 @@ class PublicationLifecycleTests(unittest.TestCase):
             plan = create_plan(
                 root,
                 operation="withdraw-edition",
-                book_id="A93-1",
+                book_id="A9-1",
                 edition=2,
                 reason="Administrative correction",
                 remote_inventory=[],
@@ -369,7 +369,7 @@ class PublicationLifecycleTests(unittest.TestCase):
                 apply_plan(
                     root,
                     plan,
-                    confirmation="WITHDRAW A93-1_v2",
+                    confirmation="WITHDRAW A9-1_v2",
                     workspace=root / "workspace",
                 )
 

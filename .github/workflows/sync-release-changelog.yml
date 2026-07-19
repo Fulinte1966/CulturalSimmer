@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Canonical release tag, for example F0-1-1_v2
+        description: Canonical release tag, for example F-1-1_v2
         required: true
         type: string
 

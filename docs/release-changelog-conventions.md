@@ -38,7 +38,7 @@ Release 中的 `{releaseTag}.content.json.gz` 使用以下字段：
     "name": "PyMuPDF",
     "version": "1.24.11"
   },
-  "bookId": "F0-1-1",
+  "bookId": "F-1-1",
   "edition": 2,
   "editionDate": "2026-07",
   "pageCount": 218,
@@ -99,7 +99,7 @@ Release 中的 `{releaseTag}.content.json.gz` 使用以下字段：
 ```json
 {
   "schemaVersion": 1,
-  "bookId": "F0-1-1",
+  "bookId": "F-1-1",
   "normalizationProfile": "culturalsimmer-content-v3",
   "fromEdition": {"edition": 1, "editionDate": "2026-06"},
   "toEdition": {"edition": 2, "editionDate": "2026-07"},
@@ -155,10 +155,10 @@ Release 中的 `{releaseTag}.content.json.gz` 使用以下字段：
 当前项目先创建 Draft intake，并在受保护候选站完成验收。正式 Release 创建前必须重新验证候选锁，并完成快照、差异和 Markdown 生成。Release 资产包括：
 
 ```text
-F0-1-1_v2.pdf
-F0-1-1_v2.manifest.json
-F0-1-1_v2.content.json.gz
-F0-1-1_v2.changelog.json
+F-1-1_v2.pdf
+F-1-1_v2.manifest.json
+F-1-1_v2.content.json.gz
+F-1-1_v2.changelog.json
 ```
 
 Release 创建时先上传 PDF、快照和 changelog，并将生成的 Markdown 作为正文。取得 GitHub 提供的 PDF asset digest 后更新 manifest，再上传最终 manifest。后续提交失败时，现有 cleanup 步骤删除本次正式 Release 和 tag；历史 Release 不受影响。
@@ -187,7 +187,7 @@ src/data/changelogs/{bookId}.md
 检查更新 URL 契约为：
 
 ```text
-https://fulinte.pages.dev/CulturalSimmer/check/?bookId=F0-1-1&edition=1
+https://fulinte.pages.dev/CulturalSimmer/check/?bookId=F-1-1&edition=1
 ```
 
 `bookId` 必须与书目内部书号完全一致，`edition` 必须为正整数。页面只把参数作为查询键，不接受 URL 覆盖书名、封面、下载地址或最新版信息。
@@ -198,15 +198,15 @@ https://fulinte.pages.dev/CulturalSimmer/check/?bookId=F0-1-1&edition=1
 
 ```bash
 python scripts/generate_release_changelog.py \
-  --old-pdf previous/F0-1-1_v1.pdf \
-  --new-pdf current/F0-1-1_v2.pdf \
-  --book-id F0-1-1 \
+  --old-pdf previous/F-1-1_v1.pdf \
+  --new-pdf current/F-1-1_v2.pdf \
+  --book-id F-1-1 \
   --old-edition 1 \
   --new-edition 2 \
   --old-edition-date 2026-06 \
   --new-edition-date 2026-07 \
-  --output-json output/F0-1-1_v2.changelog.json \
-  --output-markdown output/F0-1-1_v2.release-notes.md
+  --output-json output/F-1-1_v2.changelog.json \
+  --output-markdown output/F-1-1_v2.release-notes.md
 ```
 
 初版省略全部 `--old-*` 参数。命令默认不覆盖已有输出；需要覆盖时传 `--force`，需要保留中间快照时传 `--debug`。可使用 `--max-changes`、`--max-tokens` 和 `--timeout-seconds` 调整保护限制。

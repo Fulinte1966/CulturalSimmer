@@ -19,6 +19,7 @@
     "cloudflare:prepare": "node scripts/prepare-cloudflare-pages.mjs",
     "cloudflare:legacy": "node scripts/prepare-cloudflare-legacy-redirect.mjs",
     "publication:remove": "python3 scripts/publication_lifecycle.py",
+    "catalog:initialize": "python3 scripts/catalog_initialize.py",
     "fonts:subset": "python3 scripts/subset_fonts.py",
     "fonts:refresh": "npm run build && npm run fonts:subset && npm run build",
     "changelogs:build": "python3 scripts/build_book_changelogs.py",
@@ -26,7 +27,7 @@
     "validate": "tsx scripts/validate-books.ts",
     "test:reading": "python3 tests/python/reading_metrics_test.py",
     "test:metadata": "python3 tests/python/metadata_test.py",
-    "test:ingest": "python3 -m unittest tests/python/ingest_pdf_test.py tests/python/publication_lifecycle_test.py",
+    "test:ingest": "python3 -m unittest tests/python/ingest_pdf_test.py tests/python/publication_lifecycle_test.py tests/python/catalog_initialize_test.py",
     "test:updates": "python3 -m unittest tests/python/site_updates_archive_test.py",
     "test:changelog": "python3 -m unittest tests/python/content_snapshot_test.py tests/python/content_diff_test.py tests/python/release_changelog_test.py tests/python/book_changelog_test.py",
     "test:ui": "tsx --test tests/node/**/*.test.ts"

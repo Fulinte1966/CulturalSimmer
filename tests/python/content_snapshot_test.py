@@ -73,7 +73,7 @@ def _write_chapter_fixture(pdf_path: Path, *, revised: bool) -> None:
     )
     colophon.insert_text(
         (72, 120),
-        "排版\n排印\n内部书号 F0-9",
+        "排版\n排印\n内部书号 F-9",
         fontname="FixtureSong",
         fontfile=str(font_path),
     )
@@ -147,7 +147,7 @@ class ContentSnapshotTests(unittest.TestCase):
 
             snapshot = extract_content_snapshot(
                 pdf_path,
-                book_id="F0-9",
+                book_id="F-9",
                 edition=1,
                 edition_date="2026-07",
             )
@@ -175,7 +175,7 @@ class ContentSnapshotTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "no comparable text"):
                 extract_content_snapshot(
                     pdf_path,
-                    book_id="F0-9",
+                    book_id="F-9",
                     edition=1,
                     edition_date="2026-07",
                     exclude_cover=False,
@@ -201,7 +201,7 @@ class ContentSnapshotTests(unittest.TestCase):
 
             snapshot = extract_content_snapshot(
                 pdf_path,
-                book_id="F0-9",
+                book_id="F-9",
                 edition=1,
                 edition_date="2026-07",
                 exclude_cover=False,
@@ -258,13 +258,13 @@ class ContentSnapshotTests(unittest.TestCase):
 
             old_snapshot = extract_content_snapshot(
                 old_pdf,
-                book_id="F0-9",
+                book_id="F-9",
                 edition=1,
                 edition_date="2026-06",
             )
             new_snapshot = extract_content_snapshot(
                 new_pdf,
-                book_id="F0-9",
+                book_id="F-9",
                 edition=2,
                 edition_date="2026-07",
             )

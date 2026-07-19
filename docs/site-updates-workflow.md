@@ -13,16 +13,16 @@
 ```json
 [
   {
-    "id": "F0-1-1-listed",
+    "id": "F-1-1-listed",
     "type": "book-added",
     "publishedAt": "2026-07-08T18:01:03Z",
-    "bookId": "F0-1-1"
+    "bookId": "F-1-1"
   },
   {
-    "id": "F0-1-1-v2",
+    "id": "F-1-1-v2",
     "type": "book-updated",
     "publishedAt": "2026-07-11T10:00:00Z",
-    "bookId": "F0-1-1",
+    "bookId": "F-1-1",
     "edition": 2
   }
 ]
@@ -112,8 +112,8 @@ summary:
 自动消息映射为 `new_book` 和 `book_version`，人工消息映射为 `site_announcement` 或 `important_erratum`。设置 `notifyUpdates: false` 的书籍仍保留站内自动消息和归档，但其后续 `book_version` 不进入公开通知 feed。稳定 ID 格式为：
 
 ```text
-new-book-F0-1-1-v1
-book-version-F0-1-1-v2
+new-book-F-1-1-v1
+book-version-F-1-1-v2
 announcement-2026-07-13-maintenance
 erratum-2026-07-13-f0-1-1-v2-01
 ```
@@ -152,7 +152,7 @@ npm run announcement:new -- \
 ```json
 [
   "manual:2026-07-09-inaugural-message",
-  "automatic:F0-1-1-v2"
+  "automatic:F-1-1-v2"
 ]
 ```
 

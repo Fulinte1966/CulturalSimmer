@@ -160,13 +160,13 @@ jobs:
           book_id=""
 
           # Preferred Make/Tally title format:
-          # F0-1-1_v1: J1J2MQo
+          # F-1-1_v1: J1J2MQo
           if [[ "$title" =~ ^([^_[:space:]]+)_v[^:[:space:]]+: ]]; then
             book_id="${BASH_REMATCH[1]}"
           fi
 
           # Fallback for Make body:
-          # 索书号：F0-1-1
+          # 索书号：F-1-1
           if [ -z "$book_id" ]; then
             book_id="$(
               printf '%s\n' "$body" |

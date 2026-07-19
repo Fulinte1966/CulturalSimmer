@@ -19,7 +19,7 @@ import {
 
 const books = [
   {
-    id: "F0-1-1",
+    id: "F-1-1",
     title: "政治经济学基础知识",
     subtitle: "（资本主义部分）",
     editions: [{ edition: 1 }, { edition: 2 }],
@@ -53,10 +53,10 @@ test("formats Shanghai dates as reusable numeric fields", () => {
 test("derives automatic labels and messages without links", () => {
   const added = buildAutomaticSiteUpdate(
     {
-      id: "F0-1-1-listed",
+      id: "F-1-1-listed",
       type: "book-added",
       publishedAt: "2026-07-08T18:01:03Z",
-      bookId: "F0-1-1",
+      bookId: "F-1-1",
     },
     books
   );
@@ -66,10 +66,10 @@ test("derives automatic labels and messages without links", () => {
 
   const changed = buildAutomaticSiteUpdate(
     {
-      id: "F0-1-1-v2",
+      id: "F-1-1-v2",
       type: "book-updated",
       publishedAt: "2026-07-11T10:00:00+08:00",
-      bookId: "F0-1-1",
+      bookId: "F-1-1",
       edition: 2,
     },
     books
@@ -103,10 +103,10 @@ test("rejects invalid and reserved manual labels", () => {
 
 test("rejects invalid automatic data and missing book relations", () => {
   const base: GeneratedSiteUpdate = {
-    id: "F0-1-1-v2",
+    id: "F-1-1-v2",
     type: "book-updated",
     publishedAt: "2026-07-11T10:00:00+08:00",
-    bookId: "F0-1-1",
+    bookId: "F-1-1",
     edition: 2,
   };
   assert.throws(() => buildAutomaticSiteUpdate({ ...base, bookId: "missing" }, books));
@@ -167,10 +167,10 @@ test("unpinning leaves the original timestamp and returns an eligible item", () 
 
 test("generated update insertion is idempotent and rejects conflicts", () => {
   const incoming: GeneratedSiteUpdate = {
-    id: "F0-1-1-v2",
+    id: "F-1-1-v2",
     type: "book-updated",
     publishedAt: "2026-07-11T10:00:00+08:00",
-    bookId: "F0-1-1",
+    bookId: "F-1-1",
     edition: 2,
   };
   const once = upsertGeneratedUpdate([], incoming);

@@ -19,25 +19,25 @@ class BookChangelogTests(unittest.TestCase):
             changelog_dir = root / "src/data/changelogs"
             books_dir.mkdir(parents=True)
             changelog_dir.mkdir(parents=True)
-            (books_dir / "F0-9.md").write_text(
+            (books_dir / "F-9.md").write_text(
                 "---\n"
-                "id: F0-9\n"
+                "id: F-9\n"
                 "title: 测试书\n"
                 "editions:\n"
                 "  - edition: 1\n"
                 "    editionDate: 2026-06\n"
-                "    releaseTag: F0-9_v1\n"
+                "    releaseTag: F-9_v1\n"
                 "  - edition: 2\n"
                 "    editionDate: 2026-07\n"
-                "    releaseTag: F0-9_v2\n"
+                "    releaseTag: F-9_v2\n"
                 "---\n",
                 encoding="utf-8",
             )
-            (changelog_dir / "F0-9_v2.changelog.json").write_text(
+            (changelog_dir / "F-9_v2.changelog.json").write_text(
                 json.dumps(
                     {
                         "schemaVersion": 1,
-                        "bookId": "F0-9",
+                        "bookId": "F-9",
                         "fromEdition": {"edition": 1, "editionDate": "2026-06"},
                         "toEdition": {"edition": 2, "editionDate": "2026-07"},
                         "summary": {
@@ -67,7 +67,7 @@ class BookChangelogTests(unittest.TestCase):
             paths = build_repository_changelogs(root)
             markdown = paths[0].read_text(encoding="utf-8")
 
-            self.assertLess(markdown.index("F0-9_v2"), markdown.index("F0-9_v1"))
+            self.assertLess(markdown.index("F-9_v2"), markdown.index("F-9_v1"))
             self.assertIn("共有 **1** 处不同", markdown)
             self.assertIn("初版发行", markdown)
             self.assertFalse(markdown.startswith("# 《测试书》版本更新日志"))
@@ -80,8 +80,8 @@ class BookChangelogTests(unittest.TestCase):
             root = Path(temp_dir)
             books_dir = root / "src/content/books"
             books_dir.mkdir(parents=True)
-            (books_dir / "F0-9.md").write_text(
-                "---\nid: F0-9\ntitle: 测试书\n"
+            (books_dir / "F-9.md").write_text(
+                "---\nid: F-9\ntitle: 测试书\n"
                 "editions:\n  - edition: 2\n    editionDate: 2026-07\n---\n",
                 encoding="utf-8",
             )

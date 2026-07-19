@@ -34,6 +34,19 @@
 
 `hyperxmp` 的 `pdfsubject` 对应内容提要，不得解释为副标题。副标题经 Unicode NFC 和首尾空白清理后原样传递，入库和网页不得自动添加、删除或替换括号。
 
+## 内部书号与分类
+
+书号格式固定为 `<分类号>-<作品序号>[-<册次>]`。分类号只允许使用
+`src/data/classifications.yml` 中存在的代码；正则匹配只负责结构，不能代替
+分类表校验。
+
+当前分类为 A—K。B—K 只使用单字母大类；A 允许 A1、A2、A3、A4、A5、
+A8、A9 一层子类。不得继续使用历史测试代码 A93、B0、F0、T 或 Z。
+
+例如：`A9-1` 表示 A9 类第 1 种作品，`B-1` 表示 B 类第 1 种作品，
+`F-1-1` 表示 F 类第 1 种作品的第 1 册。版次不属于书号，继续由
+`prism:bookEdition` 单独表达。
+
 ## 自定义 PDF Info
 
 | PDF Info 键 | 类型 | 含义 |
@@ -50,7 +63,7 @@
 \usepackage{culturalsimmer-ebook-metadata}
 
 \EbookMetadata{
-  id = F0-1-1,
+  id = F-1-1,
   title = 政治经济学基础知识,
   subtitle = （资本主义部分）,
   author = 《政治经济学基础知识》编写组,
