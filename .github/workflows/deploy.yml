@@ -24,6 +24,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ops-start:
+    if: github.event_name != 'schedule'
+    continue-on-error: true
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report production deployment start
+        env:
+          NOTIFIER_DISPATCH_TOKEN: ${{ secrets.NOTIFIER_DISPATCH_TOKEN }}
+        run: |
+          if [[ -z "$NOTIFIER_DISPATCH_TOKEN" ]]; then
+            echo "::warning::NOTIFIER_DISPATCH_TOKEN is not configured; deployment observability is unavailable."
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $NOTIFIER_DISPATCH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data '{"ref":"main","inputs":{"event_id":"site.deploy","phase":"firing","variant":"started"}}' \
+            "https://api.github.com/repos/Fulinte1966/CulturalSimmer-notifier/actions/workflows/notify-ops.yml/dispatches"
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -122,6 +144,40 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  ops-finish:
+    if: always() && github.event_name != 'schedule'
+    continue-on-error: true
+    needs:
+      - build
+      - deploy-cloudflare
+      - deploy
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report production deployment result
+        env:
+          NOTIFIER_DISPATCH_TOKEN: ${{ secrets.NOTIFIER_DISPATCH_TOKEN }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          CLOUDFLARE_RESULT: ${{ needs.deploy-cloudflare.result }}
+          PAGES_RESULT: ${{ needs.deploy.result }}
+        run: |
+          if [[ -z "$NOTIFIER_DISPATCH_TOKEN" ]]; then
+            echo "::warning::NOTIFIER_DISPATCH_TOKEN is not configured; deployment observability is unavailable."
+            exit 1
+          fi
+          if [[ "$BUILD_RESULT" == success && "$CLOUDFLARE_RESULT" == success && "$PAGES_RESULT" == success ]]; then
+            payload='{"ref":"main","inputs":{"event_id":"site.deploy","phase":"resolved","variant":"started"}}'
+          else
+            payload='{"ref":"main","inputs":{"event_id":"site.deploy","phase":"firing","variant":"failed"}}'
+          fi
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $NOTIFIER_DISPATCH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$payload" \
+            "https://api.github.com/repos/Fulinte1966/CulturalSimmer-notifier/actions/workflows/notify-ops.yml/dispatches"
 
   notify:
     if: github.event_name == 'workflow_dispatch' && inputs.notify_updates

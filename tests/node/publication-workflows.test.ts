@@ -53,3 +53,17 @@ test("only an explicit ingest deployment dispatches notifications after both hos
   assert.match(source, /notify\.yml/);
   assert.match(source, /notify-ntfy\.yml/);
 });
+
+test("non-scheduled deployments report real-time operations state without blocking publication", () => {
+  const { source, value } = workflow("deploy.yml");
+  assert.match(value.jobs["ops-start"].if, /event_name != 'schedule'/);
+  assert.equal(value.jobs["ops-start"]["continue-on-error"], true);
+  assert.deepEqual(value.jobs["ops-finish"].needs, ["build", "deploy-cloudflare", "deploy"]);
+  assert.match(value.jobs["ops-finish"].if, /always\(\)/);
+  assert.match(value.jobs["ops-finish"].if, /event_name != 'schedule'/);
+  assert.equal(value.jobs["ops-finish"]["continue-on-error"], true);
+  assert.match(source, /notify-ops\.yml/);
+  assert.match(source, /site\.deploy/);
+  assert.match(source, /"variant":"started"/);
+  assert.match(source, /"variant":"failed"/);
+});
