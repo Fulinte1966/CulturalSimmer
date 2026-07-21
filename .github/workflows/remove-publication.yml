@@ -41,7 +41,7 @@ on:
 
 permissions:
   contents: write
-  actions: read
+  actions: write
 
 concurrency:
   group: publication-catalog-mutation
@@ -216,6 +216,12 @@ jobs:
           git pull --rebase origin main
           git push origin main
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger clean production deployment
+        run: >-
+          gh workflow run deploy.yml
+          --ref main
+          -f notify_updates=false
 
       - name: Wait for clean production deployment
         run: |

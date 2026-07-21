@@ -72,7 +72,7 @@
 5. 在受 Access 保护的 `removal-preview` 候选站检查删除结果。
 6. 使用完全相同的输入选择 `promote`；等待 `ebook-production` 人工批准。
 
-工作流会重新计算本地与远程 inventory。任一文件、Release 正文、资产 ID、大小或摘要变化都会拒绝执行。生产清洁版本部署成功后才删除 Release/tag；随后用清洁内容覆盖持久预览分支并删除其他历史 Cloudflare 部署。
+工作流会重新计算本地与远程 inventory。任一文件、Release 正文、资产 ID、大小或摘要变化都会拒绝执行。删除提交推送后会显式 dispatch 一次 `notify_updates=false` 的生产部署，因为 Actions `GITHUB_TOKEN` 产生的 push 不会递归触发其他工作流。生产清洁版本部署成功后才删除 Release/tag；随后用清洁内容覆盖持久预览分支并删除其他历史 Cloudflare 部署，且不发送读者更新。
 
 若公开提交已经部署、但 Release 或 Cloudflare 历史部署清理失败，不回滚公开删除。私有台账会把该 inventory 记为 `failed`；使用完全相同的输入重新运行 `promote`，从已完成边界继续收口。不得生成新的 inventory 掩盖未完成事务。
 

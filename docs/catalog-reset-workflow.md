@@ -94,7 +94,7 @@ Release 归属按书目中声明的 tag、`ingest-*` Draft 或同时具备规范
 4. 登录 Cloudflare Access 后检查 `catalog-reset-preview`：首页手工置顶公告仍在，书架、索引、搜索和书籍详情为空，检查更新及勘误的未知资源路径正常。
 5. 使用完全相同的输入选择 `promote`，并在 `ebook-production` Environment 中人工批准。
 
-工作流会重新计算清单、构建并验证空站、提交空书库、等待 Cloudflare 主站和 GitHub Pages 备份站成功部署，随后才删除 GitHub Release/tag。最后用清洁内容覆盖三个持久预览分支并清理旧 Cloudflare 部署。
+工作流会重新计算清单、构建并验证空站、提交空书库，并显式 dispatch 一次 `notify_updates=false` 的生产部署；Cloudflare 主站和 GitHub Pages 备份站成功后，才删除 GitHub Release/tag。之所以显式 dispatch，是因为使用 GitHub Actions `GITHUB_TOKEN` 推送的提交不会再次触发依赖 `push` 的工作流。最后用清洁内容覆盖三个持久预览分支并清理旧 Cloudflare 部署，全程不广播读者更新。
 
 ## 通知器与恢复测试
 
@@ -110,7 +110,7 @@ Release 归属按书目中声明的 tag、`ingest-*` Draft 或同时具备规范
 
 - 清单或远端资源发生任何变化，预览和正式执行都会拒绝继续，必须重新备份。
 - 空站生产部署失败时，不删除任何 Release/tag。
-- 生产部署成功后远端清理失败时，不回滚空站。使用本地保存的同一 `reset-plan.json` 重新运行 `finalize-remote`，再清理 Cloudflare 历史部署。
+- 生产部署成功后远端清理失败时，不回滚空站。使用本地保存的同一 `reset-plan.json` 重新运行 `finalize-remote`；若仅剩 Cloudflare 历史部署未清理，手动运行 `Clean Stale Cloudflare Deployments` 并输入 `DELETE STALE CLOUDFLARE DEPLOYMENTS`，从该检查点继续。
 - Actions artifact 只是短期诊断资料，不是备份。权威备份是本地加密归档及其独立保存的 age 身份。
 
 ## 正式上线

@@ -20,10 +20,10 @@ test("candidate publication keeps preview and production approval boundaries", (
   assert.equal(value.jobs.approval.environment, "ebook-production");
   assert.deepEqual(value.jobs.promote.needs, "approval");
   assert.equal(value.jobs.promote.environment, "cloudflare-pages");
+  assert.equal(value.permissions.actions, "write");
   assert.match(source, /candidate_lock\.py verify/);
   assert.match(source, /Roll back an uncommitted canonical Release/);
   assert.match(source, /cloudflare-clean-dist/);
-  assert.equal(value.permissions.actions, "write");
   assert.match(source, /gh workflow run deploy\.yml/);
   assert.match(source, /notify_updates=true/);
   assert.equal(
@@ -42,9 +42,12 @@ test("publication removal requires a registered ledger and records failures", ()
   assert.equal(value.jobs.approval.environment, "ebook-production");
   assert.deepEqual(value.jobs.promote.needs, "approval");
   assert.equal(value.jobs.promote.environment, "cloudflare-pages");
+  assert.equal(value.permissions.actions, "write");
   assert.match(source, /Verify private ledger registration/g);
   assert.match(source, /phase:"failed"/);
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
+  assert.match(source, /gh workflow run deploy\.yml/);
+  assert.match(source, /notify_updates=false/);
 });
 
 test("only an explicit ingest deployment dispatches notifications after both hosts", () => {
@@ -82,6 +85,7 @@ test("pre-launch reset requires backup evidence, preview, and production approva
   assert.equal(value.jobs.approval.environment, "ebook-production");
   assert.deepEqual(value.jobs.promote.needs, "approval");
   assert.equal(value.jobs.promote.environment, "cloudflare-pages");
+  assert.equal(value.permissions.actions, "write");
   assert.match(source, /backup_sha256/);
   assert.match(
     source,
@@ -93,6 +97,30 @@ test("pre-launch reset requires backup evidence, preview, and production approva
   assert.match(source, /cloudflareaccess\\\.com\/cdn-cgi\/access\/login/);
   assert.match(source, /www-authenticate: Cloudflare-Access/);
   assert.match(source, /catalog_reset\.py finalize-remote/);
+  assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
+  assert.match(source, /gh workflow run deploy\.yml/);
+  assert.match(source, /notify_updates=false/);
+});
+
+test("Cloudflare cleanup follows API pagination without an unsupported page size", () => {
+  const source = fs.readFileSync(
+    path.join(root, "scripts/cleanup-cloudflare-deployments.mjs"),
+    "utf8",
+  );
+  assert.match(source, /\/deployments\?page=\$\{page\}/);
+  assert.doesNotMatch(source, /per_page=/);
+  assert.match(source, /result_info\?\.total_pages/);
+});
+
+test("manual Cloudflare cleanup is scoped and requires exact confirmation", () => {
+  const { source, value } = workflow("cleanup-cloudflare-deployments.yml");
+  assert.equal(value.concurrency.group, "publication-catalog-mutation");
+  assert.equal(value.jobs.cleanup.environment, "cloudflare-pages");
+  assert.match(source, /DELETE STALE CLOUDFLARE DEPLOYMENTS/);
+  assert.match(
+    value.jobs.cleanup.env.CLOUDFLARE_KEEP_BRANCHES,
+    /main,ebook-preview,removal-preview,catalog-reset-preview/,
+  );
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
 });
 
