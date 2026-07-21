@@ -8,11 +8,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from catalog_reset import (
     CONFIRMATION,
+    _immutable_releases_enabled,
     apply_plan,
     build_workflow_inputs,
     create_plan,
@@ -142,6 +144,30 @@ def write_fixture(root: Path) -> dict:
 
 
 class CatalogResetTests(unittest.TestCase):
+    @patch("catalog_reset.subprocess.run")
+    def test_immutable_release_check_uses_explicit_release_fields_on_403(
+        self, run
+    ) -> None:
+        run.return_value.returncode = 1
+        run.return_value.stdout = ""
+        run.return_value.stderr = "gh: Resource not accessible by integration (HTTP 403)"
+
+        self.assertFalse(
+            _immutable_releases_enabled("owner/repo", [{"immutable": False}])
+        )
+        self.assertTrue(
+            _immutable_releases_enabled("owner/repo", [{"immutable": True}])
+        )
+
+    @patch("catalog_reset.subprocess.run")
+    def test_immutable_release_check_rejects_unverifiable_403(self, run) -> None:
+        run.return_value.returncode = 1
+        run.return_value.stdout = ""
+        run.return_value.stderr = "gh: Resource not accessible by integration (HTTP 403)"
+
+        with self.assertRaisesRegex(RuntimeError, "CATALOG_RESET_ADMIN_TOKEN"):
+            _immutable_releases_enabled("owner/repo", [])
+
     def test_plan_filters_unrelated_releases_and_tags(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

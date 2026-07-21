@@ -165,7 +165,13 @@ def _repository() -> str:
     return _gh("repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner")
 
 
-def _immutable_releases_enabled(repository: str) -> bool:
+def _immutable_releases_enabled(
+    repository: str, releases: list[dict[str, Any]]
+) -> bool:
+    environment = os.environ.copy()
+    admin_token = environment.get("CATALOG_RESET_ADMIN_TOKEN", "").strip()
+    if admin_token:
+        environment["GH_TOKEN"] = admin_token
     result = subprocess.run(
         [
             "gh",
@@ -177,12 +183,24 @@ def _immutable_releases_enabled(repository: str) -> bool:
         text=True,
         capture_output=True,
         check=False,
+        env=environment,
     )
     if result.returncode == 0:
         payload = json.loads(result.stdout)
         return bool(payload.get("enabled", True))
     if "HTTP 404" in result.stderr or "Not Found" in result.stderr:
         return False
+    if "HTTP 403" in result.stderr or "Resource not accessible" in result.stderr:
+        # GITHUB_TOKEN cannot read the repository-level setting because that
+        # endpoint requires Administration: read. The ordinary Releases API
+        # exposes the immutable state of each existing Release. Accept this
+        # fallback only when GitHub supplied the field for every Release.
+        if releases and all("immutable" in release for release in releases):
+            return any(bool(release["immutable"]) for release in releases)
+        raise RuntimeError(
+            "Unable to verify Immutable Releases with GITHUB_TOKEN; configure "
+            "CATALOG_RESET_ADMIN_TOKEN with Administration: read"
+        )
     raise RuntimeError(result.stderr.strip() or "Unable to inspect immutable releases")
 
 
@@ -284,7 +302,7 @@ def _remote_state(canonical_tags: set[str], book_ids: set[str]) -> dict[str, Any
     ]
     return _normalize_remote_state(
         {
-            "immutableReleases": _immutable_releases_enabled(repository),
+            "immutableReleases": _immutable_releases_enabled(repository, releases),
             "releases": releases,
             "tags": tags,
         },
