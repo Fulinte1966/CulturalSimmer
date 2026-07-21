@@ -10,6 +10,10 @@
 - 正式上线后，公开版次一经发行即永久占用；应使用候选预览、撤回版次或整书下架。
 - 脚本不会重写 Git 历史。旧提交和既有克隆仍可能保存测试时期的派生文本，但 PDF 从未进入 Git 历史。
 - GitHub Immutable Releases 必须保持关闭；启用后删除的 tag 不能复用，脚本会拒绝生成计划。
+- 本地管理员凭据直接读取仓库级开关；Actions 的 `GITHUB_TOKEN` 无此权限时，
+  只在标准 Releases API 为每个现存 Release 明确返回 `immutable` 状态后继续。
+  空 Release 仓库等无法证明状态的场景必须配置具有 `Administration: read` 的
+  `CATALOG_RESET_ADMIN_TOKEN`，不得把 403 当作关闭状态。
 
 ## 清理范围
 
