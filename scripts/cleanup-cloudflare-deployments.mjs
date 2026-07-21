@@ -42,7 +42,9 @@ async function cloudflare(pathname, init = {}) {
 
 const deployments = [];
 for (let page = 1; ; page += 1) {
-  const payload = await cloudflare(`/deployments?page=${page}&per_page=100`);
+  // Pages rejects unsupported page sizes. Let the API choose its documented
+  // default and follow the returned pagination metadata instead.
+  const payload = await cloudflare(`/deployments?page=${page}`);
   deployments.push(...payload.result);
   if (page >= Number(payload.result_info?.total_pages ?? 1)) break;
 }
