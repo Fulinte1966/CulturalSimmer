@@ -6,16 +6,16 @@
 
 ## 数据边界
 
-| 数据 | 人工事实来源 | 仓库中的结果 |
-| --- | --- | --- |
-| 书目与版次 | 正式上传 PDF 的 XMP | `src/content/books/`、`src/data/manifests/` |
-| 封面、书脊、目录、阅读统计 | 正式上传 PDF | `public/covers/`、`src/data/outlines/`、`src/data/reading/` |
-| 版本差异 | 相邻正式 PDF 的规范化正文 | `src/data/changelogs/` 与 Release 资产 |
-| 自动本站消息 | 正式 Release | `src/data/generated-updates.json` |
-| 人工公告 | `src/content/announcements/*.md` | 构建期渲染并写入公开归档 |
-| 公告置顶顺序 | `src/data/site-update-pins.json` | 首页置顶区 |
-| 单书更新广播策略 | 书目中的 `notifyUpdates` | 公开通知 feed 是否包含后续 `book_version` |
-| 分类树 | `src/data/classifications.yml` | 索引页与书号校验 |
+| 数据                       | 人工事实来源                     | 仓库中的结果                                                |
+| -------------------------- | -------------------------------- | ----------------------------------------------------------- |
+| 书目与版次                 | 正式上传 PDF 的 XMP              | `src/content/books/`、`src/data/manifests/`                 |
+| 封面、书脊、目录、阅读统计 | 正式上传 PDF                     | `public/covers/`、`src/data/outlines/`、`src/data/reading/` |
+| 版本差异                   | 相邻正式 PDF 的规范化正文        | `src/data/changelogs/` 与 Release 资产                      |
+| 自动本站消息               | 正式 Release                     | `src/data/generated-updates.json`                           |
+| 人工公告                   | `src/content/announcements/*.md` | 构建期渲染并写入公开归档                                    |
+| 公告置顶顺序               | `src/data/site-update-pins.json` | 首页置顶区                                                  |
+| 单书更新广播策略           | 书目中的 `notifyUpdates`         | 公开通知 feed 是否包含后续 `book_version`                   |
+| 分类树                     | `src/data/classifications.yml`   | 索引页与书号校验                                            |
 
 派生文件不得作为第二个人工数据源。需要修订书目信息时应修正 PDF 元数据并重新发布；只有更新日志的人工复核项允许按对应规范编辑结构化 changelog。
 
@@ -38,24 +38,21 @@ npm run verify
 
 空书库是受支持的初始化状态。此时首页、索引、检查更新与勘误入口仍可构建，书目详情页和 Pagefind 书目索引为空；构建后断言会拒绝内容缓存遗留的“幽灵”详情页。
 
-测试目录需要整体初始化时，先生成带 SHA-256 的清单并完成本地备份：
+测试目录需要整体初始化时，必须使用包含远端 inventory、加密备份、Access
+预览和生产批准的受保护流程：
 
 ```bash
-npm run catalog:initialize -- plan \
-  --output Work/Backups/catalog-initialize-plan.json
+npm run catalog:reset -- plan \
+  --reason "private pre-launch reset reason" \
+  --output Outputs/catalog-resets/reset-plan.json
+npm run catalog:reset -- backup \
+  --plan Outputs/catalog-resets/reset-plan.json \
+  --age-recipient "$AGE_RECIPIENT"
 ```
 
-复核清单后，用精确确认短语执行清理：
-
-```bash
-npm run catalog:initialize -- apply \
-  --plan Work/Backups/catalog-initialize-plan.json \
-  --confirmation "INITIALIZE TEST CATALOG"
-```
-
-该命令只清理派生书目数据，拒绝删除人工公告、公告资源和置顶配置，也不会调用
-GitHub API。必须先将空书库合并并成功部署，之后才能依据清单另行删除旧
-Release 和 tag。
+本地不得直接清理生产工作树。复核清单与备份 receipt 后，运行 `Reset
+Pre-launch Test Catalog` 的 `preview`，确认手工公告及置顶配置仍存在，再通过
+`ebook-production` 批准 `promote`。完整步骤见[上线前测试书库初始化](catalog-reset-workflow.md)。
 
 ## GitHub Actions
 
@@ -80,6 +77,14 @@ Release 和 tag。
 触发：维护者手动运行，选择撤回单个版次或下架整本书，并提供本地加密备份产生的 inventory 摘要和精确确认短语。
 
 `preview` 先确认私有台账已登记，再重算本地与远程 inventory、应用删除变换、运行完整验证并部署受 Access 保护的候选站。`promote` 需要 `ebook-production` 人工批准；生产清洁版本部署成功后才删除 GitHub Release/tag 和旧 Cloudflare 部署。后半段失败时私有台账记录 `failed` 检查点，重跑同一 inventory 继续收口，不重写 Git 历史。
+
+### Reset Pre-launch Test Catalog
+
+触发：维护者已在本地生成清单和加密备份后手动运行。此工作流仅服务正式上线前测试，不进入正式撤回台账，并允许清理后重新使用测试版次。
+
+`preview` 重新核对本地与远端 inventory，清空书目派生内容、保留手工网站公告，运行完整验证并部署 `catalog-reset-preview`。`promote` 需要 `ebook-production` Environment 人工批准；空站在 Cloudflare 主站和 GitHub Pages 备份站均成功上线后，才删除经清单证明属于电子书发行的 GitHub Release/tag，并清理旧 Cloudflare 部署。普通代码 tag 不属于清理范围。
+
+候选发布、撤回/下架和测试初始化共享 `publication-catalog-mutation` 并发锁，不能同时修改书库。通知器状态属于固定节点，不由本工作流自动改写；初始化结果会列出需要按通知器 runbook 归档的测试事件 ID。
 
 ### Deploy
 
@@ -109,6 +114,7 @@ Release 和 tag。
 
 - 任一元数据、版次、差异、测试、字体或构建检查失败时，不发布正式书目提交。
 - 正式 Release 创建后若生成提交尚未推送即失败，工作流删除本次正式 Release 与 tag，并保留 Draft 供检查；提交已推送后若部署失败，保留有效 Release 和公开提交，修复部署而不是回滚数据。
+- 上线前初始化只有在空站生产部署成功后才删除测试 Release/tag；若后续清理失败，保留空站并使用同一加密备份清单继续收口。
 - Draft ingest Release 只在正式站部署和候选清理都成功后删除；候选失败时保留 Draft 供重新预览。
 - 撤回与下架只有在生产清洁版本部署成功后才删除 Release/tag；后续清理失败写入私有检查点并通过同一 inventory 幂等重试。
 - 部署使用并发组串行化，不取消正在发布的版本。
