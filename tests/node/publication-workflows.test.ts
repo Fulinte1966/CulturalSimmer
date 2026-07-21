@@ -88,6 +88,10 @@ test("pre-launch reset requires backup evidence, preview, and production approva
     /catalog_reset\.py verify[\s\\\n]+--plan _catalog-reset-plan\.json[\s\\\n]+--remote/,
   );
   assert.match(source, /Wait for clean production deployment/);
+  assert.match(source, /Verify anonymous access is denied/);
+  assert.match(source, /catalog-reset-preview\.fulinte\.pages\.dev/);
+  assert.match(source, /cloudflareaccess\\\.com\/cdn-cgi\/access\/login/);
+  assert.match(source, /www-authenticate: Cloudflare-Access/);
   assert.match(source, /catalog_reset\.py finalize-remote/);
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
 });
