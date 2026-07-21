@@ -98,6 +98,19 @@ jobs:
             --commit-message="Catalog reset candidate $RESET_INVENTORY_SHA256" \
             --commit-dirty=true
 
+      - name: Verify anonymous access is denied
+        run: |
+          headers="$(mktemp)"
+          trap 'rm -f "$headers"' EXIT
+          status="$(curl -sS --max-time 20 \
+            -o /dev/null \
+            -D "$headers" \
+            -w '%{http_code}' \
+            https://catalog-reset-preview.fulinte.pages.dev/CulturalSimmer/)"
+          test "$status" = "302"
+          grep -Eqi '^location: https://[^/]+\.cloudflareaccess\.com/cdn-cgi/access/login/' "$headers"
+          grep -Eqi '^www-authenticate: Cloudflare-Access ' "$headers"
+
       - uses: actions/upload-artifact@v6
         with:
           name: catalog-reset-${{ env.RESET_INVENTORY_SHA256 }}
