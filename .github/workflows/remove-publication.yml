@@ -44,7 +44,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: publication-removal
+  group: publication-catalog-mutation
   cancel-in-progress: false
 
 jobs:

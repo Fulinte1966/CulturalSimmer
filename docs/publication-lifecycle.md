@@ -94,4 +94,6 @@
 
 “删除”只保证当前公开网站、GitHub Release/tag 和受项目控制的 Cloudflare 部署不再提供目标资源。Git 历史、第三方缓存、用户下载和本地克隆无法保证消失。只有敏感信息或法律要求才另行执行 Git 历史清理。
 
+整站测试内容初始化不应循环调用本页的下架流程，否则测试版次会被正式撤回台账永久占用。正式上线前的一次性清理使用[上线前测试书库初始化](catalog-reset-workflow.md)；正式上线后不得再复用该流程。
+
 参考：[GitHub CLI Release 删除](https://cli.github.com/manual/gh_release_delete)、[Cloudflare Pages 部署 API](https://developers.cloudflare.com/pages/configuration/api/)、[GitHub 敏感数据清除](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)。

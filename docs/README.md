@@ -11,6 +11,7 @@
 
 - [电子书上传工作流](ebook-upload-workflow.md)：本地预检、Draft、候选站、人工批准和正式发布。
 - [发布生命周期](publication-lifecycle.md)：版本取代、撤回、整书下架、加密备份和私有更正。
+- [上线前测试书库初始化](catalog-reset-workflow.md)：清单、加密备份、空站预览、人工批准及测试 Release/tag 清理。
 - [PDF 元数据契约](pdf/metadata-contract.md)：XMP 字段、校验规则和派生数据。
 - [LaTeX 元数据模块](latex/culturalsimmer-ebook-metadata.sty)：供外部 LaTeX 项目复用的元数据接口。
 - [电子书版本更新日志规范](release-changelog-conventions.md)：正文快照、差异算法、结构化 changelog 与人工补录。

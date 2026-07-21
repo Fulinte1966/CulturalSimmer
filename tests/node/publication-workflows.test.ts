@@ -7,7 +7,10 @@ import { parse as parseYaml } from "yaml";
 const root = path.resolve(new URL("../..", import.meta.url).pathname);
 
 function workflow(name: string) {
-  const source = fs.readFileSync(path.join(root, ".github/workflows", name), "utf8");
+  const source = fs.readFileSync(
+    path.join(root, ".github/workflows", name),
+    "utf8",
+  );
   return { source, value: parseYaml(source) };
 }
 
@@ -58,7 +61,11 @@ test("non-scheduled deployments report real-time operations state without blocki
   const { source, value } = workflow("deploy.yml");
   assert.match(value.jobs["ops-start"].if, /event_name != 'schedule'/);
   assert.equal(value.jobs["ops-start"]["continue-on-error"], true);
-  assert.deepEqual(value.jobs["ops-finish"].needs, ["build", "deploy-cloudflare", "deploy"]);
+  assert.deepEqual(value.jobs["ops-finish"].needs, [
+    "build",
+    "deploy-cloudflare",
+    "deploy",
+  ]);
   assert.match(value.jobs["ops-finish"].if, /always\(\)/);
   assert.match(value.jobs["ops-finish"].if, /event_name != 'schedule'/);
   assert.equal(value.jobs["ops-finish"]["continue-on-error"], true);
@@ -66,4 +73,34 @@ test("non-scheduled deployments report real-time operations state without blocki
   assert.match(source, /site\.deploy/);
   assert.match(source, /"variant":"started"/);
   assert.match(source, /"variant":"failed"/);
+});
+
+test("pre-launch reset requires backup evidence, preview, and production approval", () => {
+  const { source, value } = workflow("reset-test-catalog.yml");
+  assert.equal(value.concurrency.group, "publication-catalog-mutation");
+  assert.equal(value.jobs.preview.environment, "cloudflare-pages");
+  assert.equal(value.jobs.approval.environment, "ebook-production");
+  assert.deepEqual(value.jobs.promote.needs, "approval");
+  assert.equal(value.jobs.promote.environment, "cloudflare-pages");
+  assert.match(source, /backup_sha256/);
+  assert.match(
+    source,
+    /catalog_reset\.py verify[\s\\\n]+--plan _catalog-reset-plan\.json[\s\\\n]+--remote/,
+  );
+  assert.match(source, /Wait for clean production deployment/);
+  assert.match(source, /catalog_reset\.py finalize-remote/);
+  assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
+});
+
+test("all publication mutations share one repository-wide concurrency lock", () => {
+  for (const name of [
+    "ebook-candidate.yml",
+    "remove-publication.yml",
+    "reset-test-catalog.yml",
+  ]) {
+    assert.equal(
+      workflow(name).value.concurrency.group,
+      "publication-catalog-mutation",
+    );
+  }
 });

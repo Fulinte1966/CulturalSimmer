@@ -1,0 +1,239 @@
+name: Reset Pre-launch Test Catalog
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Build the protected empty-site preview or perform the approved reset
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - promote
+      reason_sha256:
+        description: SHA-256 of the private reset reason
+        required: true
+        type: string
+      inventory_sha256:
+        description: Inventory digest printed by the local reset plan
+        required: true
+        type: string
+      backup_sha256:
+        description: SHA-256 from the encrypted local backup receipt
+        required: true
+        type: string
+      confirmation:
+        description: Exact reset confirmation phrase
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publication-catalog-mutation
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: inputs.mode == 'preview'
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      RESET_REASON_SHA256: ${{ inputs.reason_sha256 }}
+      RESET_INVENTORY_SHA256: ${{ inputs.inventory_sha256 }}
+      RESET_BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+      RESET_CONFIRMATION: ${{ inputs.confirmation }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Validate local backup attestation
+        run: |
+          [[ "$RESET_REASON_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_INVENTORY_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_BACKUP_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_CONFIRMATION" == "RESET PRELAUNCH TEST CATALOG" ]]
+
+      - name: Recreate and verify catalog inventory
+        run: |
+          python scripts/catalog_reset.py plan \
+            --reason-digest "$RESET_REASON_SHA256" \
+            --output _catalog-reset-plan.json
+          test "$(jq -r .inventorySha256 _catalog-reset-plan.json)" = "$RESET_INVENTORY_SHA256"
+          python scripts/catalog_reset.py verify \
+            --plan _catalog-reset-plan.json \
+            --remote
+
+      - name: Build empty catalog candidate
+        run: |
+          python scripts/catalog_reset.py apply \
+            --plan _catalog-reset-plan.json \
+            --confirmation "$RESET_CONFIRMATION" \
+            --output _catalog-reset-result.json
+          npm run verify
+
+      - name: Deploy Access-protected empty catalog preview
+        run: |
+          npm run cloudflare:prepare -- dist cloudflare-catalog-reset-dist
+          npm exec wrangler -- pages deploy cloudflare-catalog-reset-dist \
+            --project-name=fulinte \
+            --branch=catalog-reset-preview \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-message="Catalog reset candidate $RESET_INVENTORY_SHA256" \
+            --commit-dirty=true
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: catalog-reset-${{ env.RESET_INVENTORY_SHA256 }}
+          path: |
+            _catalog-reset-plan.json
+            _catalog-reset-result.json
+          if-no-files-found: error
+          retention-days: 7
+
+  approval:
+    if: inputs.mode == 'promote'
+    runs-on: ubuntu-latest
+    environment: ebook-production
+    steps:
+      - run: echo "Pre-launch test catalog reset approved."
+
+  promote:
+    if: inputs.mode == 'promote'
+    needs: approval
+    runs-on: ubuntu-latest
+    environment: cloudflare-pages
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      RESET_REASON_SHA256: ${{ inputs.reason_sha256 }}
+      RESET_INVENTORY_SHA256: ${{ inputs.inventory_sha256 }}
+      RESET_BACKUP_SHA256: ${{ inputs.backup_sha256 }}
+      RESET_CONFIRMATION: ${{ inputs.confirmation }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: npm ci
+      - run: pip install -r scripts/requirements.txt
+
+      - name: Validate approved backup and confirmation
+        run: |
+          [[ "$RESET_REASON_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_INVENTORY_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_BACKUP_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$RESET_CONFIRMATION" == "RESET PRELAUNCH TEST CATALOG" ]]
+
+      - name: Recreate approved transaction
+        run: |
+          python scripts/catalog_reset.py plan \
+            --reason-digest "$RESET_REASON_SHA256" \
+            --output _catalog-reset-plan.json
+          test "$(jq -r .inventorySha256 _catalog-reset-plan.json)" = "$RESET_INVENTORY_SHA256"
+          python scripts/catalog_reset.py verify \
+            --plan _catalog-reset-plan.json \
+            --remote
+          python scripts/catalog_reset.py apply \
+            --plan _catalog-reset-plan.json \
+            --confirmation "$RESET_CONFIRMATION" \
+            --output _catalog-reset-result.json
+          npm run verify
+
+      - name: Publish empty catalog state
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/content/books/ \
+            src/content/announcements/ \
+            src/data/ \
+            public/covers/ \
+            public/fonts/subset/ \
+            docs/site-updates-archive.md
+          git commit -m "content: reset pre-launch test catalog"
+          git pull --rebase origin main
+          git push origin main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for clean production deployment
+        run: |
+          for _ in $(seq 1 60); do
+            conclusion="$(gh run list --workflow deploy.yml --commit "${{ steps.commit.outputs.sha }}" --json status,conclusion --limit 1 --jq '.[0] | if .status == "completed" then .conclusion else .status end' 2>/dev/null || true)"
+            case "$conclusion" in
+              success) exit 0 ;;
+              failure|cancelled|timed_out|action_required) exit 1 ;;
+            esac
+            sleep 15
+          done
+          exit 1
+
+      - name: Replace persistent previews with clean content
+        run: |
+          npm run cloudflare:prepare -- dist cloudflare-clean-dist
+          for branch in ebook-preview removal-preview catalog-reset-preview; do
+            npm exec wrangler -- pages deploy cloudflare-clean-dist \
+              --project-name=fulinte \
+              --branch="$branch" \
+              --commit-hash="${{ steps.commit.outputs.sha }}" \
+              --commit-message="Clean preview after catalog reset" \
+              --commit-dirty=true
+          done
+
+      - name: Delete publication Releases and tags
+        run: |
+          python scripts/catalog_reset.py finalize-remote \
+            --plan _catalog-reset-plan.json \
+            --output _catalog-reset-remote-result.json
+
+      - name: Remove stale Cloudflare deployments
+        env:
+          CLOUDFLARE_KEEP_BRANCHES: main,ebook-preview,removal-preview,catalog-reset-preview
+        run: node scripts/cleanup-cloudflare-deployments.mjs
+
+      - name: Summarize notifier follow-up
+        run: |
+          count="$(jq '.notifierUpdateIds | length' _catalog-reset-result.json)"
+          {
+            echo "## Pre-launch catalog reset complete"
+            echo
+            echo "- Inventory: \`$RESET_INVENTORY_SHA256\`"
+            echo "- Encrypted backup: \`$RESET_BACKUP_SHA256\`"
+            echo "- Removed publication update IDs: $count"
+            echo "- Reader notifier state was not modified automatically. Archive and clear these test IDs before re-running notification acceptance tests."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: catalog-reset-result-${{ env.RESET_INVENTORY_SHA256 }}
+          path: |
+            _catalog-reset-plan.json
+            _catalog-reset-result.json
+            _catalog-reset-remote-result.json
+          if-no-files-found: warn
+          retention-days: 30
