@@ -84,7 +84,7 @@ summary:
 - 不得超过六个字符；
 - 不得使用自动消息保留标签 `新书`、`更新`。
 
-`kind` 默认为 `site-announcement`。需要发布重要勘误时设为 `important-erratum`，并同时填写有效的 `bookId`、`edition` 和简短 `summary`；构建会核对该书及版次是否存在。普通公告也可填写最多八条 `summary`，这些摘要进入公开更新源，Markdown 正文仍只用于站内全文。
+`kind` 默认为 `site-announcement`。需要发布重要勘误时设为 `important-erratum`，并同时填写有效的 `bookId`、`edition` 和简短 `summary`；构建会核对该书及版次是否存在。普通公告也可填写最多八条 `summary`。每个数组元素代表一个经过审核的广播正文段落，公开 feed 保留数组顺序；QQ 与 ntfy 发送时在每段前统一加入两个全角空格。Markdown 正文仍只用于站内全文，其中的 HTML、图片、二维码和链接标记不会直接进入读者广播。
 
 ## 公开更新源
 
