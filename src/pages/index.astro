@@ -59,6 +59,7 @@ const siteUpdates = buildSiteUpdates(
 const siteUpdateGroups = splitSiteUpdates(siteUpdates, siteUpdatePins);
 
 const quoteLabelChars = Array.from(frontPageQuote.label);
+const newsletterLabelChars = Array.from("新书速递");
 const quoteStyle = [
   `--fm-quote-compact-max-width:${frontPageQuote.compactMaxWidthPx}px`,
   `--fm-quote-max-width:${frontPageQuote.maxWidthPx}px`,
@@ -183,7 +184,11 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
         <div class="fm-newsletter-viewport" tabindex="0" aria-label="横向浏览新书速递">
           <div class="fm-newsletter-track">
             <div class="fm-section-label" aria-hidden="true">
-              <span>新书速递</span>
+              <span class="fm-section-label-text">
+                {newsletterLabelChars.map((char) => (
+                  <span class="fm-section-label-glyph">{char}</span>
+                ))}
+              </span>
             </div>
 
             {leadBook && bookHref && (
@@ -239,11 +244,18 @@ const tempMin = currentForecast?.temp_min ?? weather?.temp_min ?? weather?.tempe
 
       <div class="fm-midline" aria-hidden="true"></div>
 
-      <section class="fm-book-shelf" aria-labelledby="fm-shelf-title">
+      <section class="fm-book-shelf" aria-labelledby="fm-listed-books-link">
         <div class="fm-book-shelf-track">
           <div class="fm-shelf-panel">
-            <span class="fm-shelf-badge">上架书目</span>
-            <a class="fm-shelf-button" id="fm-shelf-title" href={joinBasePath(base, "categories/")} aria-label="进入索引">
+            <a
+              class="fm-shelf-badge"
+              id="fm-listed-books-link"
+              href={joinBasePath(base, "books/")}
+              aria-label="查看上架书目"
+            >
+              上架书目
+            </a>
+            <a class="fm-shelf-button" href={joinBasePath(base, "categories/")} aria-label="进入索引">
               <i aria-hidden="true">⁝</i>
               <span class="fm-shelf-button-text">索引</span>
               <i aria-hidden="true">⁝</i>

@@ -258,24 +258,30 @@
   padding: 12px 3px;
 }
 
-.fm-section-label span {
-  align-items: center;
+.fm-section-label-text {
+  align-content: center;
   background: #fff;
   border: 1px solid transparent;
-  column-gap: 0;
-  display: flex;
+  display: grid;
   font-family: var(--font-display-compact);
   font-size: 24px;
   font-weight: 700;
+  grid-template-rows: repeat(4, 24px);
   height: 180px;
-  justify-content: center;
-  letter-spacing: 0.5rem;
+  justify-items: center;
+  letter-spacing: 0;
   line-height: 24px;
-  row-gap: 0;
+  row-gap: 8px;
   text-align: center;
-  text-orientation: upright;
   width: calc(1em + 2px);
-  writing-mode: vertical-rl;
+}
+
+.fm-section-label-glyph {
+  display: grid;
+  font-synthesis: none;
+  height: 24px;
+  place-items: center;
+  width: 24px;
 }
 
 .fm-detail {
@@ -552,10 +558,16 @@
 }
 
 .fm-site-update-open {
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 1px;
+  text-decoration-color: currentcolor;
+  text-decoration-line: underline;
+  text-decoration-skip-ink: none;
+  text-decoration-style: solid;
+  text-decoration-thickness: var(--text-link-underline-width);
+  text-underline-offset: 0.12em;
+  text-underline-position: under;
 }
 
 .fm-site-update-open:hover,
@@ -670,6 +682,14 @@
   margin-top: 18px;
 }
 
+/* Heti inserts a spacing node at the Latin-CJK boundary. A single bottom
+   border keeps this short link continuous without disabling that spacing. */
+.fm-site-update-fallback a {
+  border-bottom: var(--text-link-underline-width) solid currentcolor;
+  display: inline-block;
+  text-decoration: none;
+}
+
 .fm-site-update-body strong {
   font-family: var(--font-heiti);
   font-weight: 500;
@@ -677,13 +697,6 @@
 
 .fm-site-update-accent {
   color: var(--accent);
-}
-
-.fm-site-update-body a {
-  color: #000;
-  text-decoration: underline;
-  text-decoration-color: #000;
-  text-underline-position: from-font;
 }
 
 .fm-site-updates-list:focus-visible,
@@ -763,7 +776,14 @@
   padding: 0 0 14px 4px;
   position: relative;
   text-align: center;
+  text-decoration: none;
   width: 130px;
+}
+
+.fm-shelf-badge:hover,
+.fm-shelf-badge:focus,
+.fm-shelf-badge:focus-visible {
+  color: #e22626;
 }
 
 .fm-shelf-badge::before,
@@ -938,12 +958,6 @@
 .fm-address-line {
   display: inline-flex;
   white-space: nowrap;
-}
-
-.fm-address a {
-  color: #000;
-  text-decoration: underline;
-  text-underline-position: from-font;
 }
 
 .fm-address a:hover,

@@ -1,0 +1,40 @@
+---
+import BookCover from "./BookCover.astro";
+import { joinBasePath } from "../lib/basePath";
+import type { BookMeta } from "../lib/books";
+
+interface Props {
+  books: BookMeta[];
+  label?: string;
+  filterable?: boolean;
+}
+
+const {
+  books,
+  label = "上架书目",
+  filterable = false,
+} = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<ol class="fm-book-grid" aria-label={label}>
+  {books.map((book) => (
+    <li
+      data-book-classification={filterable ? book.parsed.classification : undefined}
+      data-book-search={filterable
+        ? [
+            book.id,
+            book.title,
+            book.subtitle,
+            book.author,
+            book.series,
+            ...book.tags,
+          ].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN")
+        : undefined}
+    >
+      <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
+        <BookCover book={book} mode="flat" />
+      </a>
+    </li>
+  ))}
+</ol>

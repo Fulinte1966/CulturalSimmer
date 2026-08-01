@@ -1,0 +1,35 @@
+---
+import { joinBasePath } from "../lib/basePath";
+import "../styles/newspaper-header.css";
+
+interface Props {
+  currentLabel: string;
+  dateLabel: string;
+  weekdayLabel: string;
+}
+
+const { currentLabel, dateLabel, weekdayLabel } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<header class="newspaper-header">
+  <nav class="newspaper-breadcrumb" aria-label="页面位置">
+    <a href={joinBasePath(base, "")}>主页</a>
+    <span aria-hidden="true">・</span>
+    <span aria-current="page">{currentLabel}</span>
+  </nav>
+  <div class="newspaper-header-right">
+    <img
+      class="newspaper-mini-logo"
+      src={joinBasePath(base, "assets/brand/culturalsimmer-wordmark.svg")}
+      alt="文火"
+      width="42"
+      height="18"
+    />
+    <div class="newspaper-date">
+      <time>{dateLabel}</time>
+      <span>{weekdayLabel}</span>
+    </div>
+  </div>
+  <div class="newspaper-headline" aria-hidden="true"></div>
+</header>
