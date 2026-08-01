@@ -1,7 +1,36 @@
 ---
-import Layout from "../../components/Layout.astro";
+import BookGrid from "../../components/BookGrid.astro";
+import NewspaperHeader from "../../components/NewspaperHeader.astro";
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import { getAllBooks } from "../../lib/books";
+import { orderBooksByInitialListing } from "../../lib/bookOrdering";
+import { getCalendarStatus } from "../../lib/uapis";
+import "../../styles/book-grid.css";
+import "../../styles/listed-books.css";
+import "../../styles/newspaper-page.css";
+
+const [allBooks, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
+const books = orderBooksByInitialListing(allBooks);
 ---
 
-<Layout title="总览" activeNav="overview">
-  <section class="reserved-page" aria-label="总览页待设计"></section>
-</Layout>
+<NewspaperLayout title="上架书目" description="文火电子书馆全部上架书目">
+  <main class="newspaper-page listed-books-page" data-pagefind-ignore="all">
+    <div class="newspaper-page-frame listed-books-frame" aria-label="文火上架书目">
+      <NewspaperHeader
+        currentLabel="上架书目"
+        dateLabel={calendar.dateLabel}
+        weekdayLabel={calendar.weekdayLabel}
+      />
+
+      <section class="listed-books" aria-label="上架书目">
+        {books.length > 0 ? (
+          <div class="listed-books-grid-frame">
+            <BookGrid books={books} />
+          </div>
+        ) : (
+          <p class="listed-books-empty">暂无上架书目。</p>
+        )}
+      </section>
+    </div>
+  </main>
+</NewspaperLayout>

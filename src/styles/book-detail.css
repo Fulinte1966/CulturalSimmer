@@ -90,6 +90,11 @@ html {
   width: 760px;
 }
 
+.bd-breadcrumb a,
+.bd-secondary-actions a {
+  text-decoration: none;
+}
+
 .bd-breadcrumb a:hover,
 .bd-breadcrumb a:focus-visible,
 .bd-proof:hover,

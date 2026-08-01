@@ -1,6 +1,9 @@
 ---
-import Layout from "../../components/Layout.astro";
+import NewspaperHeader from "../../components/NewspaperHeader.astro";
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
 import { getClassificationNodes } from "../../lib/classification";
+import { getCalendarStatus } from "../../lib/uapis";
+import "../../styles/newspaper-page.css";
 
 export async function getStaticPaths() {
   const nodes = getClassificationNodes();
@@ -18,8 +21,19 @@ export async function getStaticPaths() {
     params: { classification: code },
   }));
 }
+
+const calendar = await getCalendarStatus();
 ---
 
-<Layout title="索引" activeNav="categories">
-  <section class="reserved-page" aria-label="索引页待设计"></section>
-</Layout>
+<NewspaperLayout title="索引" description="文火电子书馆书目索引">
+  <main class="newspaper-page" data-pagefind-ignore="all">
+    <div class="newspaper-page-frame" aria-label="文火索引">
+      <NewspaperHeader
+        currentLabel="索引"
+        dateLabel={calendar.dateLabel}
+        weekdayLabel={calendar.weekdayLabel}
+      />
+      <section class="newspaper-reserved-content" aria-label="索引页待设计"></section>
+    </div>
+  </main>
+</NewspaperLayout>

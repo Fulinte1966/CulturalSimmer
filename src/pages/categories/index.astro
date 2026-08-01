@@ -1,15 +1,15 @@
 ---
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
-import BookCover from "../../components/BookCover.astro";
+import NewspaperHeader from "../../components/NewspaperHeader.astro";
+import BookGrid from "../../components/BookGrid.astro";
 import "../../styles/category-index.css";
-import { joinBasePath } from "../../lib/basePath";
+import "../../styles/book-grid.css";
 import { getAllBooks } from "../../lib/books";
 import { getClassificationNodes } from "../../lib/classification";
 import { getCalendarStatus } from "../../lib/uapis";
 import bookMarkUrl from "../../assets/icons/icon-index-toggle-book.svg?url";
 
 const [books, calendar] = await Promise.all([getAllBooks(), getCalendarStatus()]);
-const base = import.meta.env.BASE_URL;
 const pageSize = 10;
 const displayBooks = books;
 const initialPageCount = Math.max(1, Math.ceil(displayBooks.length / pageSize));
@@ -26,27 +26,11 @@ const rootRows = indexTree.children ?? [];
 <NewspaperLayout title="索引" description="文火电子书馆书目索引">
   <main class="figma-homepage" data-pagefind-ignore="all">
     <div class="fm-frame" aria-label="文火索引">
-      <header class="fm-index-head">
-        <nav class="fm-index-breadcrumb" aria-label="页面位置">
-          <a class="fm-home-link" href={joinBasePath(base, "")}>主页</a>
-          <span aria-hidden="true">・</span>
-          <span>索引</span>
-        </nav>
-        <div class="fm-index-head-right">
-          <img
-            class="fm-index-mini-logo"
-            src={joinBasePath(base, "assets/brand/culturalsimmer-wordmark.svg")}
-            alt="文火"
-            width="42"
-            height="18"
-          />
-          <div class="fm-index-date">
-            <time>{calendar.dateLabel}</time>
-            <span>{calendar.weekdayLabel}</span>
-          </div>
-        </div>
-        <div class="fm-index-headline" aria-hidden="true"></div>
-      </header>
+      <NewspaperHeader
+        currentLabel="索引"
+        dateLabel={calendar.dateLabel}
+        weekdayLabel={calendar.weekdayLabel}
+      />
 
       <section
         class="fm-index-system"
@@ -93,25 +77,7 @@ const rootRows = indexTree.children ?? [];
       </section>
 
       <section class="fm-book-results" hidden aria-label="书籍结果">
-        <ol class="fm-book-grid">
-          {displayBooks.map((book) => (
-            <li
-              data-book-classification={book.parsed.classification}
-              data-book-search={[
-                book.id,
-                book.title,
-                book.subtitle,
-                book.author,
-                book.series,
-                ...book.tags,
-              ].filter(Boolean).join(" ").toLocaleLowerCase("zh-CN")}
-            >
-              <a href={joinBasePath(base, `books/${book.id}/`)} aria-label={`查看《${book.title}》`}>
-                <BookCover book={book} mode="flat" />
-              </a>
-            </li>
-          ))}
-        </ol>
+        <BookGrid books={displayBooks} label="索引结果" filterable />
         <nav class="fm-pagination" aria-label="分页">
           <button type="button" data-page-action="first">首　页</button>
           <button type="button" data-page-action="prev">上一页</button>

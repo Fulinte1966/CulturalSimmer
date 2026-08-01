@@ -1,11 +1,21 @@
 ---
-import Layout from "../components/Layout.astro";
+import NewspaperHeader from "../components/NewspaperHeader.astro";
+import NewspaperLayout from "../components/NewspaperLayout.astro";
+import { getCalendarStatus } from "../lib/uapis";
+import "../styles/newspaper-page.css";
+
+const calendar = await getCalendarStatus();
 ---
 
-<Layout
-  title="搜索"
-  description="搜索功能暂时关闭。"
-  activeNav="search"
->
-  <section class="reserved-page" aria-label="搜索暂未开放"></section>
-</Layout>
+<NewspaperLayout title="搜索" description="搜索功能暂时关闭。">
+  <main class="newspaper-page" data-pagefind-ignore="all">
+    <div class="newspaper-page-frame" aria-label="文火搜索">
+      <NewspaperHeader
+        currentLabel="搜索"
+        dateLabel={calendar.dateLabel}
+        weekdayLabel={calendar.weekdayLabel}
+      />
+      <section class="newspaper-reserved-content" aria-label="搜索暂未开放"></section>
+    </div>
+  </main>
+</NewspaperLayout>

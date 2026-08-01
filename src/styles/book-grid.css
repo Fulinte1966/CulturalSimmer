@@ -1,0 +1,51 @@
+.fm-book-grid {
+  --fm-book-column-gap: clamp(6px, 4cqi, 36px);
+  --fm-book-columns: 2;
+  column-gap: var(--fm-book-column-gap);
+  display: grid;
+  grid-template-columns: repeat(var(--fm-book-columns), minmax(0, 168px));
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  row-gap: 24px;
+  width: 100%;
+}
+
+.fm-book-grid li,
+.fm-book-grid a,
+.fm-book-grid .book-cover,
+.fm-book-grid img {
+  aspect-ratio: 84 / 119;
+  height: auto;
+  width: 100%;
+}
+
+.fm-book-grid a {
+  border-radius: 0;
+  display: block;
+  overflow: visible;
+}
+
+.fm-book-grid a:hover,
+.fm-book-grid a:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 4px;
+}
+
+.fm-book-grid img {
+  display: block;
+  object-fit: cover;
+}
+
+@container (min-width: 550px) {
+  .fm-book-grid {
+    --fm-book-columns: 3;
+  }
+}
+
+@container (min-width: 768px) {
+  .fm-book-grid {
+    --fm-book-columns: 4;
+  }
+}

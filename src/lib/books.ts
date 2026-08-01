@@ -49,6 +49,7 @@ export interface BookMeta {
   editionDate: string;
   date: Date;
   listedAt: Date;
+  updatedAt: Date;
   editions: EditionRecord[];
   tags: string[];
   cover?: string;
@@ -238,11 +239,16 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         notifyUpdates,
       } = entry.data;
       const editions = resolveEditions(rawEditions);
+      const firstEdition = editions[0];
       const latestEdition = getLatestEdition(editions);
+      if (!firstEdition) {
+        throw new Error("Book entry must define at least one edition");
+      }
       const parsed = parseBookId(id);
       const resolvedCover = resolveCover(id, latestEdition.edition, cover);
       const reading = loadReadingMetrics(id, latestEdition.edition);
       const date = dateFromEditionDate(latestEdition.editionDate);
+      const updatedAt = loadManifestGeneratedAt(id, latestEdition.edition) ?? date;
 
       return {
         id,
@@ -261,7 +267,10 @@ export async function getAllBooks(): Promise<BookMeta[]> {
         edition: latestEdition.edition,
         editionDate: latestEdition.editionDate,
         date,
-        listedAt: loadManifestGeneratedAt(id, latestEdition.edition) ?? date,
+        listedAt:
+          loadManifestGeneratedAt(id, firstEdition.edition) ??
+          dateFromEditionDate(firstEdition.editionDate),
+        updatedAt,
         editions,
         tags,
         cover,
@@ -276,7 +285,7 @@ export async function getAllBooks(): Promise<BookMeta[]> {
     })
     .sort(
       (a, b) =>
-        b.listedAt.getTime() - a.listedAt.getTime() ||
+        b.updatedAt.getTime() - a.updatedAt.getTime() ||
         b.date.getTime() - a.date.getTime() ||
         a.id.localeCompare(b.id)
     );
