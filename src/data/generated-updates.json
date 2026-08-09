@@ -4,5 +4,11 @@
     "type": "book-added",
     "publishedAt": "2026-08-09T15:38:41Z",
     "bookId": "F-1-1"
+  },
+  {
+    "id": "A9-1-listed",
+    "type": "book-added",
+    "publishedAt": "2026-08-09T15:58:28Z",
+    "bookId": "A9-1"
   }
 ]
