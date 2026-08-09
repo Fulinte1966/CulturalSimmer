@@ -15,11 +15,10 @@ class PublicationPolicyTests(unittest.TestCase):
         path.parent.mkdir(parents=True)
         path.write_text(body, encoding="utf-8")
 
-    def test_repository_policy_blocks_local_only_book(self) -> None:
+    def test_repository_policy_allows_current_catalog(self) -> None:
         root = Path(__file__).resolve().parents[2]
-        self.assertEqual(load_blocked_books(root), {"B-1": "仅供本地校对，不上架"})
-        with self.assertRaisesRegex(SystemExit, "blocks B-1"):
-            assert_publishable(root, "B-1")
+        self.assertEqual(load_blocked_books(root), {})
+        assert_publishable(root, "B-1")
         assert_publishable(root, "A9-1")
         assert_publishable(root, "F-1-1")
 
