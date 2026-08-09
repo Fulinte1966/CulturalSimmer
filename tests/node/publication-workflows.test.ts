@@ -25,7 +25,7 @@ test("candidate publication keeps preview and production approval boundaries", (
   assert.match(source, /Roll back an uncommitted canonical Release/);
   assert.match(source, /cloudflare-clean-dist/);
   assert.match(source, /gh workflow run deploy\.yml/);
-  assert.match(source, /notify_updates=true/);
+  assert.doesNotMatch(source, /notify_updates/);
   assert.equal(
     value.jobs.promote.env.CLOUDFLARE_API_TOKEN,
     "${{ secrets.CLOUDFLARE_API_TOKEN }}",
@@ -47,17 +47,16 @@ test("publication removal requires a registered ledger and records failures", ()
   assert.match(source, /phase:"failed"/);
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
   assert.match(source, /gh workflow run deploy\.yml/);
-  assert.match(source, /notify_updates=false/);
+  assert.doesNotMatch(source, /notify_updates/);
 });
 
-test("only an explicit ingest deployment dispatches notifications after both hosts", () => {
+test("production deployment never dispatches reader notifications", () => {
   const { source, value } = workflow("deploy.yml");
-  assert.equal(value.on.workflow_dispatch.inputs.notify_updates.default, false);
-  assert.match(value.jobs.notify.if, /workflow_dispatch/);
-  assert.match(value.jobs.notify.if, /notify_updates/);
-  assert.deepEqual(value.jobs.notify.needs, ["deploy-cloudflare", "deploy"]);
-  assert.match(source, /notify\.yml/);
-  assert.match(source, /notify-ntfy\.yml/);
+  assert.equal(value.on.workflow_dispatch, null);
+  assert.equal(value.jobs.notify, undefined);
+  assert.doesNotMatch(source, /notify_updates/);
+  assert.doesNotMatch(source, /notify\.yml/);
+  assert.doesNotMatch(source, /notify-ntfy\.yml/);
 });
 
 test("non-scheduled deployments report real-time operations state without blocking publication", () => {
@@ -99,7 +98,7 @@ test("pre-launch reset requires backup evidence, preview, and production approva
   assert.match(source, /catalog_reset\.py finalize-remote/);
   assert.match(source, /cleanup-cloudflare-deployments\.mjs/);
   assert.match(source, /gh workflow run deploy\.yml/);
-  assert.match(source, /notify_updates=false/);
+  assert.doesNotMatch(source, /notify_updates/);
 });
 
 test("Cloudflare cleanup follows API pagination without an unsupported page size", () => {

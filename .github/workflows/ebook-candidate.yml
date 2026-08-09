@@ -232,7 +232,6 @@ jobs:
         run: >-
           gh workflow run deploy.yml
           --ref main
-          -f notify_updates=true
 
       - name: Roll back an uncommitted canonical Release
         if: >-

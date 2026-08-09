@@ -94,7 +94,7 @@ Release 归属按书目中声明的 tag、`ingest-*` Draft 或同时具备规范
 4. 登录 Cloudflare Access 后检查 `catalog-reset-preview`：首页手工置顶公告仍在，书架、索引、搜索和书籍详情为空，检查更新及勘误的未知资源路径正常。
 5. 使用完全相同的输入选择 `promote`，并在 `ebook-production` Environment 中人工批准。
 
-工作流会重新计算清单、构建并验证空站、提交空书库，并显式 dispatch 一次 `notify_updates=false` 的生产部署；Cloudflare 主站和 GitHub Pages 备份站成功后，才删除 GitHub Release/tag。之所以显式 dispatch，是因为使用 GitHub Actions `GITHUB_TOKEN` 推送的提交不会再次触发依赖 `push` 的工作流。最后用清洁内容覆盖三个持久预览分支并清理旧 Cloudflare 部署，全程不广播读者更新。
+工作流会重新计算清单、构建并验证空站、提交空书库，并显式 dispatch 一次生产部署；Cloudflare 主站和 GitHub Pages 备份站成功后，才删除 GitHub Release/tag。之所以显式 dispatch，是因为使用 GitHub Actions `GITHUB_TOKEN` 推送的提交不会再次触发依赖 `push` 的工作流。生产部署不发送读者消息；最后用清洁内容覆盖三个持久预览分支并清理旧 Cloudflare 部署，全程不广播读者更新。
 
 ## 通知器与恢复测试
 
