@@ -10,5 +10,11 @@
     "type": "book-added",
     "publishedAt": "2026-08-09T15:58:28Z",
     "bookId": "A9-1"
+  },
+  {
+    "id": "B-1-listed",
+    "type": "book-added",
+    "publishedAt": "2026-08-09T16:13:34Z",
+    "bookId": "B-1"
   }
 ]

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 4,
+  "bookId": "B-1",
+  "title": "辩证唯物主义历史唯物主义",
+  "edition": 1,
+  "editionDate": "2026-08",
+  "editionDateSource": "xmp:CreateDate",
+  "pdfCreateDate": "2026-08-09T22:09:29+08:00",
+  "description": "本书是为高等院校文科哲学教学编写的马克思主义哲学教科书，由艾思奇主编。全书分为“辩证唯物主义”和“历史唯物主义”两部分：前者论述世界的物质性、物质和意识、唯物辩证法的基本规律与范畴、认识和实践及真理；后者阐明社会存在和社会意识、生产力和生产关系、经济基础和上层建筑、阶级和国家、社会革命、社会意识以及人民群众和个人在历史上的作用。",
+  "creator": "艾思奇",
+  "language": "zh-CN",
+  "releaseTag": "B-1_v1",
+  "pdfFilename": "B-1_v1.pdf",
+  "downloadUrl": "https://github.com/Fulinte1966/CulturalSimmer/releases/download/B-1_v1/B-1_v1.pdf",
+  "githubAssetDigest": "sha256:cd88d8af4bfd306969e8793485b045cb990544897cbd6bd3e356049b9974c9f6",
+  "bytes": 1947584,
+  "pageCount": 394,
+  "wordCount": 225928,
+  "sourceReleaseId": 367521664,
+  "sourceAssetId": 507663331,
+  "sourceSha256": "cd88d8af4bfd306969e8793485b045cb990544897cbd6bd3e356049b9974c9f6",
+  "canonicalTag": "B-1_v1",
+  "previousEdition": null,
+  "contentSnapshotFilename": "B-1_v1.content.json.gz",
+  "changelogFilename": "B-1_v1.changelog.json",
+  "changelogPath": "src/data/changelogs/B-1_v1.changelog.json",
+  "changelogSummary": {
+    "total": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0
+  },
+  "generatedAt": "2026-08-09T16:12:27.198605+00:00",
+  "metadata": {
+    "title": "辩证唯物主义历史唯物主义",
+    "author": "艾思奇",
+    "language": "zh-CN",
+    "publisher": "CulturalSimmer",
+    "source": "用户提供的1962年第二版录入稿"
+  }
+}
