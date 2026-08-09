@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 4,
+  "bookId": "F-1-1",
+  "title": "政治经济学基础知识",
+  "edition": 1,
+  "editionDate": "2026-08",
+  "editionDateSource": "xmp:CreateDate",
+  "pdfCreateDate": "2026-08-09T10:32:16+08:00",
+  "description": "根据上海人民出版社《青年自学丛书：政治经济学基础知识》1975年12月第2版重排，并参照原书1974年第1版的体例，分为“资本主义部分”和“社会主义部分”上下两册。本册为上册“资本主义部分”。",
+  "creator": "《政治经济学基础知识》编写组",
+  "language": "zh-CN",
+  "releaseTag": "F-1-1_v1",
+  "pdfFilename": "F-1-1_v1.pdf",
+  "downloadUrl": "https://github.com/Fulinte1966/CulturalSimmer/releases/download/F-1-1_v1/F-1-1_v1.pdf",
+  "githubAssetDigest": "sha256:7f12b0ae2ded1651a0f8045cf0b7637e377bcdcae4befff354e9116f8b3b385b",
+  "bytes": 2250464,
+  "pageCount": 216,
+  "wordCount": 107926,
+  "sourceReleaseId": 367509886,
+  "sourceAssetId": 507620934,
+  "sourceSha256": "7f12b0ae2ded1651a0f8045cf0b7637e377bcdcae4befff354e9116f8b3b385b",
+  "canonicalTag": "F-1-1_v1",
+  "previousEdition": null,
+  "contentSnapshotFilename": "F-1-1_v1.content.json.gz",
+  "changelogFilename": "F-1-1_v1.changelog.json",
+  "changelogPath": "src/data/changelogs/F-1-1_v1.changelog.json",
+  "changelogSummary": {
+    "total": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0
+  },
+  "generatedAt": "2026-08-09T15:37:41.597698+00:00",
+  "metadata": {
+    "title": "政治经济学基础知识",
+    "author": "《政治经济学基础知识》编写组",
+    "language": "zh-CN",
+    "publisher": "CulturalSimmer",
+    "source": "上海人民出版社1975年12月第2版"
+  }
+}

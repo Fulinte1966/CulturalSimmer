@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "id": "F-1-1-listed",
+    "type": "book-added",
+    "publishedAt": "2026-08-09T15:38:41Z",
+    "bookId": "F-1-1"
+  }
+]
