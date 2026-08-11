@@ -90,6 +90,7 @@ jobs:
           python scripts/ingest_pdf.py generate \
             --metadata _candidate.json \
             --workspace _candidate_workspace
+          npm run updates:archive
           python scripts/candidate_lock.py create \
             --metadata _candidate.json \
             --output _candidate_workspace/candidate-lock.json
@@ -206,6 +207,7 @@ jobs:
           python scripts/ingest_pdf.py generate \
             --metadata _candidate.json \
             --workspace _candidate_workspace
+          npm run updates:archive
           npm run verify
 
       - name: Create canonical Release

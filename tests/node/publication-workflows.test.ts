@@ -22,6 +22,19 @@ test("candidate publication keeps preview and production approval boundaries", (
   assert.equal(value.jobs.promote.environment, "cloudflare-pages");
   assert.equal(value.permissions.actions, "write");
   assert.match(source, /candidate_lock\.py verify/);
+  assert.equal(
+    (source.match(/npm run updates:archive/g) ?? []).length,
+    2,
+    "preview and promotion must rebuild the update archive after candidate generation",
+  );
+  assert.match(
+    source,
+    /ingest_pdf\.py generate[\s\S]*?npm run updates:archive[\s\S]*?candidate_lock\.py create/,
+  );
+  assert.match(
+    source,
+    /candidate_lock\.py verify[\s\S]*?ingest_pdf\.py generate[\s\S]*?npm run updates:archive[\s\S]*?npm run verify/,
+  );
   assert.match(source, /Roll back an uncommitted canonical Release/);
   assert.match(source, /cloudflare-clean-dist/);
   assert.match(source, /gh workflow run deploy\.yml/);
