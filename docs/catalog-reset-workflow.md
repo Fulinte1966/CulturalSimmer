@@ -103,9 +103,10 @@ Release 归属按书目中声明的 tag、`ingest-*` Draft 或同时具备规范
 - 仅测试网站和发布链路时，无需处理通知器状态。
 - 需要重新测试同一书号和版次的通知时，把结果文件中的
   `notifierUpdateIds` JSON 数组原样交给私有通知仓库的
-  **Reset pre-launch reader state** 工作流。该工作流经
-  `reader-state-maintenance` Environment 审核后，持有共享操作锁、分别备份
-  QQ 与 ntfy 状态，并只清除明确列出的书籍事件 ID。
+  **Reset pre-launch reader state** 工作流。该工作流只允许 `Fulinte1966` 从
+  `main` 手动触发并要求精确确认词；随后持有共享操作锁、分别备份 QQ 与 ntfy
+  状态，并只清除明确列出的书籍事件 ID。当前私有仓库套餐不支持 Environment
+  Required Reviewers，不得把无审核规则的 Environment 视为审批保护。
 - 存在未决发送批次时不得清除状态；应先按通知器 runbook 解决 pending。
 
 不得只重置网站而跳过这一步后再以相同书号和版次测试通知。稳定事件 ID 会被旧的
