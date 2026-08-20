@@ -296,9 +296,10 @@ html {
   border: 0;
   color: #000;
   display: block;
-  font-family: var(--fm-serif);
+  font-family: var(--font-system-songti);
   font-size: 36px;
-  font-weight: 900;
+  font-synthesis: none;
+  font-weight: 400;
   line-height: 1;
   outline: 0;
   padding: 0;

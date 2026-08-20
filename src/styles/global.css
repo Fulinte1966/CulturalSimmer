@@ -618,6 +618,7 @@
   --font-latin-bold-inline: "CS Latin Termes Bold";
   --font-latin: "CS Latin Termes", "TeX Gyre Termes", "Times New Roman", serif;
   --font-latin-bold: "CS Latin Termes Bold", "TeX Gyre Termes", "Times New Roman", serif;
+  --font-system-songti: "Songti SC", "STSong", "SimSun", "NSimSun", "Noto Serif CJK SC", "Source Han Serif SC", serif;
   --font-song: var(--font-latin-inline), "CS Song", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
   --font-display: var(--font-latin-inline), "CS Jinshu", "寒蝉锦书宋:Bold", "Home Chill Jinshu", "Songti SC", serif;
   --font-display-text: var(--font-latin-inline), "Home Chill Jinshu", "CS Jinshu", "Songti SC", serif;
