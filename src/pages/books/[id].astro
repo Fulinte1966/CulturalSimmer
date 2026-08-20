@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import NewspaperLayout from "../../components/NewspaperLayout.astro";
 import BookCover from "../../components/BookCover.astro";
-import type { OutlineItem } from "../../lib/outline";
+import { normalizeOutlinePunctuation, type OutlineItem } from "../../lib/outline";
 import {
   formatEditionDateString,
   formatShortVolume,
@@ -273,7 +273,7 @@ const description = `${title}${subtitle ? ` - ${subtitle}` : ""}${author ? `，$
                   <ol class="bd-outline-list heti">
                     {outline.map((item) => (
                       <li class={`bd-outline-level-${item.level}`}>
-                        <span>{item.title}</span>
+                        <span>{normalizeOutlinePunctuation(item.title)}</span>
                       </li>
                     ))}
                   </ol>
