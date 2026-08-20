@@ -883,6 +883,10 @@ html {
     font-size: 28px;
   }
 
+  .bd-series--empty {
+    display: none;
+  }
+
   .bd-subtitle {
     font-size: 30px;
     line-height: 1.1;
