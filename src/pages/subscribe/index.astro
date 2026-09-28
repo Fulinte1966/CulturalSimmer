@@ -1,0 +1,50 @@
+---
+import NewspaperHeader from "../../components/NewspaperHeader.astro";
+import NewspaperLayout from "../../components/NewspaperLayout.astro";
+import { siteConfig } from "../../lib/site";
+import { getCalendarStatus } from "../../lib/uapis";
+import "../../styles/newspaper-page.css";
+
+const calendar = await getCalendarStatus();
+---
+
+<NewspaperLayout title="邮件订阅" description="通过邮箱订阅文火的新书、版本更新、重要勘误与本站公告。">
+  <main class="newspaper-page" data-pagefind-ignore="all">
+    <div class="newspaper-page-frame">
+      <NewspaperHeader currentLabel="邮件订阅" dateLabel={calendar.dateLabel} weekdayLabel={calendar.weekdayLabel} />
+      <section class="subscription-copy" aria-label="邮件订阅说明">
+        <p class="subscription-intro">用邮箱接收新书、版本更新、重要勘误与本站公告，无须安装应用。</p>
+        <p><a class="subscription-link" href={siteConfig.emailSubscriptionUrl}>前往邮件订阅</a></p>
+        <ol>
+          <li>在 follow.it 填写邮箱，按提示完成订阅。</li>
+          <li>打开确认邮件，确认订阅；未收到时检查垃圾邮件。</li>
+          <li>在接收方式中选择 <span lang="en">Single emails</span>（逐条邮件）。默认的 <span lang="en">Newspaper</span> 是每日摘要，可按个人喜好保留。</li>
+        </ol>
+        <p>订阅免费。follow.it 免费服务约每六小时检查一次更新，发现新内容后发送逐条邮件；收信会有延迟，无法保证实时或固定时刻。</p>
+        <p>邮件由 follow.it 发送，可能包含该平台的广告或推荐内容。邮箱由 follow.it 管理，可通过邮件中的链接退订。</p>
+      </section>
+    </div>
+  </main>
+</NewspaperLayout>
+
+<style>
+  .subscription-copy {
+    font-family: var(--font-system-songti);
+    font-size: 18px;
+    line-height: 1.9;
+    max-width: 36em;
+    padding-block: 12px 32px;
+    width: 100%;
+  }
+
+  .subscription-copy p { margin: 0 0 1.25em; }
+  .subscription-intro { font-size: 22px; }
+  .subscription-copy ol { margin: 1.5em 0; padding-inline-start: 1.5em; }
+  .subscription-copy li { margin-bottom: 0.7em; }
+  .subscription-link { font-weight: 600; }
+
+  @media (max-width: 767px) {
+    .subscription-copy { font-size: 16px; padding-block: 0 20px; }
+    .subscription-intro { font-size: 20px; }
+  }
+</style>

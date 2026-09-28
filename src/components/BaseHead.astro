@@ -16,13 +16,14 @@ const canonicalUrl = new URL(Astro.url.pathname, siteConfig.publicBaseUrl);
 
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="follow.it-verification-code" content="CxpKduYuRh91VduJNsrV" />
 <title>{documentTitle}</title>
 {description && <meta name="description" content={description} />}
 <link rel="canonical" href={canonicalUrl} />
 <link
   rel="alternate"
   type="application/rss+xml"
-  title="文火 CulturalSimmer 更新"
+  title="CulturalSimmer"
   href={new URL("updates/rss.xml", siteConfig.publicBaseUrl)}
 />
 <link
