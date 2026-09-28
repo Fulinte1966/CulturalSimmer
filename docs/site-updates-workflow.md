@@ -93,6 +93,7 @@ summary:
 - `/updates/feed.json`：最近 100 条权威事件；
 - `/updates/latest.json`：最新时间点的事件组；
 - `/updates/feed.schema.json`：Draft 2020-12 JSON Schema；
+- `/updates/rss.xml`：同一组最近 100 条事件的 RSS 2.0 表示，供阅读器及邮件订阅服务读取；
 - `docs/site-updates-archive.md`：包含全部事件的仓库 Markdown 归档。
 
 网站不提供完整更新正文页。`/updates/` 只为已经发布的旧链接保留静态跳转，并指向 GitHub 默认分支中的 Markdown 归档。公开 feed 为兼容现有消费者继续保留字段名 `updatesPageUrl`，其值同样指向该归档，不代表站内页面。
@@ -119,6 +120,18 @@ erratum-2026-07-13-f0-1-1-v2-01
 ```
 
 构建会按 Schema 校验日期、HTTPS URL、类型、摘要、最多 100 条记录和字段白名单，并额外拒绝重复 ID、本地路径及通知器配置名。`generatedAt` 表示本次构建时间，不参与事件去重；外部消费者必须使用 `updates[].id`。
+
+RSS 从同一份公开 feed 派生，不单独维护消息数据。每条事件以公开 ID 作为
+`guid`，并设置 `isPermaLink="false"`；同一本书的多个版次可以共享详情页链接，
+但不得共享 GUID。`pubDate` 沿用事件的正式发布时间，重建网站不会刷新事件时间
+或制造新事件。摘要按原顺序转换为经过转义的 HTML 段落，再进行 XML 转义；
+XML 1.0 不允许的字符会被移除，页面 head 提供 RSS 自动发现链接。
+空书库生成有效的空 RSS，不加入测试或占位消息。
+
+RSS 只提供公开更新数据，不负责邮件投递。第三方邮件订阅服务的抓取周期、
+读者选择的逐条通知或每日摘要，以及收件方的投递处理共同决定实际收信时间。
+固定发布时间不能视为固定发送时间；可先观察服务的抓取情况，再安排固定
+发布窗口。不能通过改写旧事件 GUID 或发布时间来重发、模拟定时通知。
 
 正式 PDF 入库会显式触发生产部署；部署只负责公开 Cloudflare Pages 与 GitHub
 Pages，不 dispatch 读者通知。QQ 与 ntfy 在北京时间每日 06:00 读取已经公开的
@@ -179,7 +192,7 @@ npm run updates:pins
 
 人工全文在 Astro 构建期通过 `render()` 转为静态 HTML，并且只嵌入首页当前可见消息对应的正文。打开全文会保存列表滚动位置和触发按钮；`〔返回〕` 或 `Escape` 恢复列表、滚动位置和焦点。全文区域使用浏览器原生滚动，支持鼠标滚轮、触控板、触屏和键盘，滚动不会改变主页布局。
 
-本站消息区域已排除 Pagefind，不提供独立正文归档页、搜索、RSS、邮件订阅或后台管理界面。完整事件记录由 `scripts/build_site_updates_archive.py` 从结构化数据确定性生成；Markdown 只是自动生成的可读镜像，不能反向作为事实来源，也不能替代独立备份。人工公告的可编辑正文仍以 `src/content/announcements/*.md` 为准。
+本站消息区域已排除 Pagefind，不提供独立正文归档页、搜索或后台管理界面。完整事件记录由 `scripts/build_site_updates_archive.py` 从结构化数据确定性生成；Markdown 只是自动生成的可读镜像，不能反向作为事实来源，也不能替代独立备份。人工公告的可编辑正文仍以 `src/content/announcements/*.md` 为准。
 
 归档文件不记录构建时间，避免每日天气部署产生无意义修改。新增电子书事件和使用管理命令创建公告时会立即重建归档；直接编辑公告后运行：
 
