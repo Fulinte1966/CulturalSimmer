@@ -33,11 +33,17 @@ function parse(xml: string) {
   ].join("\n")], { input: xml, encoding: "utf8" }));
 }
 
-test("RSS preserves event IDs for editions sharing the same book URL", () => {
+test("RSS gives editions distinct links while preserving event IDs and dates", () => {
   const input = feed();
   const output = parse(buildUpdateRss(input));
   assert.deepEqual(output.items.map((item: { guid: string }) => item.guid), input.updates.map((item) => item.id));
-  assert.equal(output.items[1].link, output.items[2].link);
+  assert.notEqual(output.items[1].link, output.items[2].link);
+  for (const [index, item] of output.items.entries()) {
+    const target = new URL(item.link);
+    assert.equal(target.searchParams.get("update"), input.updates[index].id);
+    target.searchParams.delete("update");
+    assert.equal(target.toString(), input.updates[index].url);
+  }
   assert.notEqual(output.items[1].guid, output.items[2].guid);
   assert.equal(output.items[1].isPermaLink, "false");
   assert.equal(output.items[1].pubDate, "Wed, 02 Sep 2026 00:00:00 GMT");
@@ -47,9 +53,28 @@ test("RSS preserves event IDs for editions sharing the same book URL", () => {
 test("RSS safely round-trips XML punctuation and Unicode without markup injection", () => {
   const output = parse(buildUpdateRss(feed()));
   assert.equal(output.items[0].title, "本站公告：公告 🚩");
-  assert.equal(output.items[0].link, "https://example.com/archive?a=1&b=2");
+  const target = new URL(output.items[0].link);
+  assert.equal(target.searchParams.get("a"), "1");
+  assert.equal(target.searchParams.get("b"), "2");
+  assert.equal(target.searchParams.get("update"), "announcement-notice");
   assert.equal(output.items[0].description, '<p>文字 &lt;script&gt; &amp; &quot;引号&quot;</p><p>第二段</p>');
   assert.equal(output.items[1].title, "新版发布：甲 & 乙 <丙>（v2）");
+});
+
+test("RSS keeps existing target queries and fragments for distinct announcements", () => {
+  const input = feed();
+  const original = input.updates[0];
+  input.updates = [original, { ...original, id: "announcement-second" }].map((item) => ({
+    ...item, url: "https://example.com/archive?a=1&update=old#details",
+  }));
+  const output = parse(buildUpdateRss(input));
+  assert.notEqual(output.items[0].link, output.items[1].link);
+  for (const [index, item] of output.items.entries()) {
+    const target = new URL(item.link);
+    assert.equal(target.searchParams.get("a"), "1");
+    assert.equal(target.hash, "#details");
+    assert.deepEqual(target.searchParams.getAll("update"), [input.updates[index].id]);
+  }
 });
 
 test("rebuilds do not rewrite RSS events or fabricate updates for an empty catalog", () => {
