@@ -27,13 +27,15 @@ export function buildUpdateRss(feed: PublicUpdateFeed): string {
   validatePublicUpdateFeed(feed);
   const selfUrl = new URL("updates/rss.xml", feed.siteUrl).toString();
   const items = feed.updates.map((update) => {
+    const eventUrl = new URL(update.url);
+    eventUrl.searchParams.set("update", update.id);
     const title = `${labels[update.type]}：${update.title}${update.version ? `（${update.version}）` : ""}`;
     const description = (update.summary.length ? update.summary : [title])
       .map((paragraph) => `<p>${escapeXml(paragraph)}</p>`).join("");
     return [
       "<item>",
       element("title", title),
-      element("link", update.url),
+      element("link", eventUrl.toString()),
       `<guid isPermaLink="false">${escapeXml(update.id)}</guid>`,
       element("pubDate", new Date(update.publishedAt).toUTCString()),
       element("description", description),
